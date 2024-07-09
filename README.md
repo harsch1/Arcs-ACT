@@ -2,9 +2,8 @@
 # Arcs-CAT
 Campaign Archive Tool for Leder Games' Arcs
 
-# arcs-cat
 ## Project setup
-```
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup
@@ -50,4 +49,9 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ```sh
 npm run lint
+```
+
+### Publish updates to Github Pages (after build)
+```sh
+git subtree push --prefix dist origin gh-pages
 ```
