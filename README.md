@@ -1,2 +1,2 @@
 # Arcs-CAT
-Campaign Archive Tool for Arcs
+Campaign Archive Tool for Leder Games' Arcs
