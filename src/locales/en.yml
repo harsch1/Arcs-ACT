@@ -1,0 +1,69 @@
+confirm: Confirm
+cancel: Cancel
+load: Load
+
+common:
+  home: Home
+  new_campaign: New campaign
+  new_player: New player
+system: System
+piece: Piece
+piece_id: '@.capitalize:{type} @.lower:{color}'
+system_id: System {id}
+system_menu:
+  add_building: Add building
+  add_city: Add city
+  add_starport: Add starport
+  add_ship: Add ship
+  add_token: Add token
+  configure: Configure
+piece_menu:
+  remove_piece: Remove piece
+  change_color: Change color
+  change_token: Change token
+  damage_ship: Damage
+  damage_building: Damage
+  repair_ship: Repair
+  repair_building: Repair
+  flip: Flip
+building_types:
+  CITY: City | Cities
+  STARPORT: Starport | Starports
+ship_types:
+  SHIP: Ship
+  EMPIRE: Ship
+token_types:
+  BLIGHT: Blight
+  PORTAL: Portal
+  BANNER: Banner
+  BROKEN_WORLD: Broken world
+  GOLEM: Golem
+colors:
+  # blue: Blue
+  # red: Red
+  # yellow: Yellow
+  # white: White
+  # free: Free
+  # empire: Empire
+  BLUE: Blue
+  RED: Red
+  YELLOW: Yellow
+  WHITE: White
+  FREE: Free
+  EMPIRE: Empire
+
+dialog:
+  add_ship: Add ships
+  add_building: Add buildings
+  add_ship_color: '{color} ship'
+  add_token: Add tokens
+  no_token_found: Token {token} not found
+  select_token: Select token
+  search_token: Search token...
+  help_text: Add pieces present on the system
+
+tokens:
+  BLIGHT: Blight
+  PORTAL: Portal
+  BANNER: Banner
+  BROKEN_WORLD: Broken world
