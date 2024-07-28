@@ -1,0 +1,413 @@
+{
+  "players": [
+    {
+      "cards": [
+        {
+          "id": "F2-04",
+          "name": "Book of Liberation"
+        },
+        {
+          "id": "F2-02",
+          "name": "Parade Fleets"
+        }
+      ],
+      "resources": ["PSIONIC"],
+      "outrage": [],
+      "empireStatus": "Outlaw",
+      "fateHistory": [["F2", true]],
+      "power": 8,
+      "name": "H",
+      "color": "YELLOW",
+      "currentFate": "F2"
+    },
+    {
+      "cards": [
+        {
+          "id": "F1-02",
+          "name": "Imperial Authority"
+        },
+        {
+          "id": "F1-03",
+          "name": "Dealmakers"
+        },
+        {
+          "id": "CC-03",
+          "name": "Gatekeepers"
+        },
+        {
+          "id": "CC-04",
+          "name": "Shipping Interest"
+        },
+        {
+          "id": "CC-06",
+          "name": "Arms Union"
+        },
+        {
+          "id": "L-04",
+          "name": "Mirror Plating",
+          "isAddedLore": true
+        },
+        {
+          "id": "L-24",
+          "name": "Warlord's Terror",
+          "isAddedLore": true
+        }
+      ],
+      "resources": ["MATERIAL", "MATERIAL", "PSIONIC"],
+      "outrage": [],
+      "empireStatus": "Regent",
+      "fateHistory": [["F1", true]],
+      "power": 20,
+      "name": "M",
+      "color": "RED",
+      "currentFate": "F1"
+    }
+  ],
+  "board": {
+    "systems": {
+      "1A": [
+        {
+          "item": {
+            "color": "RED",
+            "type": "SHIP"
+          },
+          "count": 4
+        },
+        {
+          "item": {
+            "type": "STARPORT",
+            "color": "RED"
+          },
+          "count": 1
+        }
+      ],
+      "1C": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 2
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 1
+        }
+      ],
+      "1H": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 1
+        }
+      ],
+      "1G": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 1
+        }
+      ],
+      "2A": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "YELLOW"
+          },
+          "count": 1
+        },
+        {
+          "item": "BLIGHT",
+          "count": 1
+        }
+      ],
+      "2C": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 1
+        }
+      ],
+      "2H": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "YELLOW"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "STARPORT",
+            "color": "YELLOW"
+          },
+          "count": 1
+        }
+      ],
+      "2G": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 1
+        }
+      ],
+      "3A": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 2
+        },
+        {
+          "item": {
+            "type": "STARPORT",
+            "color": "YELLOW"
+          },
+          "count": 1
+        }
+      ],
+      "3C": [
+        {
+          "item": {
+            "color": "YELLOW",
+            "type": "SHIP"
+          },
+          "count": 2
+        },
+        {
+          "item": {
+            "type": "STARPORT",
+            "color": "YELLOW"
+          },
+          "count": 1
+        }
+      ],
+      "3H": [
+        {
+          "item": {
+            "color": "EMPIRE",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 2
+        }
+      ],
+      "3G": [
+        {
+          "item": {
+            "color": "EMPIRE",
+            "type": "SHIP"
+          },
+          "count": 1
+        }
+      ],
+      "4A": [
+        {
+          "item": {
+            "color": "EMPIRE",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "RED"
+          },
+          "count": 1
+        }
+      ],
+      "4C": [
+        {
+          "item": {
+            "color": "EMPIRE",
+            "type": "SHIP"
+          },
+          "count": 3
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "STARPORT",
+            "color": "RED"
+          },
+          "count": 1
+        }
+      ],
+      "4H": [
+        {
+          "item": {
+            "color": "EMPIRE",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 1
+        }
+      ],
+      "4G": [
+        {
+          "item": {
+            "color": "EMPIRE",
+            "type": "SHIP"
+          },
+          "count": 1
+        }
+      ],
+      "5A": [
+        {
+          "item": "BLIGHT",
+          "count": 1
+        }
+      ],
+      "5C": [
+        {
+          "item": "BLIGHT",
+          "count": 1
+        }
+      ],
+      "5H": [
+        {
+          "item": {
+            "color": "RED",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "RED"
+          },
+          "count": 2
+        }
+      ],
+      "5G": [
+        {
+          "item": {
+            "color": "RED",
+            "type": "SHIP"
+          },
+          "count": 1
+        }
+      ],
+      "6A": [
+        {
+          "item": {
+            "type": "CITY",
+            "color": "RED"
+          },
+          "count": 1
+        }
+      ],
+      "6C": [
+        {
+          "item": {
+            "color": "RED",
+            "type": "SHIP"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "CITY",
+            "color": "FREE"
+          },
+          "count": 1
+        },
+        {
+          "item": {
+            "type": "STARPORT",
+            "color": "RED"
+          },
+          "count": 1
+        }
+      ],
+      "6H": [
+        {
+          "item": {
+            "type": "CITY",
+            "color": "RED"
+          },
+          "count": 1
+        }
+      ],
+      "6G": []
+    }
+  },
+  "scrap": [
+    {
+      "id": "CC-01",
+      "name": "Mining Interest"
+    },
+    {
+      "id": "CC-02",
+      "name": "Silver Tongues"
+    }
+  ],
+  "act": 2,
+  "edicts": [
+    {
+      "id": "S-05",
+      "name": "A Policy of Escalation"
+    }
+  ],
+  "firstRegent": "M"
+}
