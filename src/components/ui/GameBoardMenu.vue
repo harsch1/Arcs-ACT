@@ -13,7 +13,7 @@ import {
   DropdownMenuSubTrigger
 } from '@/components/ui/dropdown-menu'
 
-import SystemDialog from '@/components/ui/SystemDialog2.vue'
+import SystemDialog from '@/components/ui/SystemDialog.vue'
 import { BuildingType, Color, SHIP } from '@/Archive'
 import type { ShipType } from '@/Archive'
 

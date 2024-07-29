@@ -67,3 +67,53 @@ tokens:
   PORTAL: Portal
   BANNER: Banner
   BROKEN_WORLD: Broken world
+
+resources:
+  MATERIAL: Material
+  FUEL: Fuel
+  WEAPON: Weapon
+  RELIC: Relic
+  PSIONIC: Psionic
+
+player_area:
+  name: Name
+  color: Color
+  board: Player board
+  flagship: Flagship
+  resources: Resources
+  court: Court
+  fate: Fate
+  outrage: Outrage
+  first_regent: First regent
+  regent: Regent
+  outlaw: Outlaw
+  add_fate: Add fate
+  completed_objective: Completed objective
+  power: Power
+  outrage_help: Pick the outraged resources
+
+fates:
+  F1: Steward
+  F2: Founder
+  F3: Magnate
+  F4: Advocate
+  F5: Caretaker
+  F6: Partisan
+  F7: Admiral
+  F8: Believer
+  F9: Pathfinder
+  F10: Hegemon
+  F11: Planet Breaker
+  F12: Pirate
+  F13: Blight Speaker
+  F14: Pacifist
+  F15: Peacekeeper
+  F16: Warden
+  F17: Overlord
+  F18: Suvivalist
+  F19: Redeemer
+  F20: Guardian
+  F21: Naturalist
+  F22: Gate Wraith
+  F23: Conspirator
+  F24: Judge

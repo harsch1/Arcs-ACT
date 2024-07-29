@@ -20,7 +20,7 @@ const props = defineProps<{
     isFlipped?: boolean
   }
   scale?: number
-  systemPosition: {
+  systemPosition?: {
     x: number
     y: number
   }
@@ -44,7 +44,9 @@ const styles: CSSProperties = reactive({
   filter: props.pieceConfig.type === SHIP ? shipsUiConfig[props.pieceConfig.color].filter : 'none',
   zIndex: props.pieceConfig.type === SHIP ? 1 : 'auto',
   transformOrigin: 'top left',
-  transform: `translate(${props.systemPosition.x}px, ${props.systemPosition.y}px) scale(${props.scale ?? 0.4}) translate(${props.pieceConfig.position.x}px, ${props.pieceConfig.position.y}px)`
+  transform: props.systemPosition
+    ? `translate(${props.systemPosition.x}px, ${props.systemPosition.y}px) scale(${props.scale ?? 0.4}) translate(${props.pieceConfig.position.x}px, ${props.pieceConfig.position.y}px)`
+    : `translate(${props.pieceConfig.position.x}px, ${props.pieceConfig.position.y}px) scale(${props.scale ?? 0.4})`
 })
 
 const isFallback = ref(false)

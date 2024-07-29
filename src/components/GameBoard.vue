@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
-import { useMouse, pausableFilter, useWindowSize } from '@vueuse/core'
+import { pausableFilter, useWindowSize, useMouse } from '@vueuse/core'
 
 import SystemComponent from '@/components/game/shapes/SystemComponent'
 import GamePiece from '@/components/GamePiece.vue'
@@ -136,8 +136,6 @@ function flipPiece() {
     id="game-wrapper"
     class="select-none"
     :style="wrapperStyle"
-    @pointerdown="dragMapStart"
-    @pointerup="dragMapEnd"
   >
     <img
       :src="boardImage"
