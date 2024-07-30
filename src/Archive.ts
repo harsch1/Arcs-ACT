@@ -176,7 +176,7 @@ interface SaveFile {
   scrap: Card[]
   addedFaithfulActionCards?: Card[]
   idealMarkers?: string[]
-  act: 1 | 2 | 3
+  act: 2 | 3
   firstRegent: string
   /**
    * @param edicts - Array of edict cards (implied cards from fate history are excluded)
