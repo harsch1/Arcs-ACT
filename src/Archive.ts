@@ -1,5 +1,17 @@
 export { Archive, Board, BuildingType, Color, Fate, Golem, Player, Resource, Token }
-export type { Building, Card, Holdable, MapPiece, Multi, Piece, SaveFile, Ship, System, Systems }
+export type {
+  Building,
+  Card,
+  Holdable,
+  MapPiece,
+  Multi,
+  Piece,
+  SaveFile,
+  Ship,
+  System,
+  Systems,
+  MapKey
+}
 
 // Used to represent multiple of an item as a means of compression/easier loading
 type Multi<T> = {
@@ -19,9 +31,11 @@ type Card = {
   isAddedLore?: boolean
 }
 
+export type Cluster = 1 | 2 | 3 | 4 | 5 | 6
+
 type Ship = {
   color: Color
-  type?: string
+  type: string
 }
 
 type Building = {
