@@ -1,5 +1,17 @@
-export { Archive, Player, Board, Resource, Golem, Color, BuildingType, Token, Fate }
-export type { Card, Multi, MapPiece, Piece, Ship, Building, Holdable }
+export { Archive, Board, BuildingType, Color, Fate, Golem, Player, Resource, Token }
+export type {
+  Building,
+  Card,
+  Holdable,
+  MapPiece,
+  Multi,
+  Piece,
+  SaveFile,
+  Ship,
+  System,
+  Systems,
+  MapKey
+}
 
 // Used to represent multiple of an item as a means of compression/easier loading
 type Multi<T> = {
@@ -19,9 +31,11 @@ type Card = {
   isAddedLore?: boolean
 }
 
+export type Cluster = 1 | 2 | 3 | 4 | 5 | 6
+
 type Ship = {
   color: Color
-  type?: string
+  type: string
 }
 
 type Building = {
@@ -72,11 +86,16 @@ function processMultiPiece(piece: Multi<MapPiece>): Multi<MapPiece> {
   return newPiece
 }
 
+type MapKey = `${1 | 2 | 3 | 4 | 5 | 6}${'A' | 'C' | 'H' | 'G'}`
+
+type System = Multi<MapPiece>
+type Systems = Map<MapKey, System[]>
+
 /**
  * Represents a board with systems and pieces.
  */
 class Board {
-  Systems: Map<string, Multi<MapPiece>[]> = new Map([
+  systems: Systems = new Map([
     ['1A', []],
     ['1C', []],
     ['1H', []],
@@ -109,9 +128,9 @@ class Board {
    * @param system The system to add the piece to.
    * @param piece The piece to add.
    */
-  addPiece(system: string, piece: MapPiece) {
-    if (this.Systems.has(system)) {
-      this.Systems.get(system)?.push({ item: processPiece(piece), count: 1 })
+  addPiece(system: MapKey, piece: MapPiece) {
+    if (this.systems.has(system)) {
+      this.systems.get(system)?.push({ item: processPiece(piece), count: 1 })
     }
     this.prepForSave()
   }
@@ -121,9 +140,9 @@ class Board {
    * @param system The system to add the pieces to.
    * @param pieces An array of pieces to add.
    */
-  addPieces(system: string, pieces: (MapPiece | Multi<MapPiece>)[]) {
-    if (this.Systems.has(system)) {
-      this.Systems.get(system)?.push(
+  addPieces(system: MapKey, pieces: (MapPiece | Multi<MapPiece>)[]) {
+    if (this.systems.has(system)) {
+      this.systems.get(system)?.push(
         ...pieces.map((p) => {
           if ((p as Multi<MapPiece>).item) {
             return processMultiPiece(p as Multi<MapPiece>)
@@ -142,9 +161,9 @@ class Board {
    * @param piece The piece to update.
    * @param count The new count of the piece.
    */
-  updateCount(system: string, piece: MapPiece, count: number) {
-    if (this.Systems.has(system)) {
-      const pieces = this.Systems.get(system)
+  updateCount(system: MapKey, piece: MapPiece, count: number) {
+    if (this.systems.has(system)) {
+      const pieces = this.systems.get(system)
       if (pieces) {
         const index = pieces.findIndex((p) => p.item === piece)
         if (index >= 0) {
@@ -156,8 +175,27 @@ class Board {
   }
 
   prepForSave() {
-    this._systems = Object.fromEntries(this.Systems)
+    this._systems = Object.fromEntries(this.systems)
   }
+}
+
+interface SaveFile {
+  players: Player[]
+  board: {
+    systems: Systems
+  }
+  /**
+   * @param scrap - Array of card objects scrapped from the game (implied cards from fate history are excluded)
+   */
+  scrap: Card[]
+  addedFaithfulActionCards?: Card[]
+  idealMarkers?: string[]
+  act: 2 | 3
+  firstRegent: string
+  /**
+   * @param edicts - Array of edict cards (implied cards from fate history are excluded)
+   */
+  edicts: Card[]
 }
 
 class Archive {
