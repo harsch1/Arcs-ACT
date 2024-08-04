@@ -38,22 +38,11 @@ const triggerStyle = computed(() => ({
   left: `${props.pointerPosition.x}px`,
   top: `${props.pointerPosition.y}px`
 }))
-const pieceType = computed(() => {
-  if (props.activePiece.type === SHIP) {
-    return 'ship'
-  }
-
-  if (Object.values(BuildingType).includes(props.activePiece.type)) {
-    return 'building'
-  }
-
-  return 'token'
-})
 // For some reason i18n modifiers are not working with variables
 const pieceId = computed(() => {
   const color = t(`colors.${props.activePiece.color}`)
-  const type = t(`${pieceType.value}_types.${props.activePiece.type}`)
-  const str = pieceType.value !== 'token' ? `${color} ${type}` : type
+  const type = t(`pieces.${props.activePiece.type}`)
+  const str = props.activePiece.color ? `${color} ${type}` : type
   return `${str.charAt(0).toUpperCase()}${str.slice(1).toLowerCase()}`
 })
 

@@ -13,14 +13,15 @@ import {
   DropdownMenuSubTrigger
 } from '@/components/ui/dropdown-menu'
 
-import SystemDialog from '@/components/ui/SystemDialog.vue'
+import SystemDialog from '@/components/SystemDialog.vue'
 import { BuildingType, Color, SHIP } from '@/Archive'
 import type { ShipType } from '@/Archive'
+import type { SystemId } from '@/stores/systems'
 
 type PieceType = BuildingType | ShipType
 
 const props = defineProps<{
-  activeSystem: string
+  activeSystem: SystemId
   isOpen: boolean
   pointerPosition: {
     x: number

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-
-import shipsUiConfig from '@/lib/ships-ui-config'
+import { computed, ref } from 'vue'
 
 import type { CSSProperties } from 'vue'
 import { Token, SHIP } from '@/Archive'
@@ -28,25 +26,36 @@ const props = defineProps<{
 
 const src = computed(() => {
   if (props.pieceConfig.type === SHIP) {
-    return `/images/ship${props.pieceConfig.isFlipped ? '-flip' : ''}.png`
+    return `/images/${props.pieceConfig.color?.toLowerCase()}_ship.png`
   }
 
-  if (Object.values(Token).includes(props.pieceConfig.type)) {
+  if (Object.values(Token).includes(props.pieceConfig.type as Token)) {
     return `/images/${props.pieceConfig.type?.toLowerCase()}${props.pieceConfig.isFlipped ? '-flip' : ''}.png`
   }
 
-  return `/images/${props.pieceConfig.type?.toLowerCase()}-${props.pieceConfig.color?.toLowerCase()}${props.pieceConfig.isFlipped ? '-flip' : ''}.png`
+  return `/images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}${props.pieceConfig.isFlipped ? '_flip' : ''}.png`
 })
 
-const styles: CSSProperties = reactive({
-  left: 0,
-  top: 0,
-  filter: props.pieceConfig.type === SHIP ? shipsUiConfig[props.pieceConfig.color].filter : 'none',
-  zIndex: props.pieceConfig.type === SHIP ? 1 : 'auto',
-  transformOrigin: 'top left',
-  transform: props.systemPosition
+const styles = computed<CSSProperties>(() => {
+  return {
+    left: 0,
+    top: 0,
+    zIndex: props.pieceConfig.type === SHIP ? 1 : 'auto',
+    transformOrigin: 'top left',
+    transform: transform.value
+  }
+})
+
+const transform = computed(() => {
+  let value = props.systemPosition
     ? `translate(${props.systemPosition.x}px, ${props.systemPosition.y}px) scale(${props.scale ?? 0.4}) translate(${props.pieceConfig.position.x}px, ${props.pieceConfig.position.y}px)`
     : `translate(${props.pieceConfig.position.x}px, ${props.pieceConfig.position.y}px) scale(${props.scale ?? 0.4})`
+
+  if (props.pieceConfig.type === SHIP && props.pieceConfig.isFlipped) {
+    value = `${value} translate(100%, 100%) rotate(180deg)`
+  }
+
+  return value
 })
 
 const isFallback = ref(false)
@@ -59,6 +68,7 @@ function fallbackHandler() {
   <img
     v-if="!isFallback"
     class="absolute"
+    :class="{ damaged: pieceConfig.isFlipped }"
     :src="src"
     :style="styles"
     @error="fallbackHandler"

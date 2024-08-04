@@ -5,13 +5,14 @@ import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
 import { pausableFilter, useWindowSize, useMouse } from '@vueuse/core'
 
+import { BuildingType } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
 import GamePiece from '@/components/GamePiece.vue'
-import GameBoardMenu from '@/components/ui/GameBoardMenu.vue'
-import GamePieceMenu from '@/components/ui/GamePieceMenu.vue'
+import GameBoardMenu from '@/components/GameBoardMenu.vue'
+import GamePieceMenu from '@/components/GamePieceMenu.vue'
 
+import type { PieceState, SystemUiConfig, SystemId } from '@/stores/systems'
 import type { CSSProperties } from 'vue'
-import { BuildingType } from '@/Archive'
 
 const dragControl = pausableFilter()
 dragControl.pause()
@@ -74,10 +75,10 @@ function dragMapEnd() {
 // Menus interaction
 const isBoardMenuOpen = ref(false)
 const isPieceMenuOpen = ref(false)
-const activeSystem = ref('')
-const activePiece = ref<null | Record<string, unknown>>(null)
+const activeSystem = ref<SystemId | null>(null)
+const activePiece = ref<PieceState | null>(null)
 
-function onClick(id: string, e: PointerEvent) {
+function onClick(id: SystemId, e: PointerEvent) {
   if (isBoardMenuOpen.value) {
     return
   }
@@ -122,11 +123,15 @@ function addPiece(type: BuildingType, color?: string) {
 }
 
 function removePiece() {
-  systemsStore.removePiece(activePiece.value)
+  if (activePiece.value !== null) {
+    systemsStore.removePiece(activePiece.value)
+  }
 }
 
 function flipPiece() {
-  systemsStore.flipPiece(activePiece.value)
+  if (activePiece.value !== null) {
+    systemsStore.flipPiece(activePiece.value)
+  }
 }
 </script>
 
@@ -151,7 +156,7 @@ function flipPiece() {
       class="absolute system"
       draggable="false"
       @click="onClick"
-      @mounted="(value) => systemsStore.setSystemUi(system.id, value)"
+      @mounted="(value: SystemUiConfig) => systemsStore.setSystemUi(system.id, value)"
     />
 
     <GamePiece

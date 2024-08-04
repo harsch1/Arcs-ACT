@@ -69,14 +69,9 @@ export default {
   },
   emits: ['click', 'mounted'],
   setup(props, { emit }) {
-    // console.log(props.svgComp)
-    // console.log(props.svgRaw, h('svg', { innerHTML: props.svgRaw }))
-
     const svgRendered = shapes[props.systemConfig.id]?.render()
     const el = ref() // Main wrapper
     const path = ref() // Actual shape
-
-    // console.log(svgRendered)
 
     const onClick = function (e: PointerEvent) {
       emit('click', props.systemConfig.id, e)
@@ -85,10 +80,9 @@ export default {
     onMounted(() => {
       emit('mounted', {
         el: el.value,
-        path: path.value,
+        shape: path.value,
         bbox: path.value.getBoundingClientRect()
       })
-      // console.log('mounted', props.systemConfig.id, el.value.getBoundingClientRect(), el.value)
     })
 
     return () =>

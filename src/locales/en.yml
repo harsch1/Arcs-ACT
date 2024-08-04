@@ -1,12 +1,17 @@
-confirm: Confirm
-cancel: Cancel
-load: Load
+arcs_cat: Campaign Archival Tool
 
 common:
   home: Home
-  new_campaign: New campaign
-  new_player: New player
+  confirm: Confirm
+  cancel: Cancel
+  close: Close
+  load: Load
+  next: Next
+  back: Back
+  save: Save
+act: Act | Act {n} | Act {n}
 system: System
+cluster: Cluster
 piece: Piece
 piece_id: '@.capitalize:{type} @.lower:{color}'
 system_id: System {id}
@@ -26,25 +31,17 @@ piece_menu:
   repair_ship: Repair
   repair_building: Repair
   flip: Flip
-building_types:
+pieces:
   CITY: City | Cities
   STARPORT: Starport | Starports
-ship_types:
-  SHIP: Ship
-  EMPIRE: Ship
-token_types:
+  SHIP: Ship | Ships
+  EMPIRE: Ship | Ships
   BLIGHT: Blight
   PORTAL: Portal
   BANNER: Banner
   BROKEN_WORLD: Broken world
   GOLEM: Golem
 colors:
-  # blue: Blue
-  # red: Red
-  # yellow: Yellow
-  # white: White
-  # free: Free
-  # empire: Empire
   BLUE: Blue
   RED: Red
   YELLOW: Yellow
@@ -52,11 +49,20 @@ colors:
   FREE: Free
   EMPIRE: Empire
 
+campaign:
+  name: Campaign name
+  which_act_just_ended?: Which act just ended?
+  who_is_playing?: Who is playing?
+  board_state_help: Save the pieces in every system
+  new: New campaign
+  latest: Latest campaign
+  new_player: New player
+
 dialog:
-  add_ship: Add ships
-  add_building: Add buildings
+  add_ship: Ships
+  add_building: Buildings
   add_ship_color: '{color} ship'
-  add_token: Add tokens
+  add_token: Tokens
   no_token_found: Token {token} not found
   select_token: Select token
   search_token: Search token...
