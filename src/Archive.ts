@@ -1,4 +1,4 @@
-export { Archive, Board, BuildingType, Color, Fate, Golem, Player, Resource, Token }
+export { Archive, Board, BuildingType, Color, Fate, Golem, Player, Resource, Token, SHIP }
 export type {
   Building,
   Card,
@@ -10,7 +10,8 @@ export type {
   Ship,
   System,
   Systems,
-  MapKey
+  MapKey,
+  ShipType
 }
 
 // Used to represent multiple of an item as a means of compression/easier loading
@@ -58,9 +59,9 @@ class Player {
   empireStatus = 'Regent'
   currentFate: Fate
   /**
-   * @param fateHistory - Array of tuples of Fate and boolean if succeeded objective in chronological order prior to current game
+   * @param fateHistory - Array of tuples of Fate, power, and boolean if succeeded objective in chronological order prior to current game
    */
-  fateHistory: [Fate, boolean][] = []
+  fateHistory: [Fate, number, boolean][] = []
   power: number = 0
   //TODO flagShipData: {};
 
@@ -286,3 +287,8 @@ enum Fate {
   conspirator = 'F23',
   judge = 'F24'
 }
+
+// To keep it in a variable
+// Maybe will turn into an enum with flagships?
+const SHIP = 'SHIP'
+type ShipType = typeof SHIP

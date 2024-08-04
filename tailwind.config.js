@@ -1,9 +1,10 @@
 const animate = require('tailwindcss-animate')
 const colors = require('tailwindcss/colors')
+const safeArea = require('tailwindcss-safe-area')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['class'],
+  darkMode: 'selector',
   safelist: [
     'dark',
     {
@@ -98,5 +99,5 @@ module.exports = {
       }
     }
   },
-  plugins: [animate]
+  plugins: [animate, safeArea]
 }
