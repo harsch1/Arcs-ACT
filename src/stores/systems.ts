@@ -7,11 +7,12 @@ import { BuildingType, Token } from '@/Archive'
 import type { Color, MapPiece, Multi, ShipType } from '@/Archive'
 import { getRandomInt, randomPointWithinSVG } from '@/lib/ui-utils'
 import { getSystemOverview } from '@/lib/utils'
+import type { ArchiveJSON } from './game'
 
 export type SystemId = (typeof systemsUiConfig)[number]['id']
 
 export type SystemUiConfig = {
-  el?: SVGGraphicsElement
+  el?: SVGSVGElement
   shape?: SVGPathElement
   bbox?: DOMRect
 }
@@ -105,7 +106,16 @@ export const useSystemsStore = defineStore('systems', () => {
           type: payload.type,
           color: payload.color
         }
-        removePiece(piece)
+        // TODO: Check this behavior
+        // Some pieces to remove may not have all properties if they were added on the dialog
+        removePiece({
+          id: -1,
+          position: {
+            x: -1,
+            y: -1
+          },
+          ...piece
+        })
       }
     } else {
       for (let i = payload.count; i > 0; i--) {
@@ -197,13 +207,13 @@ export const useSystemsStore = defineStore('systems', () => {
     piece.isFlipped = !piece.isFlipped
   }
 
-  function parse(systemsConfig: Record<string, Multi<MapPiece>[]>) {
+  function parse(systemsConfig: ArchiveJSON['board']['_systems']) {
     // const patch: Partial<Record<string, SystemInfo>> = {}
     Object.entries(systemsConfig).forEach(([systemId, pieces]) => {
       pieces.forEach((piece) => {
         // Create for every count
         for (let i = piece.count ?? 1; i > 0; i--) {
-          addPiece(systemId, piece.item)
+          addPiece(systemId as SystemId, piece.item)
         }
       })
     })
@@ -222,6 +232,7 @@ export const useSystemsStore = defineStore('systems', () => {
           count
         }
       })
+      // @ts-expect-error TODO: Check types with all pieces
       result.push([id as SystemId, transformed])
     })
     return result

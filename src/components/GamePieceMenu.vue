@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import {
@@ -81,13 +81,13 @@ function onRemove() {
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
           <DropdownMenuItem @select="onSelect(BuildingType.city, Color.blue)">
-            {{ $t('colors.blue') }}
+            {{ $t('colors.BLUE') }}
           </DropdownMenuItem>
-          <DropdownMenuItem>{{ $t('colors.red') }}</DropdownMenuItem>
-          <DropdownMenuItem>{{ $t('colors.white') }}</DropdownMenuItem>
-          <DropdownMenuItem>{{ $t('colors.yellow') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.RED') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.WHITE') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.YELLOW') }}</DropdownMenuItem>
           <DropdownMenuItem @select="onSelect(BuildingType.city, Color.free)">
-            {{ $t('colors.free') }}
+            {{ $t('colors.FREE') }}
           </DropdownMenuItem>
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -96,12 +96,12 @@ function onRemove() {
           {{ $t('piece_menu.change_token') }}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
-          <DropdownMenuItem>{{ $t('colors.blue') }}</DropdownMenuItem>
-          <DropdownMenuItem>{{ $t('colors.red') }}</DropdownMenuItem>
-          <DropdownMenuItem>{{ $t('colors.white') }}</DropdownMenuItem>
-          <DropdownMenuItem>{{ $t('colors.yellow') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.BLUE') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.RED') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.WHITE') }}</DropdownMenuItem>
+          <DropdownMenuItem>{{ $t('colors.YELLOW') }}</DropdownMenuItem>
           <DropdownMenuItem @select="onSelect(BuildingType.starport, Color.free)">
-            {{ $t('colors.free') }}
+            {{ $t('colors.FREE') }}
           </DropdownMenuItem>
         </DropdownMenuSubContent>
       </DropdownMenuSub>

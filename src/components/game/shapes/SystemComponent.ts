@@ -1,4 +1,4 @@
-import { h, ref, onMounted } from 'vue'
+import { h, ref, onMounted, defineComponent } from 'vue'
 
 // Manage all the shapes
 import s1A from '@/components/game/shapes/system-1a.svg'
@@ -25,6 +25,7 @@ import s6A from '@/components/game/shapes/system-6a.svg'
 import s6C from '@/components/game/shapes/system-6c.svg'
 import s6H from '@/components/game/shapes/system-6h.svg'
 import s6G from '@/components/game/shapes/system-6g.svg'
+import type { SystemId } from '@/stores/systems'
 
 const shapes = {
   '1A': s1A,
@@ -53,7 +54,7 @@ const shapes = {
   '6G': s6G
 }
 
-export default {
+export default defineComponent({
   props: {
     position: {
       type: Object,
@@ -69,7 +70,7 @@ export default {
   },
   emits: ['click', 'mounted'],
   setup(props, { emit }) {
-    const svgRendered = shapes[props.systemConfig.id]?.render()
+    const svgRendered = (shapes[props.systemConfig.id as SystemId] as any)?.render()
     const el = ref() // Main wrapper
     const path = ref() // Actual shape
 
@@ -100,7 +101,7 @@ export default {
           },
           'data-system-id': props.systemConfig.id
         },
-        svgRendered.children?.map((child) =>
+        svgRendered.children?.map((child: any) =>
           h(child.type, {
             ref: path,
             style: {
@@ -115,4 +116,4 @@ export default {
         )
       )
   }
-}
+})

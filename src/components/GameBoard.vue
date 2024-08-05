@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck TODO: Need to generate types for the system instead of using typeof on the JSON
 import { computed, reactive, ref, watch } from 'vue'
 import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
@@ -11,6 +12,7 @@ import GamePiece from '@/components/GamePiece.vue'
 import GameBoardMenu from '@/components/GameBoardMenu.vue'
 import GamePieceMenu from '@/components/GamePieceMenu.vue'
 
+import type { ShipType } from '@/Archive'
 import type { PieceState, SystemUiConfig, SystemId } from '@/stores/systems'
 import type { CSSProperties } from 'vue'
 
@@ -107,7 +109,7 @@ function onPieceClick(piece: any, e: PointerEvent) {
   isPieceMenuOpen.value = true
 }
 
-function addPiece(type: BuildingType, color?: string) {
+function addPiece(type: BuildingType | ShipType, color?: string) {
   if (activeSystem.value === null) {
     return
   }
@@ -174,6 +176,7 @@ function flipPiece() {
 
   <!-- The dropdown is reused based on the clicked system -->
   <GameBoardMenu
+    v-if="activeSystem"
     :active-system="activeSystem"
     :is-open="isBoardMenuOpen"
     :pointer-position="menuPosition"
@@ -184,6 +187,7 @@ function flipPiece() {
 
   <!-- The dropdown is reused based on the clicked piece -->
   <GamePieceMenu
+    v-if="activePiece"
     :active-piece="activePiece"
     :is-open="isPieceMenuOpen"
     :pointer-position="menuPosition"

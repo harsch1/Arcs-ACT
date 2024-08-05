@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+// @ts-nocheck TODO: Type property when implementing Flagships
 import GamePiece from '@/components/GamePiece.vue'
 import flagshipConfig from '@/lib/flagship-ui-config'
 import buildingSvg from '@/components/game/shapes/building.svg?url'
@@ -18,7 +19,7 @@ type FlagshipState = {
   }
 }
 
-const flagshipState: Partial<FlagshipState> = reactive({})
+const flagshipState = reactive<Partial<FlagshipState>>({})
 
 const baseStyle: CSSProperties = {
   position: 'absolute',
@@ -29,7 +30,10 @@ const baseStyle: CSSProperties = {
 function cycle(type: 'upgrade' | 'armor', slot: FlagshipSlot) {
   // Ensure object is initialized
   if (flagshipState[slot] === null || flagshipState[slot] === undefined) {
-    flagshipState[slot] = {}
+    flagshipState[slot] = {
+      armor: null,
+      upgrade: null
+    }
   }
 
   const building = flagshipState[slot][type]

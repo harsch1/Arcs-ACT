@@ -214,8 +214,8 @@ function addFate() {
         <div class="my-2">
           <Label for="player-resources">{{ $t('player_area.resources') }}</Label>
           <ComboboxRoot
-            v-model:model-value="player.resources"
             v-model:open="resourceOpen"
+            :value="player.resources"
             multiple
             class="flex flex-grow"
           >
@@ -272,7 +272,9 @@ function addFate() {
                     @select.prevent="
                       (e) => {
                         if (typeof e.detail.value === 'string') {
-                          player.resources?.push(e.detail.value)
+                          updatePlayer({
+                            resources: [...player.resources, e.detail.value as Resource]
+                          })
                         }
                       }
                     "
@@ -294,8 +296,8 @@ function addFate() {
         <div class="my-2">
           <Label for="player-outrage">{{ $t('player_area.outrage') }}</Label>
           <ComboboxRoot
-            v-model:model-value="player.outrage"
             v-model:open="outrageOpen"
+            :value="player.outrage"
             multiple
             class="flex flex-grow"
           >
@@ -352,7 +354,9 @@ function addFate() {
                     @select.prevent="
                       (e) => {
                         if (typeof e.detail.value === 'string') {
-                          player.outrage?.push(e.detail.value)
+                          updatePlayer({
+                            outrage: [...player.outrage, e.detail.value as Resource]
+                          })
                         }
                       }
                     "

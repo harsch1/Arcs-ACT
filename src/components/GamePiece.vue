@@ -1,27 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-
-import type { CSSProperties } from 'vue'
 import { Token, SHIP } from '@/Archive'
 
+import type { CSSProperties } from 'vue'
+import type { PieceState, SystemConfig } from '@/stores/systems'
+
 const props = defineProps<{
-  pieceConfig: {
-    color: string
-    type: string
-    position: {
-      x: number
-      y: number
-    }
-    // Represent side of piece.
-    // For ships/buildings is the same as
-    // fresh = false / damaged = true
-    isFlipped?: boolean
-  }
+  pieceConfig: PieceState
   scale?: number
-  systemPosition?: {
-    x: number
-    y: number
-  }
+  systemPosition?: SystemConfig['position']
 }>()
 
 const src = computed(() => {

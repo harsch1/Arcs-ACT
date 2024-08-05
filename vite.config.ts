@@ -9,16 +9,9 @@ import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import svgLoader from 'vite-svg-loader'
 
-const fullReloadAlways = {
-  handleHotUpdate({ server }) {
-    server.ws.send({ type: 'full-reload' })
-    return []
-  }
-}
-
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueJsx(), ViteYaml(), svgLoader(), fullReloadAlways],
+  plugins: [vue(), vueJsx(), ViteYaml(), svgLoader(), vueDevTools()],
   base: process.env.NODE_ENV === 'production' ? '/Arcs-CAT/' : '/',
   resolve: {
     alias: {

@@ -8,7 +8,7 @@ import test from '@/stores/test.json'
 import { Archive, Color, Fate, Player } from '@/Archive'
 import { reactive, ref } from 'vue'
 
-type ArchiveJSON = typeof test
+export type ArchiveJSON = typeof test
 type GameSettings = {
   act: number
 }
