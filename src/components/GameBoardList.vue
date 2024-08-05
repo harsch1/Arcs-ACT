@@ -26,7 +26,7 @@ function updateDialog(open: boolean) {
 
 <template>
   <div class="px-4">
-    <p class="w-full text-lg">{{ $t('campaign.board_state_help') }}</p>
+    <p class="w-full py-2 text-lg">{{ $t('campaign.board_state_help') }}</p>
     <Accordion type="multiple">
       <AccordionItem
         v-for="(systems, cluster) in systemsStore.clusters"

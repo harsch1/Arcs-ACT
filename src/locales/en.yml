@@ -10,6 +10,7 @@ common:
   back: Back
   save: Save
 act: Act | Act {n} | Act {n}
+player: Player | Players
 system: System
 cluster: Cluster
 piece: Piece
@@ -53,10 +54,27 @@ campaign:
   name: Campaign name
   which_act_just_ended?: Which act just ended?
   who_is_playing?: Who is playing?
-  board_state_help: Save the pieces in every system
+  board_state_help: View or set the pieces within The Reach
   new: New campaign
   latest: Latest campaign
-  new_player: New player
+  map_view: Map view
+  list_view: List view
+
+load_dialog:
+  title: Continue campaign
+  help_text: Load a saved game or use a valid JSON
+  are_you_sure?: This can't be undone. Are you sure?
+  confirm: Load {id}
+  load_raw: Use JSON
+  load_list: Choose from saves
+  load_raw_placeholder: Paste a valid JSON
+
+  table:
+    id: ID
+    timestamp: Date
+    act: '@:act'
+    player: '@:player'
+    actions: Actions
 
 dialog:
   add_ship: Ships

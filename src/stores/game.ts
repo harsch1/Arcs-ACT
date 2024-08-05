@@ -6,22 +6,32 @@ import { useSystemsStore } from './systems'
 
 import test from '@/stores/test.json'
 import { Archive, Color, Fate, Player } from '@/Archive'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
+
 type ArchiveJSON = typeof test
+type GameSettings = {
+  act: number
+}
 
 // Prefix for the keys in storage
-const GAME_SAVE_PREFIX = 'save_'
+export const GAME_SAVE_PREFIX = 'save_'
+export const GAME_TEST_ID = 'test'
 
 export const useGameStore = defineStore('game', () => {
   const savedGames = ref<ArchiveJSON[]>([])
 
   const systems = useSystemsStore()
   const players = ref<Player[]>([])
+  const settings = reactive<GameSettings>({
+    act: 1
+  })
 
   // Parse the game json and initialize the stores
+  function initSettings(archive: ArchiveJSON) {
+    settings.act = archive.act
+  }
 
   function initPlayers(playersJSON: ArchiveJSON['players']) {
-    console.log(playersJSON)
     playersJSON.forEach((player) => {
       players.value.push(new Player(player.name, player.color as Color, player.currentFate as Fate))
     })
@@ -31,10 +41,36 @@ export const useGameStore = defineStore('game', () => {
     systems.parse(systemsJSON)
   }
 
-  function loadGame(json: ArchiveJSON) {
-    // initSystems(json)
-    initPlayers(test.players)
-    initSystems(test.board._systems)
+  async function loadGame(idOrRaw: string, raw?: boolean) {
+    let archive: ArchiveJSON | null = null
+
+    if (raw) {
+      try {
+        archive = JSON.parse(idOrRaw)
+      } catch (e) {
+        console.info(`There was an error parsing the provided JSON`)
+      }
+    } else {
+      archive = idOrRaw === GAME_TEST_ID ? test : await localforage.getItem(idOrRaw)
+
+      if (!archive) {
+        console.info(`Archive with ID '${idOrRaw}' couldn't be loaded`)
+        return
+      }
+    }
+
+    if (!archive) {
+      console.info('There was an error loading the game')
+      return
+    }
+
+    initSettings(archive)
+    initPlayers(archive.players)
+    initSystems(archive.board._systems)
+  }
+
+  function deleteGame(id: string) {
+    localforage.removeItem(id)
   }
 
   function saveGame() {
@@ -42,13 +78,16 @@ export const useGameStore = defineStore('game', () => {
     const systemsResult = systems.save()
     systemsResult.forEach(([system, pieces]) => archive.board.addPieces(system, pieces))
 
-    const id = GAME_SAVE_PREFIX + humanId({ separator: '_', adjectiveCount: 1, addAdverb: false })
+    // Remove the verb from the id
+    let id = humanId('_')
+    id = GAME_SAVE_PREFIX + id.slice(0, id.lastIndexOf('_'))
     // @ts-expect-error TODO: Extend archive with this
     archive.id = id
     // @ts-expect-error TODO: Extend archive with this
     archive.timestamp = new Date().toISOString()
 
-    localforage.setItem(id, JSON.stringify(archive))
+    // Clone the archive and store it
+    localforage.setItem(id, JSON.parse(JSON.stringify(archive)))
   }
 
   function addPlayer(name: string, color: Color, fate?: Fate) {
@@ -85,5 +124,15 @@ export const useGameStore = defineStore('game', () => {
     }
   })
 
-  return { savedGames, players, loadGame, saveGame, addPlayer, updatePlayer, updatePlayers }
+  return {
+    savedGames,
+    settings,
+    players,
+    deleteGame,
+    loadGame,
+    saveGame,
+    addPlayer,
+    updatePlayer,
+    updatePlayers
+  }
 })

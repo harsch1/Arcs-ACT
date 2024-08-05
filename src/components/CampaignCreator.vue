@@ -2,7 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Color } from '@/Archive'
 import PlayerLog from '@/components/PlayerLog.vue'
 // import PlayerFlagship from '@/components/PlayerFlagship.vue'
@@ -42,6 +42,11 @@ function advanceScreen(delta: number = 1) {
 function save() {
   gameStore.saveGame()
 }
+
+watch([gameStore.players, gameStore.settings], () => {
+  players.value = gameStore.players.map((p) => p.color)
+  act.value = gameStore.settings.act.toString()
+})
 </script>
 
 <template>

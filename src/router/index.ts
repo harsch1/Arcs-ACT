@@ -1,18 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import MapView from '../views/MapView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
-    },
-    {
-      path: '/map',
       name: 'map',
-      component: MapView
+      component: import('@/views/MapView.vue')
     },
     // {
     //   path: '/about',
@@ -33,9 +27,9 @@ const router = createRouter({
       component: () => import('@/views/CampaignView.vue')
     },
     {
-      path: '/player',
-      name: 'player',
-      component: () => import('@/views/PlayerView.vue')
+      path: '/list',
+      name: 'list_view',
+      component: () => import('@/views/CampaignListView.vue')
     }
   ]
 })

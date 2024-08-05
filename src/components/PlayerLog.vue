@@ -89,8 +89,6 @@ function updateFate(
 }
 
 function addFate() {
-  console.log(props.player.fateHistory)
-
   updatePlayer({
     color: props.player.color,
     // @ts-ignore WIP
