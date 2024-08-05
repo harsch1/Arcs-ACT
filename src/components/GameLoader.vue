@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import Button from '@/components/ui/button/Button.vue'
-import { Trash2, LoaderPinwheel } from 'lucide-vue-next'
+import { Trash2, LoaderPinwheel, FileDown } from 'lucide-vue-next'
 import { GAME_SAVE_PREFIX, useGameStore } from '@/stores/game'
 import { computed, ref } from 'vue'
 import { format } from 'date-fns'
@@ -76,6 +76,10 @@ async function loadSave() {
   emit('loaded')
 }
 
+function exportSave(id: string) {
+  gameStore.exportGame(id)
+}
+
 function deleteSave(id: string) {
   if (confirm(t('load_dialog.are_you_sure?'))) {
     gameStore.deleteGame(id)
@@ -88,7 +92,7 @@ function deleteSave(id: string) {
     <AlertDialogTrigger as-child>
       <slot></slot>
     </AlertDialogTrigger>
-    <AlertDialogContent class="max-sm:h-full max-sm:w-full">
+    <AlertDialogContent class="max-sm:h-full max-sm:w-full max-w-[800px]">
       <AlertDialogHeader>
         <AlertDialogTitle>{{ $t('load_dialog.title') }}</AlertDialogTitle>
         <AlertDialogDescription>
@@ -101,9 +105,9 @@ function deleteSave(id: string) {
         <TableHeader>
           <TableRow>
             <TableHead>{{ $t('load_dialog.table.id') }}</TableHead>
-            <TableHead>{{ $t('load_dialog.table.act') }}</TableHead>
-            <TableHead>{{ $t('load_dialog.table.player', 2) }}</TableHead>
-            <TableHead>{{ $t('load_dialog.table.timestamp') }}</TableHead>
+            <TableHead class="text-center">{{ $t('load_dialog.table.act') }}</TableHead>
+            <TableHead class="text-center">{{ $t('load_dialog.table.player', 2) }}</TableHead>
+            <TableHead class="text-center">{{ $t('load_dialog.table.timestamp') }}</TableHead>
             <TableHead><!-- actions column --></TableHead>
           </TableRow>
         </TableHeader>
@@ -116,15 +120,23 @@ function deleteSave(id: string) {
             <TableCell>
               <span class="whitespace-nowrap">{{ getFriendlyId(save.id) }}</span>
             </TableCell>
-            <TableCell>{{ save.act }}</TableCell>
-            <TableCell>{{ getPlayers(save) }}</TableCell>
-            <TableCell>{{ format(save.timestamp, 'd/LLL/yy') }}</TableCell>
-            <TableCell>
+            <TableCell class="text-center">{{ save.act }}</TableCell>
+            <TableCell class="text-center">{{ getPlayers(save) }}</TableCell>
+            <TableCell class="text-center">{{ format(save.timestamp, 'd/LLL/yy') }}</TableCell>
+            <TableCell class="text-right">
+              <Button
+                size="icon"
+                variant="ghost"
+                @click.stop="exportSave(save.id)"
+              >
+                <FileDown />
+              </Button>
+
               <Button
                 class="text-destructive"
                 size="icon"
                 variant="ghost"
-                @click="deleteSave(save.id)"
+                @click.stop="deleteSave(save.id)"
               >
                 <Trash2 />
               </Button>
@@ -136,16 +148,22 @@ function deleteSave(id: string) {
       <Textarea
         v-else
         v-model="raw"
+        class="md:h-[320px]"
         :placeholder="$t('load_dialog.load_raw_placeholder')"
       >
       </Textarea>
 
-      <AlertDialogFooter>
+      <AlertDialogFooter class="">
         <AlertDialogCancel as-child>
-          <Button variant="link">{{ $t('common.cancel') }}</Button>
+          <Button
+            variant="link"
+            class="!mt-2"
+            >{{ $t('common.cancel') }}</Button
+          >
         </AlertDialogCancel>
+
         <Button
-          class="my-2"
+          class="!mt-2 md:order-3"
           :disabled="!enableLoad || loading"
           @click="loadSave"
         >
@@ -155,7 +173,9 @@ function deleteSave(id: string) {
           />
           {{ $t('load_dialog.confirm', { id: getFriendlyId(selected) }) }}
         </Button>
+
         <Button
+          class="md:order-2 !mt-2"
           variant="secondary"
           @click="showTable = !showTable"
         >

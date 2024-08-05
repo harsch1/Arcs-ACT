@@ -7,6 +7,8 @@ import { useSystemsStore } from './systems'
 import test from '@/stores/test.json'
 import { Archive, Color, Fate, Player } from '@/Archive'
 import { reactive, ref } from 'vue'
+import { exportArchive } from '@/lib/utils'
+import type { ISOStringFormat } from 'date-fns'
 
 export type ArchiveJSON = typeof test
 type GameSettings = {
@@ -67,6 +69,18 @@ export const useGameStore = defineStore('game', () => {
     initSettings(archive)
     initPlayers(archive.players)
     initSystems(archive.board._systems)
+  }
+
+  async function exportGame(id: string) {
+    const archive = await localforage.getItem<Archive & { id: string; timestamp: ISOStringFormat }>(
+      id
+    )
+
+    if (!archive) {
+      return
+    }
+
+    exportArchive(archive)
   }
 
   function deleteGame(id: string) {
@@ -131,6 +145,7 @@ export const useGameStore = defineStore('game', () => {
     deleteGame,
     loadGame,
     saveGame,
+    exportGame,
     addPlayer,
     updatePlayer,
     updatePlayers

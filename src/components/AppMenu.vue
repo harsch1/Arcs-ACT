@@ -79,7 +79,7 @@ function loadTestGame(id: string) {
               class="w-full my-2"
               @click.stop
             >
-              {{ $t('common.load') }}
+              {{ $t('common.load') }} / {{ $t('common.export') }}
             </Button>
           </GameLoader>
         </li>

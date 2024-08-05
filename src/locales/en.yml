@@ -6,6 +6,7 @@ common:
   cancel: Cancel
   close: Close
   load: Load
+  export: Export
   next: Next
   back: Back
   save: Save

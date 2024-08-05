@@ -1,6 +1,7 @@
-import type { Color, BuildingType, ShipType, Token } from '@/Archive'
-import type { PieceState, SystemId } from '@/stores/systems'
+import type { Color, BuildingType, ShipType, Token, Archive } from '@/Archive'
+import type { PieceState } from '@/stores/systems'
 import { type ClassValue, clsx } from 'clsx'
+import type { ISOStringFormat } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -42,4 +43,22 @@ export function getSystemOverview(systemPieces: PieceState[]) {
     }
   })
   return result
+}
+
+export function exportArchive(save: Archive & { id: string; timestamp: ISOStringFormat }) {
+  const blob = new Blob([JSON.stringify(save)], { type: 'application/json' })
+  const link = document.createElement('a')
+
+  link.download = save.id
+  link.href = window.URL.createObjectURL(blob)
+  link.dataset.downloadurl = ['application/json', link.download, link.href].join(':')
+
+  const e = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true
+  })
+
+  link.dispatchEvent(e)
+  link.remove()
 }
