@@ -1,0 +1,144 @@
+arcs_cat: Campaign Archival Tool
+
+common:
+  home: Home
+  confirm: Confirm
+  cancel: Cancel
+  close: Close
+  load: Load
+  export: Export
+  next: Next
+  back: Back
+  save: Save
+act: Act | Act {n} | Act {n}
+player: Player | Players
+system: System
+cluster: Cluster
+piece: Piece
+piece_id: '@.capitalize:{type} @.lower:{color}'
+system_id: System {id}
+system_menu:
+  add_building: Add building
+  add_city: Add city
+  add_starport: Add starport
+  add_ship: Add ship
+  add_token: Add token
+  configure: Configure
+piece_menu:
+  remove_piece: Remove piece
+  change_color: Change color
+  change_token: Change token
+  damage_ship: Damage
+  damage_building: Damage
+  repair_ship: Repair
+  repair_building: Repair
+  flip: Flip
+pieces:
+  CITY: City | Cities
+  STARPORT: Starport | Starports
+  SHIP: Ship | Ships
+  EMPIRE: Ship | Ships
+  BLIGHT: Blight
+  PORTAL: Portal
+  BANNER: Banner
+  BROKEN_WORLD: Broken world
+  GOLEM: Golem
+colors:
+  BLUE: Blue
+  RED: Red
+  YELLOW: Yellow
+  WHITE: White
+  FREE: Free
+  EMPIRE: Empire
+
+campaign:
+  name: Campaign name
+  which_act_just_ended?: Which act just ended?
+  who_is_playing?: Who is playing?
+  board_state_help: View or set the pieces within The Reach
+  new: New campaign
+  latest: Latest campaign
+  map_view: Map view
+  list_view: List view
+
+load_dialog:
+  title: Continue campaign
+  help_text: Load a saved game or use a valid JSON
+  are_you_sure?: This can't be undone. Are you sure?
+  confirm: Load {id}
+  load_raw: Use JSON
+  load_list: Choose from saves
+  load_raw_placeholder: Paste a valid JSON
+
+  table:
+    id: ID
+    timestamp: Date
+    act: '@:act'
+    player: '@:player'
+    actions: Actions
+
+dialog:
+  add_ship: Ships
+  add_building: Buildings
+  add_ship_color: '{color} ship'
+  add_token: Tokens
+  no_token_found: Token {token} not found
+  select_token: Select token
+  search_token: Search token...
+  help_text: Add pieces present on the system
+
+tokens:
+  BLIGHT: Blight
+  PORTAL: Portal
+  BANNER: Banner
+  BROKEN_WORLD: Broken world
+
+resources:
+  MATERIAL: Material
+  FUEL: Fuel
+  WEAPON: Weapon
+  RELIC: Relic
+  PSIONIC: Psionic
+
+player_area:
+  name: Name
+  color: Color
+  board: Player board
+  flagship: Flagship
+  resources: Resources
+  court: Court
+  fate: Fate
+  outrage: Outrage
+  first_regent: First regent
+  regent: Regent
+  outlaw: Outlaw
+  add_fate: Add fate
+  completed_objective: Completed objective
+  power: Power
+  outrage_help: Pick the outraged resources
+
+fates:
+  F1: Steward
+  F2: Founder
+  F3: Magnate
+  F4: Advocate
+  F5: Caretaker
+  F6: Partisan
+  F7: Admiral
+  F8: Believer
+  F9: Pathfinder
+  F10: Hegemon
+  F11: Planet Breaker
+  F12: Pirate
+  F13: Blight Speaker
+  F14: Pacifist
+  F15: Peacekeeper
+  F16: Warden
+  F17: Overlord
+  F18: Suvivalist
+  F19: Redeemer
+  F20: Guardian
+  F21: Naturalist
+  F22: Gate Wraith
+  F23: Conspirator
+  F24: Judge
