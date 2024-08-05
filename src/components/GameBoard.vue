@@ -120,7 +120,9 @@ function addPiece(type: BuildingType | ShipType, color?: string) {
       type,
       color
     },
-    menuPosition
+    {
+      ...menuPosition
+    }
   )
 }
 

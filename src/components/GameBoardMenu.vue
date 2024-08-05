@@ -42,7 +42,6 @@ const triggerStyle = computed(() => ({
 
 function onOpenChange(e: boolean) {
   emit('update', e)
-  Object.keys(Color).forEach((k) => k)
 }
 
 function onSelect(type: PieceType, color: Color) {

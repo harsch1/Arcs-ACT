@@ -23,16 +23,6 @@ const src = computed(() => {
   return `/images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}${props.pieceConfig.isFlipped ? '_flip' : ''}.png`
 })
 
-const styles = computed<CSSProperties>(() => {
-  return {
-    left: 0,
-    top: 0,
-    zIndex: props.pieceConfig.type === SHIP ? 1 : 'auto',
-    transformOrigin: 'top left',
-    transform: transform.value
-  }
-})
-
 const transform = computed(() => {
   let value = props.systemPosition
     ? `translate(${props.systemPosition.x}px, ${props.systemPosition.y}px) scale(${props.scale ?? 0.4}) translate(${props.pieceConfig.position.x}px, ${props.pieceConfig.position.y}px)`
@@ -43,6 +33,16 @@ const transform = computed(() => {
   }
 
   return value
+})
+
+const styles = computed<CSSProperties>(() => {
+  return {
+    left: 0,
+    top: 0,
+    zIndex: props.pieceConfig.type === SHIP ? 1 : 'auto',
+    transformOrigin: 'top left',
+    transform: transform.value
+  }
 })
 
 const isFallback = ref(false)
