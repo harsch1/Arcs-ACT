@@ -23,8 +23,7 @@ const flagshipState = reactive<Partial<FlagshipState>>({})
 
 const baseStyle: CSSProperties = {
   position: 'absolute',
-  scale: 0.5,
-  transformOrigin: 'top left'
+  scale: 0.5
 }
 
 function cycle(type: 'upgrade' | 'armor', slot: FlagshipSlot) {

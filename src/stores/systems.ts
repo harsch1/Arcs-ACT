@@ -2,11 +2,12 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import systemsUiConfig from '@/lib/systems-ui-config'
 
-import { groupBy } from 'lodash'
+import { groupBy, cloneDeep, cloneDeepWith } from 'lodash'
 import { BuildingType, Token } from '@/Archive'
-import type { Color, MapPiece, Multi, ShipType } from '@/Archive'
 import { getRandomInt, randomPointWithinSVG } from '@/lib/ui-utils'
 import { getSystemOverview } from '@/lib/utils'
+
+import type { Color, MapPiece, Multi, ShipType } from '@/Archive'
 import type { ArchiveJSON } from './game'
 
 export type SystemId = (typeof systemsUiConfig)[number]['id']
@@ -14,7 +15,7 @@ export type SystemId = (typeof systemsUiConfig)[number]['id']
 export type SystemUiConfig = {
   el?: SVGSVGElement
   shape?: SVGPathElement
-  bbox?: DOMRect
+  bounds?: SVGPathElement
 }
 
 export type SystemConfig = (typeof systemsUiConfig)[number] & SystemUiConfig
@@ -35,7 +36,16 @@ export type PieceState = {
   position: { x: number; y: number }
   color?: Color
   slot?: SystemInfo['slots'][number]
-  isFlipped?: boolean
+  isFresh?: boolean
+}
+
+export type PieceStateGroup = Pick<PieceState, 'system' | 'color' | 'position'> & {
+  // Only SHIP and Token can be grouped
+  type: Token | ShipType
+  group: {
+    damaged: Pick<PieceState, 'id' | 'isFresh'>[]
+    fresh: Pick<PieceState, 'id' | 'isFresh'>[]
+  }
 }
 
 export type TokenPieceState = PieceState & { type: Token }
@@ -48,24 +58,33 @@ export type SystemStorePayload = {
   color?: Color
 }
 
+const _initialSystemsState = systemsUiConfig.reduce(
+  (acc, config) => {
+    acc[config.id] = {
+      config,
+      slots: config.slots.map((slot) => ({ ...slot, isEmpty: true })),
+      pieces: []
+    }
+
+    return acc
+  },
+  {} as Record<SystemId, SystemInfo>
+)
+
 export const useSystemsStore = defineStore('systems', () => {
   // Simple id
   const id = ref(0)
   // Init based on the configuration
-  const systems = ref(
-    systemsUiConfig.reduce(
-      (acc, config) => {
-        acc[config.id] = {
-          config,
-          slots: config.slots.map((slot) => ({ ...slot, isEmpty: true })),
-          pieces: []
-        }
+  const systems = ref(cloneDeep(_initialSystemsState))
 
-        return acc
-      },
-      {} as Record<SystemId, SystemInfo>
-    )
-  )
+  function $reset() {
+    id.value = 0
+    systems.value = cloneDeepWith(_initialSystemsState, (v, k) => {
+      if (k === 'config') {
+        return systems.value[v.id as SystemId].config
+      }
+    })
+  }
 
   const pieces = computed(() =>
     Object.values(systems.value).reduce(
@@ -129,7 +148,11 @@ export const useSystemsStore = defineStore('systems', () => {
     }
   }
 
-  function addPiece(system: SystemId, piece: any, position?: { x: number; y: number }) {
+  function addPiece(
+    system: SystemId,
+    piece: PieceState | Token,
+    position?: { x: number; y: number }
+  ): PieceState | undefined {
     const activeSystem = systems.value[system]
 
     if (!activeSystem) {
@@ -155,22 +178,19 @@ export const useSystemsStore = defineStore('systems', () => {
         console.info('No free slots')
         return
       }
+      // TODO: System coordinates need to be added to the slot
       piece.slot = slot
-      piece.position = slot.position
+      piece.position = {
+        x: slot.position.x + activeSystem.config.position.x,
+        y: slot.position.y + activeSystem.config.position.y
+      }
       slot.isEmpty = false
     } else {
-      // // TODO: Improve placement
-      // piece.position = position ?? activeSystem.config.bbox
-      // piece.translation = randomPointWithinSVG(
-      //   activeSystem.config.el,
-      //   activeSystem.config.shape,
-      //   activeSystem.config.bbox
-      // )
       piece.position = position ??
         randomPointWithinSVG(
           activeSystem.config.el,
           activeSystem.config.shape,
-          activeSystem.config.bbox
+          activeSystem.config.bounds
         ) ?? {
           x: getRandomInt(activeSystem.config.position.x, activeSystem.config.position.x + 100),
           y: getRandomInt(activeSystem.config.position.y, activeSystem.config.position.y + 100)
@@ -178,9 +198,12 @@ export const useSystemsStore = defineStore('systems', () => {
     }
 
     piece.id = id.value++
+    piece.isFresh = piece.isFresh ?? true
     // Keep reference of system
     piece.system = system
     activeSystem.pieces.push(piece)
+
+    return piece
   }
 
   function removePiece(piece: PieceState) {
@@ -203,8 +226,17 @@ export const useSystemsStore = defineStore('systems', () => {
     ]
   }
 
-  function flipPiece(piece: PieceState) {
-    piece.isFlipped = !piece.isFlipped
+  function flipPiece(piece: PieceState | PieceStateGroup, isFresh: boolean) {
+    // Handle flip on a PieceState
+    if (!('group' in piece)) {
+      return (piece.isFresh = !piece.isFresh)
+    }
+
+    // When flipping in a group get the first piece that matches and flip it
+    const toFlip = systems.value[piece.system].pieces.find((piece) => piece.isFresh === isFresh)
+    if (toFlip) {
+      toFlip.isFresh = !toFlip.isFresh
+    }
   }
 
   function parse(systemsConfig: ArchiveJSON['board']['_systems']) {
@@ -213,7 +245,7 @@ export const useSystemsStore = defineStore('systems', () => {
       pieces.forEach((piece) => {
         // Create for every count
         for (let i = piece.count ?? 1; i > 0; i--) {
-          addPiece(systemId as SystemId, piece.item)
+          addPiece(systemId as SystemId, piece.item, undefined)
         }
       })
     })
@@ -239,10 +271,10 @@ export const useSystemsStore = defineStore('systems', () => {
   }
 
   // TODO: Create a separate store for UI?
-  function setSystemUi(systemId: SystemId, { el, shape, bbox }: SystemUiConfig) {
+  function setSystemUi(systemId: SystemId, { el, shape, bounds }: SystemUiConfig) {
     systems.value[systemId].config.el = el
     systems.value[systemId].config.shape = shape
-    systems.value[systemId].config.bbox = bbox
+    systems.value[systemId].config.bounds = bounds
   }
 
   return {
@@ -257,6 +289,7 @@ export const useSystemsStore = defineStore('systems', () => {
     flipPiece,
     parse,
     save,
-    setSystemUi
+    setSystemUi,
+    $reset
   }
 })

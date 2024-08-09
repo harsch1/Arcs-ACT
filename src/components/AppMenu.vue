@@ -21,7 +21,13 @@ const open = ref(false)
 
 function viewGame() {
   open.value = false
-  router.push('list')
+
+  if (
+    router.currentRoute.value.name !== 'list_view' &&
+    router.currentRoute.value.name !== 'campaign'
+  ) {
+    router.push('list')
+  }
 }
 
 function loadTestGame(id: string) {

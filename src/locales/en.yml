@@ -25,13 +25,16 @@ system_menu:
   add_token: Add token
   configure: Configure
 piece_menu:
-  remove_piece: Remove piece
+  add: Add
+  remove: Remove
+  remove_fresh: Remove fresh
+  remove_damaged: Remove damaged
   change_color: Change color
   change_token: Change token
-  damage_ship: Damage
-  damage_building: Damage
-  repair_ship: Repair
-  repair_building: Repair
+  damage: Damage
+  repair: Repair
+  damage_fresh: Damage fresh
+  repair_damaged: Repair damaged
   flip: Flip
 pieces:
   CITY: City | Cities

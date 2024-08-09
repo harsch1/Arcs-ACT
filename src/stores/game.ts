@@ -28,6 +28,11 @@ export const useGameStore = defineStore('game', () => {
     act: 1
   })
 
+  function $reset() {
+    players.value = []
+    settings.act = 1
+  }
+
   // Parse the game json and initialize the stores
   function initSettings(archive: ArchiveJSON) {
     settings.act = archive.act
@@ -65,6 +70,10 @@ export const useGameStore = defineStore('game', () => {
       console.info('There was an error loading the game')
       return
     }
+
+    // Clear the previous archive
+    $reset()
+    systems.$reset()
 
     initSettings(archive)
     initPlayers(archive.players)
@@ -148,6 +157,7 @@ export const useGameStore = defineStore('game', () => {
     exportGame,
     addPlayer,
     updatePlayer,
-    updatePlayers
+    updatePlayers,
+    $reset
   }
 })

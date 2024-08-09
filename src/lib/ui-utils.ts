@@ -5,73 +5,32 @@ export function getRandomInt(min: number, max: number) {
 }
 
 export function randomPointWithinSVG(
-  svg?: SVGSVGElement,
-  shape?: SVGPathElement,
-  svgBbox?: DOMRect
+  svg: SVGSVGElement,
+  shape: SVGPathElement,
+  bounds?: SVGPathElement
 ) {
-  if (!svg || !(svg instanceof SVGSVGElement) || !(shape instanceof SVGPathElement)) {
+  if (!(svg instanceof SVGSVGElement) || !(shape instanceof SVGPathElement)) {
     return
   }
-
-  const ctx = document.createElement('canvas').getContext('2d')
-  const path = new Path2D(shape.getAttribute('d')!)
-
-  // console.log(shape, svgBbox, shape.getBBox())
-
-  // bbox = bbox ?? shape.getBBox()
+  shape = bounds ?? shape
   const bbox = shape.getBBox()
+  const matrix = shape.getScreenCTM()!
+
+  matrix.e = parseInt(svg.style.getPropertyValue('left')?.replace(/.*?(\d+).*?/g, '$1'))
+  matrix.f = parseInt(svg.style.getPropertyValue('top')?.replace(/.*?(\d+).*?/g, '$1')) + 64
 
   let point = svg.createSVGPoint()
-  let bPoint = svg.createSVGPoint()
-  let tries = 1
-  // do {
-  //   point.x = getRandomInt(bbox.x, bbox.x + bbox.width)
-  //   point.y = getRandomInt(bbox.y, bbox.y + bbox.height)
-  //   tries++
-  // } while (!shape.isPointInFill(point) || !ctx?.isPointInPath(path, point.x, point.y))
+  let tries = 0
+  const width = 363
+  const height = 149
+
   do {
-    point.x = getRandomInt(bbox.x, bbox.x + bbox.width)
-    point.y = getRandomInt(bbox.y, bbox.y + bbox.height)
-    bPoint.x = point.x + 200
-    bPoint.y = point.y + 80
+    point.x = getRandomInt(bbox.x + width / 2, bbox.x + bbox.width - width / 2)
+    point.y = getRandomInt(bbox.y + height / 2, bbox.y + bbox.height - height / 2)
     tries++
-  } while (!shape.isPointInFill(point) || !shape.isPointInFill(bPoint))
+  } while (!shape.isPointInFill(point) && tries < 30)
 
-  // console.log(
-  //   'before',
-  //   shape.isPointInFill(point),
-  //   shape.isPointInFill(bPoint),
-  //   // svgBbox,
-  //   tries,
-  //   // bbox,
-  //   point
-  // )
-  // console.log(
-  //   tries,
-  //   shape.isPointInFill(point),
-  //   ctx?.isPointInPath(path, point.x, point.y),
-  //   // svgBbox,
-  //   // bbox,
-  //   // { x: bPoint.x - 200, y: bPoint.y - 80 },
-  //   point
-  // )
-  // // Translate the point to the actual system coordinates
-  // const xPercentage = point.x / bbox.width
-  // const yPercentage = point.y / bbox.height
-
-  // // // Add the system position
-  // // point.x = svgBbox.x + (svgBbox?.width ?? 1) * xPercentage
-  // // point.y = svgBbox.y + (svgBbox?.height ?? 1) * yPercentage
-
-  // // console.log(
-  // //   tries,
-  // //   shape.isPointInFill(point),
-  // //   ctx?.isPointInPath(path, point.x, point.y),
-  // //   // svgBbox,
-  // //   // bbox,
-  // //   // { x: bPoint.x - 200, y: bPoint.y - 80 },
-  // //   point
-  // // )
+  point = point.matrixTransform(matrix.translate(0, -128))
 
   return point
 }

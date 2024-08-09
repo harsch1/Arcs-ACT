@@ -4,23 +4,25 @@ import { computed, reactive, ref, watch } from 'vue'
 import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
-import { pausableFilter, useWindowSize, useMouse } from '@vueuse/core'
+import { pausableFilter, useWindowSize, useMouse, useElementBounding } from '@vueuse/core'
 
-import { BuildingType } from '@/Archive'
+import { BuildingType, SHIP, Token } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
 import GamePiece from '@/components/GamePiece.vue'
 import GameBoardMenu from '@/components/GameBoardMenu.vue'
 import GamePieceMenu from '@/components/GamePieceMenu.vue'
 
 import type { ShipType } from '@/Archive'
-import type { PieceState, SystemUiConfig, SystemId } from '@/stores/systems'
+import type { PieceState, SystemUiConfig, SystemId, PieceStateGroup } from '@/stores/systems'
 import type { CSSProperties } from 'vue'
+import { transform } from 'lodash'
 
 const dragControl = pausableFilter()
 dragControl.pause()
 const { x: dx, y: dy } = useMouse({ type: 'movement', eventFilter: dragControl.eventFilter })
 const menuPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
 const wrapperPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
+const systemClientPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
 
 const wrapperStyle = computed<CSSProperties>(() => ({
   width: 'max-content',
@@ -78,13 +80,19 @@ function dragMapEnd() {
 const isBoardMenuOpen = ref(false)
 const isPieceMenuOpen = ref(false)
 const activeSystem = ref<SystemId | null>(null)
-const activePiece = ref<PieceState | null>(null)
+const activePiece = ref<PieceState | PieceStateGroup | null>(null)
+const activeSystemPosition = computed(() =>
+  activeSystem.value ? systemsStore.systemUi(activeSystem.value, 'position') : undefined
+)
 
-function onClick(id: SystemId, e: PointerEvent) {
+function onSystemClick(id: SystemId, e: PointerEvent) {
   if (isBoardMenuOpen.value) {
     return
   }
 
+  let systemRect = (e.target as SVGElement | null)?.getBoundingClientRect() ?? { x: 0, y: 0 }
+  systemClientPosition.x = systemRect.x
+  systemClientPosition.y = systemRect.y
   menuPosition.x = e.clientX
   menuPosition.y = e.clientY
   activeSystem.value = id
@@ -99,13 +107,79 @@ function onPieceOpenChange(e: boolean) {
   isPieceMenuOpen.value = e
 }
 
+function closeBoardMenu() {
+  isBoardMenuOpen.value = false
+  activeSystem.value = null
+}
+
 // Piece handling
+const groupPieces = ref(true)
 const systemsStore = useSystemsStore()
 
-function onPieceClick(piece: any, e: PointerEvent) {
+const pieces = computed(
+  () => {
+    if (!groupPieces.value) {
+      return systemsStore.pieces
+    }
+
+    const grouped = new Map<string, PieceState | PieceStateGroup>()
+    systemsStore.pieces.forEach((piece) => {
+      const key = `${piece.system} ${piece.color} ${piece.type}`
+      // Buildings are not grouped
+      if (Object.values(BuildingType).includes(piece.type)) {
+        grouped.set(key + piece.id, piece)
+        return
+      }
+
+      const outerKeys = ['system', 'type', 'color', 'position']
+      if (!grouped.has(key)) {
+        grouped.set(
+          key,
+          transform(
+            piece,
+            (acc, v, k) => {
+              if (outerKeys.includes(k)) {
+                acc[k] = v
+              }
+            },
+            {
+              group: { damaged: [], fresh: [] }
+            }
+          )
+        )
+      }
+
+      const innerKeys = ['id', 'isFresh']
+      const _piece = grouped.get(key) as PieceStateGroup
+      const toAdd = transform(
+        piece,
+        (acc, v, k) => {
+          if (innerKeys.includes(k)) {
+            acc[k] = v
+          }
+        },
+        { isFresh: true }
+      )
+      toAdd.isFresh ? _piece.group.fresh.push(toAdd) : _piece.group.damaged.push(toAdd)
+    })
+
+    return Array.from(grouped.values())
+  },
+  {
+    onTrack(e) {
+      console.log('track', e)
+    },
+    onTrigger(e) {
+      console.log('trigger', e)
+    }
+  }
+)
+
+function onPieceClick(piece: PieceState | PieceStateGroup, e: PointerEvent) {
   menuPosition.x = e.clientX
   menuPosition.y = e.clientY
   activePiece.value = piece
+  activeSystem.value = piece.system
   isPieceMenuOpen.value = true
 }
 
@@ -114,6 +188,9 @@ function addPiece(type: BuildingType | ShipType, color?: string) {
     return
   }
 
+  // Scroll offsets to be added
+  let { x, y } = wrapperEl.value!.getBoundingClientRect()
+
   systemsStore.addPiece(
     activeSystem.value,
     {
@@ -121,7 +198,8 @@ function addPiece(type: BuildingType | ShipType, color?: string) {
       color
     },
     {
-      ...menuPosition
+      x: menuPosition.x - x,
+      y: menuPosition.y - y
     }
   )
 }
@@ -132,9 +210,9 @@ function removePiece() {
   }
 }
 
-function flipPiece() {
+function flipPiece(isFresh: boolean) {
   if (activePiece.value !== null) {
-    systemsStore.flipPiece(activePiece.value)
+    systemsStore.flipPiece(activePiece.value, isFresh)
   }
 }
 </script>
@@ -159,16 +237,16 @@ function flipPiece() {
       :position="system.position"
       class="absolute system"
       draggable="false"
-      @click="onClick"
+      @click="onSystemClick"
       @mounted="(value: SystemUiConfig) => systemsStore.setSystemUi(system.id, value)"
     />
 
     <GamePiece
-      v-for="piece in systemsStore.pieces"
+      v-for="piece in pieces"
       :id="`${piece.type}${piece.color ? `-${piece.color}` : ''}-${piece.system}`"
       :key="piece.id"
       :piece-config="piece"
-      :system-position="systemsStore.systemUi(piece.system, 'position')"
+      :system-position="activeSystemPosition"
       @click="onPieceClick(piece, $event)"
       draggable="false"
     />
@@ -184,7 +262,7 @@ function flipPiece() {
     :pointer-position="menuPosition"
     @select="addPiece"
     @update="onOpenChange"
-    @close="isBoardMenuOpen = false"
+    @close="closeBoardMenu"
   />
 
   <!-- The dropdown is reused based on the clicked piece -->
@@ -193,7 +271,7 @@ function flipPiece() {
     :active-piece="activePiece"
     :is-open="isPieceMenuOpen"
     :pointer-position="menuPosition"
-    @select="addPiece"
+    @add="addPiece"
     @remove="removePiece"
     @flip="flipPiece"
     @update="onPieceOpenChange"
