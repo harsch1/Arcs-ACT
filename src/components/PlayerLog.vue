@@ -11,8 +11,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { NumberField, NumberFieldContent, NumberFieldInput } from './ui/number-field'
+import { NumberField, NumberFieldContent, NumberFieldInput } from '@/components/ui/number-field'
 import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
+import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
 import { ComboboxAnchor, ComboboxInput, ComboboxPortal, ComboboxRoot } from 'radix-vue'
 import { vOnClickOutside } from '@vueuse/components'
 import {
@@ -23,7 +25,7 @@ import {
 } from '@/components/ui/tags-input'
 import { Plus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-import { Color, Fate, Player, Resource } from '@/Archive'
+import { Color, EmpireStatus, Fate, Player, Resource } from '@/Archive'
 // import PlayerFlagship from '@/components/PlayerFlagship.vue'
 import { romanNumerals } from '@/lib/utils'
 import { useGameStore } from '@/stores/game'
@@ -57,6 +59,18 @@ const canAddFate = computed(() => {
 
   return (props.player.fateHistory ?? []).length < props.act
 })
+
+function updateFirstRegent(value: boolean) {
+  console.log(value)
+
+  const currentRegent = gameStore.settings.firstRegent
+  // No first regent
+  if (currentRegent === props.player.name && !value) {
+    gameStore.settings.firstRegent = ''
+  } else {
+    gameStore.settings.firstRegent = props.player.name
+  }
+}
 
 function updatePlayer(update: Partial<Player>) {
   const payload = {
@@ -141,6 +155,47 @@ function addFate() {
           </SelectContent>
         </Select>
 
+        <!-- Empire status -->
+        <div class="flex items-center my-4 space-x-2">
+          <Switch
+            id="empire-status"
+            name="empire-status"
+            :checked="player.empireStatus === EmpireStatus.regent"
+            :value="player.empireStatus"
+            size=""
+            @update:checked="
+              (value) =>
+                updatePlayer({ empireStatus: value ? EmpireStatus.regent : EmpireStatus.outlaw })
+            "
+          />
+          <Label for="empire-status">
+            <Badge
+              class="text-white rounded-sm"
+              :class="{
+                'bg-empire-600': player.empireStatus === EmpireStatus.regent,
+                'bg-orange-900': player.empireStatus === EmpireStatus.outlaw
+              }"
+              >{{ $t(`empire_status.${player.empireStatus}`) }}</Badge
+            >
+          </Label>
+
+          <div class="flex grow"></div>
+
+          <Checkbox
+            v-if="player.empireStatus === EmpireStatus.regent"
+            id="first-regent"
+            :checked="gameStore.settings.firstRegent === player.name"
+            @update:checked="updateFirstRegent"
+          />
+          <Label
+            v-if="player.empireStatus === EmpireStatus.regent"
+            for="first-regent"
+            class="ml-2"
+          >
+            {{ $t('empire_status.FIRST_REGENT') }}
+          </Label>
+        </div>
+
         <!-- Fates -->
         <div
           v-for="([fate, power, succeeded], fateAct) in player.fateHistory"
@@ -162,7 +217,10 @@ function addFate() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent
+                    :collision-padding="{ top: 64, bottom: 200 }"
+                    avoid-collisions
+                  >
                     <SelectItem
                       v-for="fateId in Fate"
                       :key="fateId"

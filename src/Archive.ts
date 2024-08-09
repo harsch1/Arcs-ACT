@@ -1,4 +1,16 @@
-export { Archive, Board, BuildingType, Color, Fate, Golem, Player, Resource, Token, SHIP }
+export {
+  Archive,
+  Board,
+  BuildingType,
+  Color,
+  Fate,
+  Golem,
+  Player,
+  Resource,
+  Token,
+  EmpireStatus,
+  SHIP
+}
 export type {
   Building,
   Card,
@@ -56,7 +68,7 @@ class Player {
   cards: Card[] = []
   resources: Holdable[] = []
   outrage: Resource[] = []
-  empireStatus = 'Regent'
+  empireStatus = EmpireStatus.regent
   currentFate: Fate
   /**
    * @param fateHistory - Array of tuples of Fate, power, and boolean if succeeded objective in chronological order prior to current game
@@ -223,6 +235,11 @@ class Archive {
   setFirstRegent(player: Player) {
     this.firstRegent = player.name
   }
+}
+
+enum EmpireStatus {
+  regent = 'REGENT',
+  outlaw = 'OUTLAW'
 }
 
 enum Resource {

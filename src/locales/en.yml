@@ -112,13 +112,15 @@ player_area:
   court: Court
   fate: Fate
   outrage: Outrage
-  first_regent: First regent
-  regent: Regent
-  outlaw: Outlaw
   add_fate: Add fate
   completed_objective: Completed objective
   power: Power
   outrage_help: Pick the outraged resources
+
+empire_status:
+  FIRST_REGENT: First Regent
+  REGENT: Regent
+  OUTLAW: Outlaw
 
 fates:
   F1: Steward

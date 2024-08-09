@@ -13,6 +13,7 @@ import type { ISOStringFormat } from 'date-fns'
 export type ArchiveJSON = typeof test
 type GameSettings = {
   act: number
+  firstRegent: string
 }
 
 // Prefix for the keys in storage
@@ -25,17 +26,20 @@ export const useGameStore = defineStore('game', () => {
   const systems = useSystemsStore()
   const players = ref<Player[]>([])
   const settings = reactive<GameSettings>({
-    act: 1
+    act: 1,
+    firstRegent: ''
   })
 
   function $reset() {
     players.value = []
     settings.act = 1
+    settings.firstRegent = ''
   }
 
   // Parse the game json and initialize the stores
   function initSettings(archive: ArchiveJSON) {
     settings.act = archive.act
+    settings.firstRegent = archive.firstRegent
   }
 
   function initPlayers(playersJSON: ArchiveJSON['players']) {
