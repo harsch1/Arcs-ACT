@@ -1,64 +1,64 @@
 const config = {
-  SlipstreamDrive: {
+  slipstreamDrive: {
     upgrade: {
-      x: 24,
-      y: 284
+      x: -80,
+      y: 25
     },
     armor: {
-      x: 24,
-      y: 128
+      x: -79,
+      y: -86
     }
   },
-  TractorBeam: {
+  tractorBeam: {
     upgrade: {
-      x: 209,
-      y: 284
+      x: 51,
+      y: 25
     },
     armor: {
-      x: 210,
-      y: 128
+      x: 51,
+      y: -86
     }
   },
-  ControlArray: {
+  controlArray: {
     upgrade: {
-      x: 394,
-      y: 284
+      x: 182,
+      y: 25
     },
     armor: {
-      x: 395,
-      y: 128
+      x: 182,
+      y: -86
     }
   },
-  DefenseArray: {
+  defenseArray: {
     upgrade: {
-      x: 821,
-      y: 284
+      x: 483,
+      y: 25
     },
     armor: {
-      x: 822,
-      y: 128
+      x: 483,
+      y: -86
     }
   },
-  ShipCrane: {
+  shipCrane: {
     upgrade: {
-      x: 1006,
-      y: 284
+      x: 614,
+      y: 25
     },
     armor: {
-      x: 1008,
-      y: 128
+      x: 614,
+      y: -86
     }
   },
-  Hull: {
+  hull: {
     upgrade: {
-      x: 1192,
-      y: 284
+      x: 745,
+      y: 25
     },
     armor: {
-      x: 1193,
-      y: 128
+      x: 745,
+      y: -86
     }
   }
-}
+} as const
 
 export default config

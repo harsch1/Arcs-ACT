@@ -1,11 +1,20 @@
-import type { Color, BuildingType, ShipType, Token, Archive } from '@/Archive'
-import type { PieceState } from '@/stores/systems'
-import { type ClassValue, clsx } from 'clsx'
-import type { ISOStringFormat } from 'date-fns'
+import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { Fate } from '@/Archive'
+
+import type { Ref } from 'vue'
+import type { Color, BuildingType, ShipType, TokenType, SaveFile } from '@/Archive'
+import type { PieceState } from '@/stores/systems'
+import type { ClassValue } from 'clsx'
+import type { Updater } from '@tanstack/vue-table'
+import type { GameDeck } from '@/stores/game'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export function valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref) {
+  ref.value = typeof updaterOrValue === 'function' ? updaterOrValue(ref.value) : updaterOrValue
 }
 
 // You say this could be a function? Yes but it's not needed
@@ -19,7 +28,7 @@ export function countByColorAndType(
   return pieces.filter((piece) => piece.type === type && piece.color === color).length
 }
 
-export function countByType(pieces: PieceState[], type: BuildingType | ShipType | Token) {
+export function countByType(pieces: PieceState[], type: BuildingType | ShipType | TokenType) {
   return pieces.filter((piece) => piece.type === type).length
 }
 
@@ -45,7 +54,7 @@ export function getSystemOverview(systemPieces: PieceState[]) {
   return result
 }
 
-export function exportArchive(save: Archive & { id: string; timestamp: ISOStringFormat }) {
+export function exportArchive(save: SaveFile) {
   const blob = new Blob([JSON.stringify(save)], { type: 'application/json' })
   const link = document.createElement('a')
 
@@ -61,4 +70,14 @@ export function exportArchive(save: Archive & { id: string; timestamp: ISOString
 
   link.dispatchEvent(e)
   link.remove()
+}
+
+export function getFateName(fateId: string): Fate {
+  const [fate] = Object.entries(Fate).find(([, id]) => fateId === id) ?? []
+  return fate as Fate
+}
+
+export const gameDecks = ['court', 'scrap', 'rules']
+export function isGameDeck(deck: string): deck is GameDeck {
+  return gameDecks.includes(deck)
 }

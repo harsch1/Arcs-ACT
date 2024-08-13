@@ -14,14 +14,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import SystemDialog from '@/components/SystemDialog.vue'
-import { BuildingType, Color, SHIP } from '@/Archive'
-import type { ShipType } from '@/Archive'
-import type { SystemId } from '@/stores/systems'
+import { BuildingType, Color, ShipType } from '@/Archive'
+import type { SystemKey } from '@/Archive'
 
 type PieceType = BuildingType | ShipType
 
 const props = defineProps<{
-  activeSystem: SystemId
+  activeSystem: SystemKey
   isOpen: boolean
   pointerPosition: {
     x: number
@@ -70,7 +69,7 @@ function onSelect(type: PieceType, color: Color) {
             v-for="color in Color"
             :key="color"
             :class="{ hidden: color == Color.free }"
-            @select="onSelect(SHIP, color)"
+            @select="onSelect(ShipType.ship, color)"
           >
             {{ $t(`colors.${color}`) }}
           </DropdownMenuItem>

@@ -1,19 +1,18 @@
 <script setup lang="ts">
-// @ts-nocheck TODO: Need to generate types for the system instead of using typeof on the JSON
 import { computed, reactive, ref, watch } from 'vue'
 import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
-import { pausableFilter, useWindowSize, useMouse, useElementBounding } from '@vueuse/core'
+import { pausableFilter, useWindowSize, useMouse } from '@vueuse/core'
 
-import { BuildingType, SHIP, Token } from '@/Archive'
+import { BuildingType } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
 import GamePiece from '@/components/GamePiece.vue'
 import GameBoardMenu from '@/components/GameBoardMenu.vue'
 import GamePieceMenu from '@/components/GamePieceMenu.vue'
 
-import type { ShipType } from '@/Archive'
-import type { PieceState, SystemUiConfig, SystemId, PieceStateGroup } from '@/stores/systems'
+import type { Color, ShipType, SystemKey, TokenType } from '@/Archive'
+import type { PieceState, SystemUiConfig, PieceStateGroup, SystemConfig } from '@/stores/systems'
 import type { CSSProperties } from 'vue'
 import { transform } from 'lodash'
 
@@ -79,13 +78,15 @@ function dragMapEnd() {
 // Menus interaction
 const isBoardMenuOpen = ref(false)
 const isPieceMenuOpen = ref(false)
-const activeSystem = ref<SystemId | null>(null)
+const activeSystem = ref<SystemKey>()
 const activePiece = ref<PieceState | PieceStateGroup | null>(null)
 const activeSystemPosition = computed(() =>
-  activeSystem.value ? systemsStore.systemUi(activeSystem.value, 'position') : undefined
+  activeSystem.value
+    ? (systemsStore.systemUi(activeSystem.value, 'position') as SystemConfig['position'])
+    : undefined
 )
 
-function onSystemClick(id: SystemId, e: PointerEvent) {
+function onSystemClick(id: SystemKey, e: PointerEvent) {
   if (isBoardMenuOpen.value) {
     return
   }
@@ -109,71 +110,64 @@ function onPieceOpenChange(e: boolean) {
 
 function closeBoardMenu() {
   isBoardMenuOpen.value = false
-  activeSystem.value = null
+  activeSystem.value = undefined
 }
 
 // Piece handling
 const groupPieces = ref(true)
 const systemsStore = useSystemsStore()
 
-const pieces = computed(
-  () => {
-    if (!groupPieces.value) {
-      return systemsStore.pieces
-    }
-
-    const grouped = new Map<string, PieceState | PieceStateGroup>()
-    systemsStore.pieces.forEach((piece) => {
-      const key = `${piece.system} ${piece.color} ${piece.type}`
-      // Buildings are not grouped
-      if (Object.values(BuildingType).includes(piece.type)) {
-        grouped.set(key + piece.id, piece)
-        return
-      }
-
-      const outerKeys = ['system', 'type', 'color', 'position']
-      if (!grouped.has(key)) {
-        grouped.set(
-          key,
-          transform(
-            piece,
-            (acc, v, k) => {
-              if (outerKeys.includes(k)) {
-                acc[k] = v
-              }
-            },
-            {
-              group: { damaged: [], fresh: [] }
-            }
-          )
-        )
-      }
-
-      const innerKeys = ['id', 'isFresh']
-      const _piece = grouped.get(key) as PieceStateGroup
-      const toAdd = transform(
-        piece,
-        (acc, v, k) => {
-          if (innerKeys.includes(k)) {
-            acc[k] = v
-          }
-        },
-        { isFresh: true }
-      )
-      toAdd.isFresh ? _piece.group.fresh.push(toAdd) : _piece.group.damaged.push(toAdd)
-    })
-
-    return Array.from(grouped.values())
-  },
-  {
-    onTrack(e) {
-      console.log('track', e)
-    },
-    onTrigger(e) {
-      console.log('trigger', e)
-    }
+const pieces = computed(() => {
+  if (!groupPieces.value) {
+    return systemsStore.pieces
   }
-)
+
+  const grouped = new Map<string, PieceState | PieceStateGroup>()
+  systemsStore.pieces.forEach((piece) => {
+    const key = `${piece.system} ${piece.color} ${piece.type}`
+    // Buildings are not grouped
+    if (Object.values(BuildingType).includes(piece.type as BuildingType)) {
+      grouped.set(key + piece.id, piece)
+      return
+    }
+
+    const outerKeys = ['system', 'type', 'color', 'position']
+    if (!grouped.has(key)) {
+      grouped.set(
+        key,
+        // @ts-ignore
+        transform(
+          piece,
+          (acc, v, k) => {
+            if (outerKeys.includes(k)) {
+              // @ts-ignore
+              acc[k] = v
+            }
+          },
+          {
+            group: { damaged: [], fresh: [] }
+          }
+        )
+      )
+    }
+
+    const innerKeys = ['id', 'isFresh']
+    const _piece = grouped.get(key) as PieceStateGroup
+    const toAdd = transform(
+      piece,
+      (acc, v, k) => {
+        if (innerKeys.includes(k)) {
+          // @ts-ignore
+          acc[k] = v
+        }
+      },
+      { isFresh: true }
+    )
+    toAdd.isFresh ? _piece.group.fresh.push(toAdd) : _piece.group.damaged.push(toAdd)
+  })
+
+  return Array.from(grouped.values())
+})
 
 function onPieceClick(piece: PieceState | PieceStateGroup, e: PointerEvent) {
   menuPosition.x = e.clientX
@@ -183,8 +177,8 @@ function onPieceClick(piece: PieceState | PieceStateGroup, e: PointerEvent) {
   isPieceMenuOpen.value = true
 }
 
-function addPiece(type: BuildingType | ShipType, color?: string) {
-  if (activeSystem.value === null) {
+function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
+  if (!activeSystem.value) {
     return
   }
 
@@ -195,6 +189,7 @@ function addPiece(type: BuildingType | ShipType, color?: string) {
     activeSystem.value,
     {
       type,
+      // @ts-ignore
       color
     },
     {
@@ -204,9 +199,9 @@ function addPiece(type: BuildingType | ShipType, color?: string) {
   )
 }
 
-function removePiece() {
+function removePiece(isFresh: boolean) {
   if (activePiece.value !== null) {
-    systemsStore.removePiece(activePiece.value)
+    systemsStore.removePiece(activePiece.value, isFresh)
   }
 }
 
@@ -242,9 +237,9 @@ function flipPiece(isFresh: boolean) {
     />
 
     <GamePiece
-      v-for="piece in pieces"
+      v-for="(piece, i) in pieces"
       :id="`${piece.type}${piece.color ? `-${piece.color}` : ''}-${piece.system}`"
-      :key="piece.id"
+      :key="i"
       :piece-config="piece"
       :system-position="activeSystemPosition"
       @click="onPieceClick(piece, $event)"

@@ -30,16 +30,16 @@ import {
 } from '@/components/ui/tags-input'
 import { ChevronRight, ChevronLeft } from 'lucide-vue-next'
 
-import { Color, Token, SHIP } from '@/Archive'
+import { Color, TokenType, ShipType } from '@/Archive'
 import { BuildingType } from '@/Archive'
-import type { ShipType } from '@/Archive'
+import type { SystemKey } from '@/Archive'
 import { useGameStore } from '@/stores/game'
 import { useSystemsStore } from '@/stores/systems'
-import type { SystemId, SystemStorePayload, TokenPieceState } from '@/stores/systems'
+import type { SystemStorePayload, TokenPieceState } from '@/stores/systems'
 import { countByColorAndType } from '@/lib/utils'
 
 const props = defineProps<{
-  systemId: SystemId
+  systemId: SystemKey
   cluster?: number
   defaultOpen?: boolean
 }>()
@@ -62,10 +62,10 @@ const systemState = computed(() => systemsStore.systemState(activeSystem.value))
 
 // Variables to work with locally before applying the changes
 const pieces = computed(() => [...systemState.value.pieces])
-const tokens = ref<Token[]>([])
+const tokens = ref<TokenType[]>([])
 // const tokens = computed(() =>
 //   pieces.value
-//     .filter((piece) => Object.values(Token).includes(piece.type as Token))
+//     .filter((piece) => Object.values(TokenType).includes(piece.type as TokenType))
 //     .map((piece) => piece.type)
 // )
 watch(
@@ -73,7 +73,7 @@ watch(
   () => {
     tokens.value = pieces.value
       .filter((piece): piece is TokenPieceState =>
-        Object.values(Token).includes(piece.type as Token)
+        Object.values(TokenType).includes(piece.type as TokenType)
       )
       .map((piece) => piece.type)
   },
@@ -92,7 +92,10 @@ const colorsWithShips = activeColors.concat(Color.empire)
 
 // Calculated derived state
 const shipCounters = computed<[Color, Ref<number>][]>(() =>
-  colorsWithShips.map((color) => [color, ref(countByColorAndType(pieces.value, color, SHIP))])
+  colorsWithShips.map((color) => [
+    color,
+    ref(countByColorAndType(pieces.value, color, ShipType.ship))
+  ])
 )
 const cityCounters = computed<[Color, Ref<number>][]>(() =>
   colorsWithBuildings.map((color) => [
@@ -108,9 +111,9 @@ const starportCounters = computed<[Color, Ref<number>][]>(() =>
 )
 
 // Since tokens are tags, to remove them there's a delete button on every one
-function updateTokens(type: Token, remove = false) {
+function updateTokens(type: TokenType, remove = false) {
   // if (remove) {
-  //   // Token was removed
+  //   // TokenType was removed
   //   const toRemove = tokens.value.findIndex((token) => token === type)
   //   // Something happened, you shouldn't be here
   //   if (toRemove < 0) {
@@ -147,7 +150,7 @@ function advanceSystem(delta: number, cluster?: boolean) {
 }
 
 type UpdatePayload = {
-  type: BuildingType | Token | ShipType
+  type: BuildingType | TokenType | ShipType
   color?: Color
   currentValue: number
   newValue: number
@@ -195,9 +198,9 @@ function updateState(update: UpdatePayload) {
 // }
 
 // // Since tokens are tags, to remove them there's a delete button on every one
-// function updateTokens(type: Token, remove = false) {
+// function updateTokens(type: TokenType, remove = false) {
 //   if (remove) {
-//     // Token was removed
+//     // TokenType was removed
 //     const toRemove = pieces.value.findIndex((piece) => piece.type === type)
 //     // Something happened, you shouldn't be here
 //     if (toRemove < 0) {
@@ -294,7 +297,12 @@ function updateState(update: UpdatePayload) {
           class="m-1"
           @update:model-value="
             (value) =>
-              updateState({ type: SHIP, currentValue: counter.value, newValue: value, color })
+              updateState({
+                type: ShipType.ship,
+                currentValue: counter.value,
+                newValue: value,
+                color
+              })
           "
         >
           <Label :for="`ship-${color}`">{{ $t(`colors.${color}`) }}</Label>
@@ -406,7 +414,7 @@ function updateState(update: UpdatePayload) {
             <CommandEmpty />
             <CommandGroup>
               <CommandItem
-                v-for="token in Token"
+                v-for="token in TokenType"
                 :key="token"
                 :value="token"
                 @select.prevent="

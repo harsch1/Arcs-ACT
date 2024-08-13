@@ -10,12 +10,12 @@ import Button from '@/components/ui/button/Button.vue'
 import SystemDialog from '@/components/SystemDialog.vue'
 
 import { useSystemsStore } from '@/stores/systems'
-import type { SystemId } from '@/stores/systems'
 import { ref } from 'vue'
 import { getSystemOverview } from '@/lib/utils'
+import type { SystemKey } from '@/Archive'
 
 const systemsStore = useSystemsStore()
-const activeSystem = ref<SystemId | null>()
+const activeSystem = ref<SystemKey | null>()
 
 function updateDialog(open: boolean) {
   if (!open) {

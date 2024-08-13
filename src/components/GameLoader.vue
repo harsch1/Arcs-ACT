@@ -25,8 +25,7 @@ import { GAME_SAVE_PREFIX, useGameStore } from '@/stores/game'
 import { computed, ref } from 'vue'
 import { format } from 'date-fns'
 import { useI18n } from 'vue-i18n'
-
-import type { ArchiveJSON } from '@/stores/game'
+import type { SaveFile } from '@/Archive'
 
 const emit = defineEmits<{
   loaded: []
@@ -54,7 +53,7 @@ function getFriendlyId(id: string | null) {
   return id.slice(GAME_SAVE_PREFIX.length).replace(/_/g, ' ')
 }
 
-function getPlayers(archive: ArchiveJSON) {
+function getPlayers(archive: SaveFile) {
   return archive.players.map((p) => p.name).join(', ')
 }
 

@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Redo, Sparkles } from 'lucide-vue-next'
 
-import { Color, Token, type ShipType } from '@/Archive'
+import { Color, TokenType, type ShipType } from '@/Archive'
 import type { PieceState, PieceStateGroup } from '@/stores/systems'
 
 const props = defineProps<{
@@ -30,8 +30,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   update: [value: boolean]
   // select: [type: BuildingType, color: Color]
-  add: [type: Token | ShipType, color: Color]
-  remove: []
+  add: [type: TokenType | ShipType, color?: Color]
+  remove: [isFresh: boolean]
   flip: [isFresh: boolean]
 }>()
 
@@ -58,11 +58,15 @@ function onOpenChange(e: boolean) {
 // }
 
 function onAdd() {
-  emit('add', props.activePiece.type, props.activePiece.color)
+  if (props.activePiece.color) {
+    emit('add', props.activePiece.type as ShipType, props.activePiece.color)
+  } else {
+    emit('add', props.activePiece.type as TokenType)
+  }
 }
 
-function onRemove() {
-  emit('remove')
+function onRemove(isFresh: boolean = true) {
+  emit('remove', isFresh)
 }
 
 function onFlip(isFresh: boolean = true) {

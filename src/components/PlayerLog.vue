@@ -25,8 +25,9 @@ import {
 } from '@/components/ui/tags-input'
 import { Plus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-import { Color, EmpireStatus, Fate, Player, Resource } from '@/Archive'
-// import PlayerFlagship from '@/components/PlayerFlagship.vue'
+import { CardType, Color, EmpireStatus, Fate, Player, Resource } from '@/Archive'
+import PlayerFlagship from '@/components/PlayerFlagship.vue'
+import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
 import { romanNumerals } from '@/lib/utils'
 import { useGameStore } from '@/stores/game'
 
@@ -123,9 +124,9 @@ function addFate() {
       <TabsTrigger value="court">
         {{ $t('player_area.court') }}
       </TabsTrigger>
-      <!-- <TabsTrigger value="flagship">
+      <TabsTrigger value="flagship">
         {{ $t('player_area.flagship') }}
-      </TabsTrigger> -->
+      </TabsTrigger>
     </TabsList>
 
     <TabsContent value="board">
@@ -434,11 +435,21 @@ function addFate() {
       </div>
     </TabsContent>
 
-    <TabsContent value="court">TODO</TabsContent>
+    <TabsContent value="court">
+      <DeckBuilder :tags="[CardType.ability, CardType.guild, CardType.title]" />
+    </TabsContent>
 
-    <!-- <TabsContent value="flagship">
-      <PlayerFlagship />
-    </TabsContent> -->
+    <TabsContent value="flagship">
+      <PlayerFlagship
+        :color="player.color"
+        @update="
+          (value) =>
+            updatePlayer({
+              flagshipState: value
+            })
+        "
+      />
+    </TabsContent>
   </Tabs>
 </template>
 

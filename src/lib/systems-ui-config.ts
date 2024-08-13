@@ -1,4 +1,6 @@
-export default [
+import type { SystemConfig } from '@/stores/systems'
+
+const config: SystemConfig[] = [
   {
     id: '1A',
     scale: 0.5,
@@ -9,14 +11,14 @@ export default [
     slots: [
       {
         position: {
-          x: 588,
-          y: 410
+          x: 145,
+          y: 74
         }
       },
       {
         position: {
-          x: 878,
-          y: 282
+          x: 261,
+          y: 23
         }
       }
     ]
@@ -31,8 +33,8 @@ export default [
     slots: [
       {
         position: {
-          x: 305,
-          y: 385
+          x: 32,
+          y: 64
         }
       }
     ]
@@ -47,14 +49,14 @@ export default [
     slots: [
       {
         position: {
-          x: 506,
-          y: 224
+          x: 112,
+          y: 0
         }
       },
       {
         position: {
-          x: 759,
-          y: 425
+          x: 214,
+          y: 80
         }
       }
     ]
@@ -78,8 +80,8 @@ export default [
     slots: [
       {
         position: {
-          x: 759,
-          y: 872
+          x: 214,
+          y: 259
         }
       }
     ]
@@ -94,8 +96,8 @@ export default [
     slots: [
       {
         position: {
-          x: 1277,
-          y: 418
+          x: 421,
+          y: 77
         }
       }
     ]
@@ -110,14 +112,14 @@ export default [
     slots: [
       {
         position: {
-          x: 716,
-          y: 253
+          x: 196,
+          y: 11
         }
       },
       {
         position: {
-          x: 976,
-          y: 394
+          x: 300,
+          y: 68
         }
       }
     ]
@@ -141,8 +143,8 @@ export default [
     slots: [
       {
         position: {
-          x: 984,
-          y: 238
+          x: 304,
+          y: 5
         }
       }
     ]
@@ -157,8 +159,8 @@ export default [
     slots: [
       {
         position: {
-          x: 346,
-          y: 253
+          x: 48,
+          y: 11
         }
       }
     ]
@@ -173,14 +175,14 @@ export default [
     slots: [
       {
         position: {
-          x: 854,
-          y: 650
+          x: 252,
+          y: 170
         }
       },
       {
         position: {
-          x: 608,
-          y: 838
+          x: 153,
+          y: 245
         }
       }
     ]
@@ -204,14 +206,14 @@ export default [
     slots: [
       {
         position: {
-          x: 524,
-          y: 467
+          x: 120,
+          y: 97
         }
       },
       {
         position: {
-          x: 278,
-          y: 278
+          x: 21,
+          y: 21
         }
       }
     ]
@@ -226,14 +228,14 @@ export default [
     slots: [
       {
         position: {
-          x: 739,
-          y: 705
+          x: 206,
+          y: 192
         }
       },
       {
         position: {
-          x: 494,
-          y: 516
+          x: 108,
+          y: 116
         }
       }
     ]
@@ -248,8 +250,8 @@ export default [
     slots: [
       {
         position: {
-          x: 1143,
-          y: 588
+          x: 367,
+          y: 145
         }
       }
     ]
@@ -270,11 +272,18 @@ export default [
       x: 520,
       y: 1082
     },
+    // bounds: {
+    //   scale: 0.8,
+    //   position: {
+    //     x: 190,
+    //     y: 150
+    //   }
+    // },
     slots: [
       {
         position: {
-          x: 383,
-          y: 798
+          x: 63,
+          y: 229
         }
       }
     ]
@@ -286,11 +295,18 @@ export default [
       x: 520,
       y: 960
     },
+    // bounds: {
+    //   scale: 0.8,
+    //   position: {
+    //     x: 50,
+    //     y: 110
+    //   }
+    // },
     slots: [
       {
         position: {
-          x: 830,
-          y: 205
+          x: 242,
+          y: -8
         }
       }
     ]
@@ -305,14 +321,14 @@ export default [
     slots: [
       {
         position: {
-          x: 82,
-          y: 357
+          x: -57,
+          y: 53
         }
       },
       {
         position: {
-          x: 327,
-          y: 170
+          x: 41,
+          y: -22
         }
       }
     ]
@@ -333,11 +349,18 @@ export default [
       x: 525,
       y: 420
     },
+    // bounds: {
+    //   scale: 0.8,
+    //   position: {
+    //     x: 84,
+    //     y: 106
+    //   }
+    // },
     slots: [
       {
         position: {
-          x: 809,
-          y: 512
+          x: 234,
+          y: 115
         }
       }
     ]
@@ -349,17 +372,24 @@ export default [
       x: 488,
       y: 64
     },
+    // bounds: {
+    //   scale: 0.8,
+    //   position: {
+    //     x: 180,
+    //     y: 155
+    //   }
+    // },
     slots: [
       {
         position: {
-          x: 572,
-          y: 666
+          x: 139,
+          y: 176
         }
       },
       {
         position: {
-          x: 817,
-          y: 478
+          x: 237,
+          y: 101
         }
       }
     ]
@@ -374,8 +404,8 @@ export default [
     slots: [
       {
         position: {
-          x: 902,
-          y: 355
+          x: 271,
+          y: 52
         }
       }
     ]
@@ -389,4 +419,6 @@ export default [
     },
     slots: []
   }
-] as const
+]
+
+export default config

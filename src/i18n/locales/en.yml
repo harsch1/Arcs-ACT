@@ -40,6 +40,7 @@ pieces:
   CITY: City | Cities
   STARPORT: Starport | Starports
   SHIP: Ship | Ships
+  FLAGSHIP: Flagship | Flagships
   EMPIRE: Ship | Ships
   BLIGHT: Blight
   PORTAL: Portal
@@ -121,6 +122,30 @@ empire_status:
   FIRST_REGENT: First Regent
   REGENT: Regent
   OUTLAW: Outlaw
+
+deck-builder:
+  table:
+    id: ID
+    name: Name
+    filter: Filter cards
+    type: Type
+    set: Set
+    selected: '{count} of {size} selected'
+    location: Location
+  type:
+    FATE: Fate
+    COURT: Court
+    ACTION: Action
+    LORE: Lore
+    LAW: Law
+    EDICT: Edict
+    TITLE: Title
+  move_to: Move to
+  search: Type to search
+  deck: Deck
+  scrap: Scrap
+  edict: Edict | Edicts
+  law: Law | Laws
 
 fates:
   F1: Steward

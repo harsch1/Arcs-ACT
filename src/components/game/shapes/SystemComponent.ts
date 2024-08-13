@@ -1,4 +1,4 @@
-import { h, ref, onMounted, defineComponent } from 'vue'
+import { h, ref, onMounted, defineComponent, type VNode } from 'vue'
 
 // Manage all the shapes
 import s1A from '@/components/game/shapes/system-1a.svg'
@@ -25,7 +25,7 @@ import s6A from '@/components/game/shapes/system-6a.svg'
 import s6C from '@/components/game/shapes/system-6c.svg'
 import s6H from '@/components/game/shapes/system-6h.svg'
 import s6G from '@/components/game/shapes/system-6g.svg'
-import type { SystemId } from '@/stores/systems'
+import type { SystemKey } from '@/Archive'
 
 const shapes = {
   '1A': s1A,
@@ -69,10 +69,12 @@ export default defineComponent({
     }
   },
   emits: ['click', 'mounted'],
-  setup(props, { emit }) {
-    const svgRendered = (shapes[props.systemConfig.id as SystemId] as any)?.render()
+  setup(props, { emit, attrs }) {
+    const svgRendered = (shapes[props.systemConfig.id as SystemKey] as any)?.render()
     const el = ref() // Main wrapper
     const path = ref() // Actual shape
+    const boundsEl = ref() // Main wrapper
+    const bounds = ref() // Bounds to contain elements
 
     const onClick = function (e: PointerEvent) {
       emit('click', props.systemConfig.id, e)
@@ -80,24 +82,27 @@ export default defineComponent({
 
     onMounted(() => {
       emit('mounted', {
-        el: el.value,
+        el: boundsEl.value ?? el.value,
         shape: path.value,
-        bbox: path.value.getBoundingClientRect()
+        bounds: bounds.value
       })
     })
 
-    return () =>
+    const shape = () =>
       h(
         svgRendered.type,
         {
           ...svgRendered.props,
           ref: el,
+          ...attrs,
           style: {
             pointerEvents: 'none',
             scale: props.systemConfig.scale,
             left: `${props.systemConfig.position.x}px`,
             top: `${props.systemConfig.position.y}px`,
-            transformOrigin: 'top left'
+            // transformOrigin: 'top left',
+            transformOrigin: 'center',
+            transform: 'translate(-50%, -50%)'
           },
           'data-system-id': props.systemConfig.id
         },
@@ -111,9 +116,46 @@ export default defineComponent({
               onClick(e)
             },
             ...child.props
-            // fill: '#fffA'
+            // fill: '#f005'
           })
         )
       )
+
+    if (!props.systemConfig.bounds) {
+      return shape
+    }
+
+    return () => [
+      h(
+        svgRendered.type,
+        {
+          ...svgRendered.props,
+          ref: boundsEl,
+          ...attrs,
+          style: {
+            pointerEvents: 'none',
+            scale: props.systemConfig.scale * props.systemConfig.bounds.scale,
+            left: `${props.systemConfig.position.x}px`,
+            top: `${props.systemConfig.position.y}px`,
+            // transform: 'translate(-50%, -50%)'
+            transform: `translate(-${props.systemConfig.bounds.position.x}px, -${props.systemConfig.bounds.position.y}px) translate(-50%, -50%)`
+          },
+          'data-system-id': `${props.systemConfig.id}-bounds`
+        },
+        svgRendered.children?.map((child: any) =>
+          h(child.type, {
+            ref: bounds,
+            style: {
+              pointerEvents: 'all'
+              // scale: props.systemConfig.bounds.scale,
+              // transform: `translate(${props.systemConfig.bounds.position.x}px, ${props.systemConfig.bounds.position.y}px)`
+            },
+            ...child.props
+            // fill: '#0f05'
+          })
+        )
+      ),
+      h(shape)
+    ]
   }
 })
