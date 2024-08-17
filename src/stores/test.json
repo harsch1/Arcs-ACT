@@ -13,14 +13,33 @@
           "name": "Parade Fleets"
         }
       ],
-      "resources": ["PSIONIC"],
+      "resources": [
+        "PSIONIC"
+      ],
       "outrage": [],
-      "empireStatus": "Outlaw",
-      "fateHistory": [["F2", true]],
+      "empireStatus": "OUTLAW",
+      "fateHistory": [
+        [
+          "F2",
+          true
+        ]
+      ],
       "power": 8,
       "name": "H",
       "color": "YELLOW",
-      "currentFate": "F2"
+      "currentFate": "F2",
+      "flagshipState": {
+        "slipstreamDrive": {
+          "upgrade": [
+            "CITY",
+            true
+          ],
+          "armor": [
+            "STARPORT",
+            false
+          ]
+        }
+      }
     },
     {
       "cards": [
@@ -55,10 +74,19 @@
           "isAddedLore": true
         }
       ],
-      "resources": ["MATERIAL", "MATERIAL", "PSIONIC"],
+      "resources": [
+        "MATERIAL",
+        "MATERIAL",
+        "PSIONIC"
+      ],
       "outrage": [],
-      "empireStatus": "Regent",
-      "fateHistory": [["F1", true]],
+      "empireStatus": "REGENT",
+      "fateHistory": [
+        [
+          "F1",
+          true
+        ]
+      ],
       "power": 20,
       "name": "M",
       "color": "RED",

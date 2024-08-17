@@ -30,23 +30,23 @@ import {
 } from '@/components/ui/tags-input'
 import { ChevronRight, ChevronLeft } from 'lucide-vue-next'
 
-import { Color, Token, SHIP } from '@/Archive'
+import { Color, TokenType, ShipType } from '@/Archive'
 import { BuildingType } from '@/Archive'
-import type { ShipType } from '@/Archive'
+import type { SystemKey } from '@/Archive'
 import { useGameStore } from '@/stores/game'
 import { useSystemsStore } from '@/stores/systems'
-import type { SystemId, SystemStorePayload, TokenPieceState } from '@/stores/systems'
+import type { SystemStorePayload, TokenPieceState } from '@/stores/systems'
 import { countByColorAndType } from '@/lib/utils'
 
 const props = defineProps<{
-  systemId: SystemId
+  systemId: SystemKey
   cluster?: number
   defaultOpen?: boolean
 }>()
 
-const emit = defineEmits<{
-  confirm: []
-}>()
+// const emit = defineEmits<{
+//   confirm: []
+// }>()
 
 const gameStore = useGameStore()
 const systemsStore = useSystemsStore()
@@ -62,10 +62,10 @@ const systemState = computed(() => systemsStore.systemState(activeSystem.value))
 
 // Variables to work with locally before applying the changes
 const pieces = computed(() => [...systemState.value.pieces])
-const tokens = ref<Token[]>([])
+const tokens = ref<TokenType[]>([])
 // const tokens = computed(() =>
 //   pieces.value
-//     .filter((piece) => Object.values(Token).includes(piece.type as Token))
+//     .filter((piece) => Object.values(TokenType).includes(piece.type as TokenType))
 //     .map((piece) => piece.type)
 // )
 watch(
@@ -73,7 +73,7 @@ watch(
   () => {
     tokens.value = pieces.value
       .filter((piece): piece is TokenPieceState =>
-        Object.values(Token).includes(piece.type as Token)
+        Object.values(TokenType).includes(piece.type as TokenType)
       )
       .map((piece) => piece.type)
   },
@@ -86,13 +86,16 @@ const tokenComboboxOpen = ref(false)
 const searchTerm = ref('')
 
 // Values to generate the UI
-const activeColors = gameStore.players.map((player) => player.color)
-const colorsWithBuildings = activeColors.concat(Color.free)
-const colorsWithShips = activeColors.concat(Color.empire)
+const activeColors = computed(() => gameStore.players.map((player) => player.color))
+const colorsWithBuildings = activeColors.value.concat(Color.free)
+const colorsWithShips = activeColors.value.concat(Color.empire)
 
 // Calculated derived state
 const shipCounters = computed<[Color, Ref<number>][]>(() =>
-  colorsWithShips.map((color) => [color, ref(countByColorAndType(pieces.value, color, SHIP))])
+  colorsWithShips.map((color) => [
+    color,
+    ref(countByColorAndType(pieces.value, color, ShipType.ship))
+  ])
 )
 const cityCounters = computed<[Color, Ref<number>][]>(() =>
   colorsWithBuildings.map((color) => [
@@ -108,19 +111,7 @@ const starportCounters = computed<[Color, Ref<number>][]>(() =>
 )
 
 // Since tokens are tags, to remove them there's a delete button on every one
-function updateTokens(type: Token, remove = false) {
-  // if (remove) {
-  //   // Token was removed
-  //   const toRemove = tokens.value.findIndex((token) => token === type)
-  //   // Something happened, you shouldn't be here
-  //   if (toRemove < 0) {
-  //     return
-  //   }
-
-  //   tokens.value = [...tokens.value.slice(0, toRemove), ...tokens.value.slice(toRemove + 1)]
-  // } else {
-  //   tokens.value.push(type)
-  // }
+function updateTokens(type: TokenType, remove = false) {
   const payload: SystemStorePayload = {
     system: activeSystem.value,
     type: type,
@@ -147,7 +138,7 @@ function advanceSystem(delta: number, cluster?: boolean) {
 }
 
 type UpdatePayload = {
-  type: BuildingType | Token | ShipType
+  type: BuildingType | TokenType | ShipType
   color?: Color
   currentValue: number
   newValue: number
@@ -163,78 +154,6 @@ function updateState(update: UpdatePayload) {
   }
   systemsStore.updateState(payload)
 }
-
-// function updateCount(type: BuildingType | ShipType, color: Color, newValue: number) {
-//   // Check if we need to add or remove elements
-//   const currentValue = countByColorAndType(pieces.value, color, type)
-//   let delta = newValue - currentValue
-
-//   while (delta !== 0) {
-//     // Items were added
-//     if (delta > 0) {
-//       pieces.value.push({
-//         system: props.systemId,
-//         color,
-//         type
-//       })
-
-//       delta--
-//     } else {
-//       // Items were removed
-//       const toRemove = pieces.value.findIndex(
-//         (piece) => piece.color === color && piece.type === type
-//       )
-//       // Something happened, you shouldn't be here
-//       if (toRemove < 0) {
-//         return
-//       }
-//       pieces.value = [...pieces.value.slice(0, toRemove), ...pieces.value.slice(toRemove + 1)]
-//       delta++
-//     }
-//   }
-// }
-
-// // Since tokens are tags, to remove them there's a delete button on every one
-// function updateTokens(type: Token, remove = false) {
-//   if (remove) {
-//     // Token was removed
-//     const toRemove = pieces.value.findIndex((piece) => piece.type === type)
-//     // Something happened, you shouldn't be here
-//     if (toRemove < 0) {
-//       return
-//     }
-//     pieces.value = [...pieces.value.slice(0, toRemove), ...pieces.value.slice(toRemove + 1)]
-//   } else {
-//     pieces.value.push({
-//       system: props.systemId,
-//       type
-//     })
-//   }
-// }
-
-// // Compute the differences and call the required methods from the store
-// function confirm() {
-//   const toKeep: PieceState[] = []
-//   const toAdd: Partial<PieceState>[] = []
-//   pieces.value.forEach((piece) => {
-//     // Can check for color since a token would match with both being 'undefined'
-//     const found = systemsStore.pieces.find((p) => p.type === piece.type && p.color === piece.color)
-//     if (found) {
-//       toKeep.push(found)
-//     } else {
-//       // A new piece was added
-//       toAdd.push(piece)
-//     }
-//   })
-//   // After looping the changes everything that is not present in `toKeep` is removed
-//   systemState.value.pieces
-//     .filter((p) => !toKeep.includes(p))
-//     .forEach((p) => systemsStore.removePiece(p))
-//   // Add the new elements
-//   toAdd.forEach((p) => systemsStore.addPiece(props.systemId, p))
-
-//   emit('confirm')
-// }
 </script>
 
 <template>
@@ -294,7 +213,12 @@ function updateState(update: UpdatePayload) {
           class="m-1"
           @update:model-value="
             (value) =>
-              updateState({ type: SHIP, currentValue: counter.value, newValue: value, color })
+              updateState({
+                type: ShipType.ship,
+                currentValue: counter.value,
+                newValue: value,
+                color
+              })
           "
         >
           <Label :for="`ship-${color}`">{{ $t(`colors.${color}`) }}</Label>
@@ -322,7 +246,15 @@ function updateState(update: UpdatePayload) {
           :model-value="counter.value"
           :min="0"
           class="m-1"
-          @update:model-value="(value) => (counter.value = value)"
+          @update:model-value="
+            (value) =>
+              updateState({
+                type: BuildingType.city,
+                currentValue: counter.value,
+                newValue: value,
+                color
+              })
+          "
         >
           <Label :for="`bulding-${color}-city`">{{ $t(`colors.${color}`) }}</Label>
           <NumberFieldContent class="dark:text-black">
@@ -344,7 +276,15 @@ function updateState(update: UpdatePayload) {
           :model-value="counter.value"
           :min="0"
           class="m-1"
-          @update:model-value="(value) => (counter.value = value)"
+          @update:model-value="
+            (value) =>
+              updateState({
+                type: BuildingType.starport,
+                currentValue: counter.value,
+                newValue: value,
+                color
+              })
+          "
         >
           <Label :for="`building-${color}-starport`">{{ $t(`colors.${color}`) }}</Label>
           <NumberFieldContent class="dark:text-black">
@@ -406,7 +346,7 @@ function updateState(update: UpdatePayload) {
             <CommandEmpty />
             <CommandGroup>
               <CommandItem
-                v-for="token in Token"
+                v-for="token in TokenType"
                 :key="token"
                 :value="token"
                 @select.prevent="

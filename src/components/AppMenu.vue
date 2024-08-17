@@ -21,7 +21,10 @@ const open = ref(false)
 
 function viewGame() {
   open.value = false
-  router.push('list')
+
+  if (router.currentRoute.value.name !== 'list_view' && router.currentRoute.value.name !== 'map') {
+    router.push('list')
+  }
 }
 
 function loadTestGame(id: string) {
@@ -32,11 +35,14 @@ function loadTestGame(id: string) {
 
 <template>
   <Sheet v-model:open="open">
-    <SheetTrigger>
-      <Menu
-        class="px-2 menu"
-        :size="48"
-      />
+    <SheetTrigger as-child>
+      <Button
+        class="w-12 h-12 p-2 menu"
+        size="icon"
+        variant="ghost"
+      >
+        <Menu :size="48" />
+      </Button>
     </SheetTrigger>
     <SheetContent side="left">
       <SheetHeader>
@@ -59,12 +65,17 @@ function loadTestGame(id: string) {
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/new_campaign">
+          <RouterLink to="/campaign">
             {{ $t('campaign.new') }}
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/campaign">
+          <RouterLink :to="{ path: '/campaign', query: { mode: 'edit' } }">
+            {{ $t('campaign.current') }}
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink to="/map">
             {{ $t('campaign.map_view') }}
           </RouterLink>
         </li>

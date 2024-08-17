@@ -1,4 +1,20 @@
-export { Archive, Board, BuildingType, Color, Fate, Golem, Player, Resource, Token, SHIP }
+import type { ISOStringFormat } from 'date-fns'
+
+export {
+  Archive,
+  Board,
+  BuildingType,
+  Color,
+  Fate,
+  Golem,
+  Player,
+  Resource,
+  TokenType,
+  EmpireStatus,
+  CardType,
+  ShipType
+}
+
 export type {
   Building,
   Card,
@@ -10,8 +26,10 @@ export type {
   Ship,
   System,
   Systems,
-  MapKey,
-  ShipType
+  SystemKey,
+  Token,
+  FlagshipState,
+  FlagshipSlot
 }
 
 // Used to represent multiple of an item as a means of compression/easier loading
@@ -36,7 +54,7 @@ export type Cluster = 1 | 2 | 3 | 4 | 5 | 6
 
 type Ship = {
   color: Color
-  type: string
+  type: ShipType
 }
 
 type Building = {
@@ -46,9 +64,29 @@ type Building = {
   isCloudCity?: boolean
 }
 
+type Token = {
+  type: TokenType
+  // side: 'A' | 'B'
+}
+
 type MapPiece = Ship | Building | Token
 type Holdable = Resource | Golem
 type Piece = MapPiece | Holdable
+
+type FlagshipSlot =
+  | 'slipstreamDrive'
+  | 'tractorBeam'
+  | 'controlArray'
+  | 'defenseArray'
+  | 'shipCrane'
+  | 'hull'
+
+type FlagshipState = {
+  [slot in FlagshipSlot]?: {
+    upgrade?: [BuildingType, boolean] // Boolean is for freshness
+    armor?: [BuildingType, boolean]
+  }
+}
 
 class Player {
   name: string
@@ -56,14 +94,15 @@ class Player {
   cards: Card[] = []
   resources: Holdable[] = []
   outrage: Resource[] = []
-  empireStatus = 'Regent'
+  empireStatus = EmpireStatus.regent
   currentFate: Fate
+  notes: string = ''
   /**
    * @param fateHistory - Array of tuples of Fate, power, and boolean if succeeded objective in chronological order prior to current game
    */
   fateHistory: [Fate, number, boolean][] = []
   power: number = 0
-  //TODO flagShipData: {};
+  flagshipState?: FlagshipState
 
   constructor(name: string, color: Color, currentFate: Fate) {
     this.name = name
@@ -76,7 +115,7 @@ class Player {
 function processPiece(piece: MapPiece): MapPiece {
   if ((piece as Ship).color && !(piece as Ship).type) {
     const newPiece = piece as Ship
-    newPiece.type = 'SHIP'
+    newPiece.type = ShipType.ship
     return newPiece
   }
   return piece
@@ -87,10 +126,10 @@ function processMultiPiece(piece: Multi<MapPiece>): Multi<MapPiece> {
   return newPiece
 }
 
-type MapKey = `${1 | 2 | 3 | 4 | 5 | 6}${'A' | 'C' | 'H' | 'G'}`
+type SystemKey = `${1 | 2 | 3 | 4 | 5 | 6}${'A' | 'C' | 'H' | 'G'}`
 
 type System = Multi<MapPiece>
-type Systems = Map<MapKey, System[]>
+type Systems = Map<SystemKey, System[]>
 
 /**
  * Represents a board with systems and pieces.
@@ -129,7 +168,7 @@ class Board {
    * @param system The system to add the piece to.
    * @param piece The piece to add.
    */
-  addPiece(system: MapKey, piece: MapPiece) {
+  addPiece(system: SystemKey, piece: MapPiece) {
     if (this.systems.has(system)) {
       this.systems.get(system)?.push({ item: processPiece(piece), count: 1 })
     }
@@ -141,7 +180,7 @@ class Board {
    * @param system The system to add the pieces to.
    * @param pieces An array of pieces to add.
    */
-  addPieces(system: MapKey, pieces: (MapPiece | Multi<MapPiece>)[]) {
+  addPieces(system: SystemKey, pieces: (MapPiece | Multi<MapPiece>)[]) {
     if (this.systems.has(system)) {
       this.systems.get(system)?.push(
         ...pieces.map((p) => {
@@ -162,7 +201,7 @@ class Board {
    * @param piece The piece to update.
    * @param count The new count of the piece.
    */
-  updateCount(system: MapKey, piece: MapPiece, count: number) {
+  updateCount(system: SystemKey, piece: MapPiece, count: number) {
     if (this.systems.has(system)) {
       const pieces = this.systems.get(system)
       if (pieces) {
@@ -181,6 +220,9 @@ class Board {
 }
 
 interface SaveFile {
+  id: string
+  name: string
+  timestamp: ISOStringFormat
   players: Player[]
   board: {
     systems: Systems
@@ -225,6 +267,28 @@ class Archive {
   }
 }
 
+enum CardType {
+  court = 'COURT',
+  law = 'LAW',
+  action = 'ACTION',
+  fate = 'FATE',
+  rules = 'RULES',
+  ability = 'Ability',
+  lore = 'Lore',
+  guild = 'Guild',
+  edict = 'Edict',
+  title = 'Title',
+  vox = 'Vox',
+  setup = 'Setup',
+  objective = 'Objective',
+  resolution = 'Resolution'
+}
+
+enum EmpireStatus {
+  regent = 'REGENT',
+  outlaw = 'OUTLAW'
+}
+
 enum Resource {
   material = 'MATERIAL',
   fuel = 'FUEL',
@@ -249,12 +313,17 @@ enum Color {
   free = 'FREE'
 }
 
+enum ShipType {
+  ship = 'SHIP',
+  flagship = 'FLAGSHIP'
+}
+
 enum BuildingType {
   city = 'CITY',
   starport = 'STARPORT'
 }
 
-enum Token {
+enum TokenType {
   blight = 'BLIGHT',
   portal = 'PORTAL',
   banner = 'BANNER',
@@ -287,8 +356,3 @@ enum Fate {
   conspirator = 'F23',
   judge = 'F24'
 }
-
-// To keep it in a variable
-// Maybe will turn into an enum with flagships?
-const SHIP = 'SHIP'
-type ShipType = typeof SHIP

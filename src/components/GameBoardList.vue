@@ -10,12 +10,12 @@ import Button from '@/components/ui/button/Button.vue'
 import SystemDialog from '@/components/SystemDialog.vue'
 
 import { useSystemsStore } from '@/stores/systems'
-import type { SystemId } from '@/stores/systems'
 import { ref } from 'vue'
 import { getSystemOverview } from '@/lib/utils'
+import type { SystemKey } from '@/Archive'
 
 const systemsStore = useSystemsStore()
-const activeSystem = ref<SystemId | null>()
+const activeSystem = ref<SystemKey | null>()
 
 function updateDialog(open: boolean) {
   if (!open) {
@@ -43,7 +43,36 @@ function updateDialog(open: boolean) {
               :value="system"
             >
               <AccordionTrigger class="py-1">
-                <span class="text-left grow">{{ $t('system') }} {{ system }}</span>
+                <div class="flex items-center grow">
+                  {{ $t('system') }}
+                  <span class="ml-2">
+                    {{ system.charAt(0) }}
+                  </span>
+                  <img
+                    v-if="system.charAt(1) === 'A'"
+                    class="h-[1rem]"
+                    src="/images/symbol_arrow.png"
+                    alt="Arrow"
+                  />
+                  <img
+                    v-else-if="system.charAt(1) === 'H'"
+                    class="h-[1rem]"
+                    src="/images/symbol_hex.png"
+                    alt="Hex"
+                  />
+                  <img
+                    v-else-if="system.charAt(1) === 'C'"
+                    class="h-[1rem]"
+                    src="/images/symbol_moon.png"
+                    alt="Moon"
+                  />
+                  <span
+                    v-else
+                    class="mr-2"
+                  >
+                    G
+                  </span>
+                </div>
                 <Button
                   variant="ghost"
                   class="self-end"
@@ -56,16 +85,28 @@ function updateDialog(open: boolean) {
                 <ul>
                   <li
                     v-for="([piece, count], i) in getSystemOverview(
-                      systemsStore.systemState(system).pieces
+                      systemsStore.systemState(system).pieces,
+                      { freshness: false }
                     )"
                     :key="i"
                   >
-                    {{ count }}
-                    {{
-                      piece.color
-                        ? `${$t(`colors.${piece.color}`)} ${$t(`pieces.${piece.type}`, count)}`
-                        : $t(`pieces.${piece.type}`, count)
-                    }}
+                    <template v-if="Array.isArray(count)">
+                      {{ count[0] + count[1] }}
+                      {{
+                        piece.color
+                          ? `${$t(`colors.${piece.color}`)} ${$t(`pieces.${piece.type}`, count)}`
+                          : $t(`pieces.${piece.type}`, count)
+                      }}
+                      ({{ count[0] }} {{ $t('fresh') }}, {{ count[1] }} {{ $t('damaged') }})
+                    </template>
+                    <template v-else>
+                      {{ count }}
+                      {{
+                        piece.color
+                          ? `${$t(`colors.${piece.color}`)} ${$t(`pieces.${piece.type}`, count)}`
+                          : $t(`pieces.${piece.type}`, count)
+                      }}
+                    </template>
                   </li>
                 </ul>
               </AccordionContent>

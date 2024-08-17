@@ -1,42 +1,45 @@
 <script setup lang="ts">
-import { type Systems, type MapKey, type Cluster, type MapPiece, Token, Resource } from '@/Archive';
+import {
+  type Systems,
+  type SystemKey,
+  type Cluster,
+  type MapPiece,
+  type Token,
+  TokenType,
+  Resource
+} from '@/Archive'
 
 interface MapProps {
   systems: Systems | null
 }
 
-withDefaults(defineProps<MapProps>(), { systems: null });
+withDefaults(defineProps<MapProps>(), { systems: null })
 
-const clusters: Cluster[] = [
-  1,
-  2,
-  3,
-  4,
-  5,
-  6
-];
+const clusters: Cluster[] = [1, 2, 3, 4, 5, 6]
 
-function getMapKeysFromCluster(cluster: Cluster): MapKey[] {
-  return [
-    `${cluster}A`,
-    `${cluster}C`,
-    `${cluster}H`,
-    `${cluster}G`,
-  ];
+function getMapKeysFromCluster(cluster: Cluster): SystemKey[] {
+  return [`${cluster}A`, `${cluster}C`, `${cluster}H`, `${cluster}G`]
 }
 
-function isToken(mapPiece: MapPiece): mapPiece is Token {
-  return Object.values(Token).includes(mapPiece as Token);
-}
-
-function mapPieceToString(piece: MapPiece): string {
-  if (isToken(piece)) {
-    return `${piece.toLocaleLowerCase()} token`;
+function isToken(mapPiece: MapPiece | string): mapPiece is Token | TokenType {
+  if (typeof mapPiece === 'string') {
+    return Object.values(TokenType).includes(mapPiece as TokenType)
   }
-  return `${piece.type.toLocaleLowerCase()} (${piece.color.toLocaleLowerCase()})`;
+
+  return Object.values(TokenType).includes(mapPiece.type as TokenType)
 }
 
-const mapKeyResourceTypeLookup: Record<MapKey, Resource | null> = {
+function mapPieceToString(piece: MapPiece | TokenType): string {
+  if (isToken(piece)) {
+    if (typeof piece === 'string') {
+      return `${piece.toLocaleLowerCase()} token`
+    }
+    return `${piece.type.toLocaleLowerCase()} token`
+  }
+  return `${piece.type.toLocaleLowerCase()} (${piece.color.toLocaleLowerCase()})`
+}
+
+const mapKeyResourceTypeLookup: Record<SystemKey, Resource | null> = {
   '1A': Resource.weapon,
   '1C': Resource.fuel,
   '1H': Resource.material,
@@ -61,16 +64,15 @@ const mapKeyResourceTypeLookup: Record<MapKey, Resource | null> = {
   '6C': Resource.fuel,
   '6H': Resource.psionic,
   '6G': null
-};
-
-function mapKeyToString(mapKey: MapKey): string {
-  const resource = mapKeyResourceTypeLookup[mapKey];
-  if (!resource) {
-    return `${mapKey} (gate)`;
-  }
-  return `${mapKey} (${resource.toLocaleLowerCase()})`;
 }
 
+function mapKeyToString(SystemKey: SystemKey): string {
+  const resource = mapKeyResourceTypeLookup[SystemKey]
+  if (!resource) {
+    return `${SystemKey} (gate)`
+  }
+  return `${SystemKey} (${resource.toLocaleLowerCase()})`
+}
 </script>
 
 <template>
@@ -79,14 +81,23 @@ function mapKeyToString(mapKey: MapKey): string {
   </div>
   <div v-else>
     <section class="map">
-      <template v-for="cluster in clusters" :key="cluster">
+      <template
+        v-for="cluster in clusters"
+        :key="cluster"
+      >
         <div class="cluster">
           <h2 class="clusterTitle">Cluster {{ cluster }}</h2>
           <div class="clusterContents">
-            <template v-for="mapKey in getMapKeysFromCluster(cluster)" :key="mapKey">
-              <div class="mapKey">{{ mapKeyToString(mapKey) }}</div>
+            <template
+              v-for="SystemKey in getMapKeysFromCluster(cluster)"
+              :key="SystemKey"
+            >
+              <div class="SystemKey">{{ mapKeyToString(SystemKey) }}</div>
               <div class="systemContents">
-                <template v-for="system in systems.get(mapKey)" :key="system.type + '' + system.count">
+                <template
+                  v-for="system in systems.get(SystemKey)"
+                  :key="system.type + '' + system.count"
+                >
                   <div class="systemInfo">{{ mapPieceToString(system.item) }}</div>
                 </template>
               </div>

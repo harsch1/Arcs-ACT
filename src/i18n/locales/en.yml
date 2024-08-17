@@ -10,33 +10,42 @@ common:
   next: Next
   back: Back
   save: Save
+  create: Create
+  view: View
 act: Act | Act {n} | Act {n}
 player: Player | Players
 system: System
 cluster: Cluster
 piece: Piece
 piece_id: '@.capitalize:{type} @.lower:{color}'
+fresh: fresh
+damaged: damaged
 system_id: System {id}
 system_menu:
   add_building: Add building
   add_city: Add city
   add_starport: Add starport
   add_ship: Add ship
+  add_flagship: Add flagship
   add_token: Add token
   configure: Configure
 piece_menu:
-  remove_piece: Remove piece
+  add: Add
+  remove: Remove
+  remove_fresh: Remove fresh
+  remove_damaged: Remove damaged
   change_color: Change color
   change_token: Change token
-  damage_ship: Damage
-  damage_building: Damage
-  repair_ship: Repair
-  repair_building: Repair
+  damage: Damage
+  repair: Repair
+  damage_fresh: Damage fresh
+  repair_damaged: Repair damaged
   flip: Flip
 pieces:
   CITY: City | Cities
   STARPORT: Starport | Starports
   SHIP: Ship | Ships
+  FLAGSHIP: Flagship | Flagships
   EMPIRE: Ship | Ships
   BLIGHT: Blight
   PORTAL: Portal
@@ -57,9 +66,13 @@ campaign:
   who_is_playing?: Who is playing?
   board_state_help: View or set the pieces within The Reach
   new: New campaign
+  current: Current campaign
   latest: Latest campaign
   map_view: Map view
   list_view: List view
+
+toast:
+  game_saved: Game saved to {id}!
 
 load_dialog:
   title: Continue campaign
@@ -72,6 +85,7 @@ load_dialog:
 
   table:
     id: ID
+    name: Name
     timestamp: Date
     act: '@:act'
     player: '@:player'
@@ -102,6 +116,7 @@ resources:
 
 player_area:
   name: Name
+  notes: Notes
   color: Color
   board: Player board
   flagship: Flagship
@@ -109,13 +124,43 @@ player_area:
   court: Court
   fate: Fate
   outrage: Outrage
-  first_regent: First regent
-  regent: Regent
-  outlaw: Outlaw
   add_fate: Add fate
   completed_objective: Completed objective
   power: Power
+  total_power: Total power
   outrage_help: Pick the outraged resources
+
+empire_status:
+  FIRST_REGENT: First Regent
+  REGENT: Regent
+  OUTLAW: Outlaw
+
+deck_builder:
+  title: Manage the cards in the campaign
+  player_court: Manage the player court
+  table:
+    id: ID
+    name: Name
+    filter: Filter cards
+    type: Type
+    set: Set
+    selected: '{count} of {size} selected'
+    location: Location
+  type:
+    FATE: Fate
+    COURT: Court
+    ACTION: Action
+    LORE: Lore
+    LAW: Law
+    EDICT: Edict
+    TITLE: Title
+  move_to: Move to
+  search: Type to search
+  result: Result
+  deck: Deck
+  scrap: Scrap
+  edict: Edict | Edicts
+  law: Law | Laws
 
 fates:
   F1: Steward

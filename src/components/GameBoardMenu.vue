@@ -12,17 +12,19 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger
 } from '@/components/ui/dropdown-menu'
-
+import { OnClickOutside } from '@vueuse/components'
 import SystemDialog from '@/components/SystemDialog.vue'
-import { BuildingType, Color, SHIP } from '@/Archive'
-import type { ShipType } from '@/Archive'
-import type { SystemId } from '@/stores/systems'
+import { BuildingType, Color, ShipType, TokenType } from '@/Archive'
+import { useGameStore } from '@/stores/game'
 
-type PieceType = BuildingType | ShipType
+import type { SystemKey } from '@/Archive'
+
+type PieceType = BuildingType | ShipType | TokenType
 
 const props = defineProps<{
-  activeSystem: SystemId
+  activeSystem: SystemKey
   isOpen: boolean
+  isFull: boolean
   pointerPosition: {
     x: number
     y: number
@@ -31,9 +33,21 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   update: [value: boolean]
-  select: [type: PieceType, color: Color]
+  select: [type: PieceType, color?: Color]
   close: []
 }>()
+
+// Values to generate the UI
+const gameStore = useGameStore()
+const activeColors = computed(() => {
+  if (gameStore.players.length > 0) {
+    return gameStore.players.map((player) => player.color)
+  }
+
+  return Object.values(Color).filter((color) => color !== Color.free && color !== Color.empire)
+})
+const colorsWithBuildings = activeColors.value.concat(Color.free)
+const colorsWithShips = activeColors.value.concat(Color.empire)
 
 const triggerStyle = computed(() => ({
   left: `${props.pointerPosition.x}px`,
@@ -44,8 +58,9 @@ function onOpenChange(e: boolean) {
   emit('update', e)
 }
 
-function onSelect(type: PieceType, color: Color) {
+function onSelect(type: PieceType, color?: Color) {
   emit('select', type, color)
+  emit('close')
 }
 </script>
 
@@ -59,65 +74,97 @@ function onSelect(type: PieceType, color: Color) {
       :style="triggerStyle"
     ></DropdownMenuTrigger>
     <DropdownMenuContent>
-      <DropdownMenuLabel>{{ $t('system_id', { id: activeSystem }) }}</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>
-          {{ $t('system_menu.add_ship') }}
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <DropdownMenuItem
-            v-for="color in Color"
-            :key="color"
-            :class="{ hidden: color == Color.free }"
-            @select="onSelect(SHIP, color)"
+      <OnClickOutside @trigger="emit('close')">
+        <DropdownMenuLabel>{{ $t('system_id', { id: activeSystem }) }}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            {{ $t('system_menu.add_ship') }}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem
+              v-for="color in colorsWithShips"
+              :key="color"
+              @select="onSelect(ShipType.ship, color)"
+            >
+              {{ $t(`colors.${color}`) }}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            {{ $t('system_menu.add_flagship') }}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem
+              v-for="color in activeColors"
+              :key="color"
+              @select="onSelect(ShipType.flagship, color)"
+            >
+              {{ $t(`colors.${color}`) }}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger
+            class="data-[disabled]:opacity-50"
+            :disabled="isFull"
           >
-            {{ $t(`colors.${color}`) }}
-          </DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>
-          {{ $t('system_menu.add_city') }}
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <!-- Hide the empire color from cities -->
-          <DropdownMenuItem
-            v-for="color in Color"
-            :key="color"
-            :class="{ hidden: color == Color.empire }"
-            @select="onSelect(BuildingType.city, color)"
+            {{ $t('system_menu.add_city') }}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <!-- Hide the empire color from cities -->
+            <DropdownMenuItem
+              v-for="color in colorsWithBuildings"
+              :key="color"
+              @select="onSelect(BuildingType.city, color)"
+            >
+              {{ $t(`colors.${color}`) }}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger
+            class="data-[disabled]:opacity-50"
+            :disabled="isFull"
           >
-            {{ $t(`colors.${color}`) }}
+            {{ $t('system_menu.add_starport') }}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <!-- Hide the empire color from starports -->
+            <DropdownMenuItem
+              v-for="color in colorsWithBuildings"
+              :key="color"
+              @select="onSelect(BuildingType.starport, color)"
+            >
+              {{ $t(`colors.${color}`) }}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            {{ $t('system_menu.add_token') }}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem
+              v-for="token in TokenType"
+              :key="token"
+              @select="onSelect(token)"
+            >
+              {{ $t(`pieces.${token}`) }}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        <SystemDialog
+          :system-id="activeSystem"
+          @confirm="$emit('close')"
+        >
+          <DropdownMenuItem @select.prevent>
+            {{ $t('system_menu.configure') }}
           </DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>
-          {{ $t('system_menu.add_starport') }}
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <!-- Hide the empire color from starports -->
-          <DropdownMenuItem
-            v-for="color in Color"
-            :key="color"
-            :class="{ hidden: color == Color.empire }"
-            @select="onSelect(BuildingType.starport, color)"
-          >
-            {{ $t(`colors.${color}`) }}
-          </DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuItem>{{ $t('system_menu.add_token') }}</DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <SystemDialog
-        :system-id="activeSystem"
-        @confirm="$emit('close')"
-      >
-        <DropdownMenuItem @select.prevent>
-          {{ $t('system_menu.configure') }}
-        </DropdownMenuItem>
-      </SystemDialog>
+        </SystemDialog>
+      </OnClickOutside>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
@@ -126,5 +173,9 @@ function onSelect(type: PieceType, color: Color) {
 .dropdown-trigger {
   width: 1px;
   height: 1px;
+}
+
+.menu-entry[data-disabled] {
+  color: gainsboro;
 }
 </style>

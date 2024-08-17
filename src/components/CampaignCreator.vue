@@ -2,30 +2,52 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { computed, ref, watch } from 'vue'
-import { Color } from '@/Archive'
+import { computed, ref } from 'vue'
+import { CardType, Color } from '@/Archive'
 import PlayerLog from '@/components/PlayerLog.vue'
-// import PlayerFlagship from '@/components/PlayerFlagship.vue'
 import GameBoardList from '@/components/GameBoardList.vue'
 import { useGameStore } from '@/stores/game'
+import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
+import { useRouter } from 'vue-router'
+import { useToast } from '@/components/ui/toast/use-toast'
+import { useI18n } from 'vue-i18n'
+
+const props = withDefaults(
+  defineProps<{
+    mode: 'create' | 'edit'
+  }>(),
+  {
+    mode: 'create'
+  }
+)
 
 enum Screen {
   Settings = 0,
   Players = 1,
   Map = 2,
+  Deck = 3,
   _TOTAL_
 }
 
+const router = useRouter()
 const gameStore = useGameStore()
+const { t } = useI18n()
+const { toast } = useToast()
 
 const players = ref<Color[]>([])
-const act = ref('1')
-const currentScreen = ref(Screen.Settings)
-const currentPlayer = ref('')
+const currentScreen = ref(props.mode === 'create' ? Screen.Settings : Screen.Players)
+const currentPlayer = ref<Color | undefined>(players.value[0])
 const playerColors = Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
 
-const canAdvance = computed(() => players.value.length > 0)
+const isEditing = computed(() => props.mode === 'edit')
+const canAdvance = computed(() => players.value.length > 0 && currentScreen.value < Screen._TOTAL_)
+const canReturn = computed(() => currentScreen.value > 0)
 const canSave = computed(() => true)
+
+if (gameStore.players.length < 1) {
+  router.replace('campaign')
+  currentScreen.value = Screen.Settings
+}
 
 function advanceScreen(delta: number = 1) {
   if (currentScreen.value === Screen.Settings) {
@@ -34,23 +56,29 @@ function advanceScreen(delta: number = 1) {
 
   currentScreen.value += delta
 
-  if (currentScreen.value === Screen.Players && currentPlayer.value === '') {
+  if (currentScreen.value === Screen.Players && currentPlayer.value === undefined) {
     currentPlayer.value = players.value[0]
   }
 }
 
-function save() {
-  gameStore.saveGame()
+async function save() {
+  const id = await gameStore.saveGame()
+  toast({
+    title: t('toast.game_saved', { id }),
+    duration: 5000
+    // description: 'There was a problem with your request.',
+    // action: h(ToastAction, {
+    //   altText: 'Try again',
+    // }, {
+    //   default: () => 'Try again',
+    // }),
+  })
 }
-
-watch([gameStore.players, gameStore.settings], () => {
-  players.value = gameStore.players.map((p) => p.color)
-  act.value = gameStore.settings.act.toString()
-})
 </script>
 
 <template>
   <div class="viewport">
+    <!-- Settings -->
     <div
       v-if="currentScreen === Screen.Settings"
       class="p-4"
@@ -58,8 +86,9 @@ watch([gameStore.players, gameStore.settings], () => {
       <div class="mb-8">
         <p class="w-full mb-4 text-xl">{{ $t('campaign.which_act_just_ended?') }}</p>
         <ToggleGroup
-          v-model="act"
           type="single"
+          :default-value="gameStore.settings.act.toString()"
+          @update:model-value="(value) => (gameStore.settings.act = parseInt(value as string))"
         >
           <ToggleGroupItem
             v-for="i in [1, 2]"
@@ -93,6 +122,8 @@ watch([gameStore.players, gameStore.settings], () => {
         </ToggleGroup>
       </div>
     </div>
+
+    <!-- Players -->
     <div v-if="currentScreen === Screen.Players">
       <Tabs
         v-model="currentPlayer"
@@ -119,13 +150,26 @@ watch([gameStore.players, gameStore.settings], () => {
         >
           <PlayerLog
             :player="player"
-            :act="parseInt(act)"
+            :act="gameStore.settings.act"
           />
         </TabsContent>
       </Tabs>
     </div>
+
+    <!-- Map -->
     <div v-if="currentScreen === Screen.Map">
       <GameBoardList />
+    </div>
+
+    <!-- Deck -->
+    <div
+      v-if="currentScreen === Screen.Deck"
+      class="p-4"
+    >
+      <DeckBuilder
+        :title="$t('deck_builder.title')"
+        :exclude-tags="[CardType.setup, CardType.resolution, CardType.objective]"
+      />
     </div>
   </div>
 
@@ -133,7 +177,7 @@ watch([gameStore.players, gameStore.settings], () => {
     class="fixed bottom-0 left-0 flex justify-between w-full pt-4 pb-safe-offset-4 px-safe-offset-4 bg-inherit"
   >
     <Button
-      :disabled="!canAdvance"
+      :disabled="!canReturn"
       @click="advanceScreen(-1)"
     >
       {{ $t('common.back') }}
@@ -151,7 +195,7 @@ watch([gameStore.players, gameStore.settings], () => {
       :disabled="!canSave"
       @click="save()"
     >
-      {{ $t('common.save') }}
+      {{ $t('common.create') }}
     </Button>
   </div>
 </template>

@@ -1,9 +1,7 @@
 {
   "files": [],
   "compilerOptions": {
-    "types": [
-      "@modyfi/vite-plugin-yaml/modules"
-    ],
+    "types": ["@intlify/unplugin-vue-i18n/messages"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
