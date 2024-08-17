@@ -1,21 +1,5 @@
 <script lang="ts" setup>
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import {
-  TagsInput,
-  TagsInputInput,
-  TagsInputItem,
-  TagsInputItemDelete
-} from '@/components/ui/tags-input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Filter, Check } from 'lucide-vue-next'
 import type { Column, Table } from '@tanstack/vue-table'
@@ -45,22 +29,6 @@ function update(value: string | string[]) {
 </script>
 
 <template>
-  <!-- <Select>
-    <SelectTrigger class="bg-transparent border-none">
-      <SelectValue :placeholder="placeholder" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectGroup>
-        <SelectItem
-          v-for="value in values"
-          :key="value"
-          :value="value"
-        >
-          {{ value }}
-        </SelectItem>
-      </SelectGroup>
-    </SelectContent>
-  </Select> -->
   <Popover>
     <PopoverTrigger v-bind="$attrs">
       <Filter />

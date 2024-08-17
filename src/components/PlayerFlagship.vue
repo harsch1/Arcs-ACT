@@ -3,18 +3,30 @@ import GamePiece from '@/components/GamePiece.vue'
 import flagshipConfig from '@/lib/flagship-ui-config'
 import buildingSvg from '@/components/game/shapes/building.svg?url'
 
-import { BuildingType, type Color, type FlagshipState, type FlagshipSlot } from '@/Archive'
-import { reactive, type CSSProperties } from 'vue'
+import { BuildingType, type FlagshipState, type FlagshipSlot, Player } from '@/Archive'
+import { watch, type CSSProperties } from 'vue'
 
-defineProps<{
-  color: Color
-}>()
+const props = withDefaults(
+  defineProps<{
+    player: Player
+    offset?: {
+      x: number
+      y: number
+    }
+  }>(),
+  {
+    offset: () => ({
+      x: 0,
+      y: 0
+    })
+  }
+)
 
 const emit = defineEmits<{
   update: [state: FlagshipState]
 }>()
 
-const flagshipState = reactive<FlagshipState>({})
+let flagshipState: FlagshipState = {}
 
 const baseStyle: CSSProperties = {
   position: 'absolute',
@@ -38,6 +50,16 @@ function cycle(type: 'upgrade' | 'armor', slot: FlagshipSlot) {
 
   emit('update', flagshipState)
 }
+
+watch(
+  () => props.player.flagshipState,
+  (newState) => {
+    flagshipState = { ...(newState ?? {}) }
+  },
+  {
+    immediate: true
+  }
+)
 </script>
 
 <template>
@@ -46,7 +68,7 @@ function cycle(type: 'upgrade' | 'armor', slot: FlagshipSlot) {
       <img src="/images/board-flagship.jpg" />
     </div>
     <template
-      v-for="(config, slot) in flagshipState"
+      v-for="(config, slot) in player.flagshipState"
       :key="slot"
     >
       <template
@@ -59,8 +81,11 @@ function cycle(type: 'upgrade' | 'armor', slot: FlagshipSlot) {
           :piece-config="{
             type: building[0],
             isFresh: building[1],
-            color,
-            position: flagshipConfig[slot][type]
+            color: player.color,
+            position: {
+              x: flagshipConfig[slot][type].x + offset.x,
+              y: flagshipConfig[slot][type].y + offset.y
+            }
           }"
         />
       </template>

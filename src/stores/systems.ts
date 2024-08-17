@@ -1,11 +1,11 @@
-import { computed, ref } from 'vue'
-import { defineStore } from 'pinia'
 import systemsUiConfig from '@/lib/systems-ui-config'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 
-import { groupBy, cloneDeep, cloneDeepWith } from 'lodash'
 import { BuildingType, TokenType } from '@/Archive'
 import { getRandomInt, randomPointWithinSVG } from '@/lib/ui-utils'
 import { getSystemOverview } from '@/lib/utils'
+import { cloneDeep, cloneDeepWith, groupBy } from 'lodash'
 
 import type { Color, MapPiece, Multi, SaveFile, ShipType, System, SystemKey } from '@/Archive'
 
@@ -110,6 +110,10 @@ export const useSystemsStore = defineStore('systems', () => {
       }
       return systems.value[systemId].config
     }
+  })
+
+  const isSystemFull = computed(() => {
+    return (systemId: SystemKey) => !systems.value[systemId].slots.find((s) => s.isEmpty)
   })
 
   const clusters = computed(
@@ -250,12 +254,22 @@ export const useSystemsStore = defineStore('systems', () => {
     }
   }
 
+  function movePiece(piece: PieceState | PieceStateGroup, destination: SystemKey) {
+    piece.system = destination
+  }
+
   function parse(systemsConfig: SaveFile['board']['systems']) {
     // const patch: Partial<Record<string, SystemInfo>> = {}
     Object.entries(systemsConfig).forEach(([systemId, pieces]) => {
       pieces.forEach((piece: System) => {
         // Create for every count
         for (let i = piece.count ?? 1; i > 0; i--) {
+          if (typeof piece.item === 'string') {
+            piece.item = {
+              type: piece.item
+            }
+          }
+
           addPiece(systemId as SystemKey, piece.item, undefined)
         }
       })
@@ -298,9 +312,11 @@ export const useSystemsStore = defineStore('systems', () => {
     addPiece,
     removePiece,
     flipPiece,
+    movePiece,
     parse,
     save,
     setSystemUi,
+    isSystemFull,
     $reset
   }
 })

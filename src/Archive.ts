@@ -96,6 +96,7 @@ class Player {
   outrage: Resource[] = []
   empireStatus = EmpireStatus.regent
   currentFate: Fate
+  notes: string = ''
   /**
    * @param fateHistory - Array of tuples of Fate, power, and boolean if succeeded objective in chronological order prior to current game
    */
@@ -220,6 +221,7 @@ class Board {
 
 interface SaveFile {
   id: string
+  name: string
   timestamp: ISOStringFormat
   players: Player[]
   board: {

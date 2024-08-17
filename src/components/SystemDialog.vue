@@ -44,9 +44,9 @@ const props = defineProps<{
   defaultOpen?: boolean
 }>()
 
-const emit = defineEmits<{
-  confirm: []
-}>()
+// const emit = defineEmits<{
+//   confirm: []
+// }>()
 
 const gameStore = useGameStore()
 const systemsStore = useSystemsStore()
@@ -86,9 +86,9 @@ const tokenComboboxOpen = ref(false)
 const searchTerm = ref('')
 
 // Values to generate the UI
-const activeColors = gameStore.players.map((player) => player.color)
-const colorsWithBuildings = activeColors.concat(Color.free)
-const colorsWithShips = activeColors.concat(Color.empire)
+const activeColors = computed(() => gameStore.players.map((player) => player.color))
+const colorsWithBuildings = activeColors.value.concat(Color.free)
+const colorsWithShips = activeColors.value.concat(Color.empire)
 
 // Calculated derived state
 const shipCounters = computed<[Color, Ref<number>][]>(() =>
@@ -112,18 +112,6 @@ const starportCounters = computed<[Color, Ref<number>][]>(() =>
 
 // Since tokens are tags, to remove them there's a delete button on every one
 function updateTokens(type: TokenType, remove = false) {
-  // if (remove) {
-  //   // TokenType was removed
-  //   const toRemove = tokens.value.findIndex((token) => token === type)
-  //   // Something happened, you shouldn't be here
-  //   if (toRemove < 0) {
-  //     return
-  //   }
-
-  //   tokens.value = [...tokens.value.slice(0, toRemove), ...tokens.value.slice(toRemove + 1)]
-  // } else {
-  //   tokens.value.push(type)
-  // }
   const payload: SystemStorePayload = {
     system: activeSystem.value,
     type: type,
@@ -166,78 +154,6 @@ function updateState(update: UpdatePayload) {
   }
   systemsStore.updateState(payload)
 }
-
-// function updateCount(type: BuildingType | ShipType, color: Color, newValue: number) {
-//   // Check if we need to add or remove elements
-//   const currentValue = countByColorAndType(pieces.value, color, type)
-//   let delta = newValue - currentValue
-
-//   while (delta !== 0) {
-//     // Items were added
-//     if (delta > 0) {
-//       pieces.value.push({
-//         system: props.systemId,
-//         color,
-//         type
-//       })
-
-//       delta--
-//     } else {
-//       // Items were removed
-//       const toRemove = pieces.value.findIndex(
-//         (piece) => piece.color === color && piece.type === type
-//       )
-//       // Something happened, you shouldn't be here
-//       if (toRemove < 0) {
-//         return
-//       }
-//       pieces.value = [...pieces.value.slice(0, toRemove), ...pieces.value.slice(toRemove + 1)]
-//       delta++
-//     }
-//   }
-// }
-
-// // Since tokens are tags, to remove them there's a delete button on every one
-// function updateTokens(type: TokenType, remove = false) {
-//   if (remove) {
-//     // TokenType was removed
-//     const toRemove = pieces.value.findIndex((piece) => piece.type === type)
-//     // Something happened, you shouldn't be here
-//     if (toRemove < 0) {
-//       return
-//     }
-//     pieces.value = [...pieces.value.slice(0, toRemove), ...pieces.value.slice(toRemove + 1)]
-//   } else {
-//     pieces.value.push({
-//       system: props.systemId,
-//       type
-//     })
-//   }
-// }
-
-// // Compute the differences and call the required methods from the store
-// function confirm() {
-//   const toKeep: PieceState[] = []
-//   const toAdd: Partial<PieceState>[] = []
-//   pieces.value.forEach((piece) => {
-//     // Can check for color since a token would match with both being 'undefined'
-//     const found = systemsStore.pieces.find((p) => p.type === piece.type && p.color === piece.color)
-//     if (found) {
-//       toKeep.push(found)
-//     } else {
-//       // A new piece was added
-//       toAdd.push(piece)
-//     }
-//   })
-//   // After looping the changes everything that is not present in `toKeep` is removed
-//   systemState.value.pieces
-//     .filter((p) => !toKeep.includes(p))
-//     .forEach((p) => systemsStore.removePiece(p))
-//   // Add the new elements
-//   toAdd.forEach((p) => systemsStore.addPiece(props.systemId, p))
-
-//   emit('confirm')
-// }
 </script>
 
 <template>
@@ -330,7 +246,15 @@ function updateState(update: UpdatePayload) {
           :model-value="counter.value"
           :min="0"
           class="m-1"
-          @update:model-value="(value) => (counter.value = value)"
+          @update:model-value="
+            (value) =>
+              updateState({
+                type: BuildingType.city,
+                currentValue: counter.value,
+                newValue: value,
+                color
+              })
+          "
         >
           <Label :for="`bulding-${color}-city`">{{ $t(`colors.${color}`) }}</Label>
           <NumberFieldContent class="dark:text-black">
@@ -352,7 +276,15 @@ function updateState(update: UpdatePayload) {
           :model-value="counter.value"
           :min="0"
           class="m-1"
-          @update:model-value="(value) => (counter.value = value)"
+          @update:model-value="
+            (value) =>
+              updateState({
+                type: BuildingType.starport,
+                currentValue: counter.value,
+                newValue: value,
+                color
+              })
+          "
         >
           <Label :for="`building-${color}-starport`">{{ $t(`colors.${color}`) }}</Label>
           <NumberFieldContent class="dark:text-black">

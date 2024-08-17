@@ -1,13 +1,13 @@
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { Fate } from '@/Archive'
+import { Fate, Resource } from '@/Archive'
 
 import type { Ref } from 'vue'
-import type { Color, BuildingType, ShipType, TokenType, SaveFile } from '@/Archive'
+import { type Color, BuildingType, ShipType, type TokenType, type SaveFile } from '@/Archive'
 import type { PieceState } from '@/stores/systems'
 import type { ClassValue } from 'clsx'
 import type { Updater } from '@tanstack/vue-table'
-import type { GameDeck } from '@/stores/game'
+import type { GameDeck } from '@/stores/cards'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -20,19 +20,77 @@ export function valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref
 // You say this could be a function? Yes but it's not needed
 export const romanNumerals = [null, 'I', 'II', 'III', 'IV', 'V']
 
+export function groupByColorAndTypeAndFreshness() {}
+
 export function countByColorAndType(
   pieces: PieceState[],
   color: Color,
-  type: BuildingType | ShipType
-) {
+  type: BuildingType | ShipType,
+  freshness: true
+): [number, number]
+export function countByColorAndType(
+  pieces: PieceState[],
+  color: Color,
+  type: BuildingType | ShipType,
+  freshness?: boolean
+): number
+export function countByColorAndType(
+  pieces: PieceState[],
+  color: Color,
+  type: BuildingType | ShipType,
+  freshness?: boolean
+): number | [number, number] {
+  // Returns a tuple with [freshCount, damagedCount]
+  if (freshness) {
+    return pieces
+      .filter((piece) => piece.type === type && piece.color === color)
+      .reduce(
+        (acc, value) => {
+          value.isFresh ? acc[0]++ : acc[1]++
+          return acc
+        },
+        [0, 0]
+      )
+  }
+  // Returns the count
   return pieces.filter((piece) => piece.type === type && piece.color === color).length
 }
 
-export function countByType(pieces: PieceState[], type: BuildingType | ShipType | TokenType) {
+export function countByType(
+  pieces: PieceState[],
+  type: BuildingType | ShipType | TokenType,
+  freshness: true
+): [number, number]
+export function countByType(
+  pieces: PieceState[],
+  type: BuildingType | ShipType | TokenType,
+  freshness?: boolean
+): number
+export function countByType(
+  pieces: PieceState[],
+  type: BuildingType | ShipType | TokenType,
+  freshness?: boolean
+): number | [number, number] {
+  // Returns a tuple with [freshCount, damagedCount]
+  if (freshness) {
+    return pieces
+      .filter((piece) => piece.type === type)
+      .reduce(
+        (acc, value) => {
+          value.isFresh ? acc[0]++ : acc[1]++
+          return acc
+        },
+        [0, 0]
+      )
+  }
+  // Returns the count
   return pieces.filter((piece) => piece.type === type).length
 }
 
-export function getSystemOverview(systemPieces: PieceState[]) {
+export function getSystemOverview(
+  systemPieces: PieceState[],
+  { freshness }: { freshness?: boolean } = {}
+) {
   const uniquePieces: Pick<PieceState, 'color' | 'type'>[] = []
   systemPieces.forEach((piece) => {
     if (!uniquePieces.find((p) => p.type === piece.type && p.color === piece.color)) {
@@ -46,9 +104,9 @@ export function getSystemOverview(systemPieces: PieceState[]) {
   uniquePieces.forEach((piece) => {
     if (piece.color) {
       // @ts-ignore TODO: Narrow properly
-      result.push([piece, countByColorAndType(systemPieces, piece.color, piece.type)])
+      result.push([piece, countByColorAndType(systemPieces, piece.color, piece.type, freshness)])
     } else {
-      result.push([piece, countByType(systemPieces, piece.type)])
+      result.push([piece, countByType(systemPieces, piece.type, freshness)])
     }
   })
   return result
@@ -77,7 +135,24 @@ export function getFateName(fateId: string): Fate {
   return fate as Fate
 }
 
+export function getFateId(fateName: string): string {
+  const [, fate] = Object.entries(Fate).find(([name]) => name === fateName) ?? []
+  return fate as string
+}
+
 export const gameDecks = ['court', 'scrap', 'rules']
 export function isGameDeck(deck: string): deck is GameDeck {
   return gameDecks.includes(deck)
+}
+
+export function isResource(resource: unknown): resource is Resource {
+  return Object.values(Resource).includes(resource as Resource)
+}
+
+export function isBuilding(piece: unknown): piece is BuildingType {
+  return Object.values(BuildingType).includes(piece as BuildingType)
+}
+
+export function isFlagship(piece: unknown): piece is ShipType.flagship {
+  return piece === ShipType.flagship
 }

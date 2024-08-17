@@ -22,8 +22,6 @@ import {
 import {
   Pagination,
   PaginationEllipsis,
-  PaginationFirst,
-  PaginationLast,
   PaginationList,
   PaginationListItem,
   PaginationNext,
@@ -34,7 +32,7 @@ import { valueUpdater } from '@/lib/utils'
 import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/vue-table'
 import TableFilterColumn from '@/components/deck-builder/TableFilterColumn.vue'
 import TableRowActions from '@/components/deck-builder/TableRowActions.vue'
-import type { GameCard } from '@/stores/game'
+import type { GameCard } from '@/stores/cards'
 
 const props = defineProps<{
   columns: ColumnDef<GameCard, GameCard>[]
@@ -78,7 +76,8 @@ const table = useVueTable({
   onGlobalFilterChange: (updaterOrValue) => {
     globalFilter.value =
       typeof updaterOrValue === 'function' ? updaterOrValue(globalFilter.value) : updaterOrValue
-  }
+  },
+  autoResetPageIndex: false
 })
 
 function moveTo(id: string, location: string) {
@@ -90,7 +89,7 @@ function moveTo(id: string, location: string) {
   <div class="flex items-center py-4">
     <Input
       class="max-w-sm"
-      :placeholder="$t('deck-builder.table.filter')"
+      :placeholder="$t('deck_builder.table.filter')"
       :model-value="globalFilter"
       @update:model-value="(value) => (globalFilter = String(value))"
     />
@@ -154,7 +153,7 @@ function moveTo(id: string, location: string) {
               />
             </TableCell>
             <!-- Actions -->
-            <TableCell>
+            <TableCell class="text-right whitespace-nowrap">
               <TableRowActions
                 :card="row.original"
                 :locations="locations"
@@ -180,7 +179,7 @@ function moveTo(id: string, location: string) {
   <div class="flex items-center justify-end py-4 space-x-2">
     <div class="flex-1 text-sm text-muted-foreground">
       {{
-        $t('deck-builder.table.selected', {
+        $t('deck_builder.table.selected', {
           count: table.getFilteredSelectedRowModel().rows.length,
           size: table.getFilteredRowModel().rows.length
         })

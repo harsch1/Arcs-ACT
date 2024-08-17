@@ -5,7 +5,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'map',
+      name: 'home',
       component: import('@/views/MapView.vue')
     },
     // {
@@ -17,13 +17,14 @@ const router = createRouter({
     //   component: () => import('../views/AboutView.vue')
     // },
     {
-      path: '/new_campaign',
-      name: 'new_campaign',
-      component: () => import('@/views/CampaignCreatorView.vue')
-    },
-    {
       path: '/campaign',
       name: 'campaign',
+      component: () => import('@/views/CampaignCreatorView.vue'),
+      props: (route) => ({ mode: route.query.mode })
+    },
+    {
+      path: '/map',
+      name: 'map',
       component: () => import('@/views/CampaignView.vue')
     },
     {

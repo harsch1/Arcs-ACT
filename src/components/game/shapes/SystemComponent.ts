@@ -1,4 +1,4 @@
-import { h, ref, onMounted, defineComponent, type VNode } from 'vue'
+import { h, ref, onMounted, defineComponent } from 'vue'
 
 // Manage all the shapes
 import s1A from '@/components/game/shapes/system-1a.svg'

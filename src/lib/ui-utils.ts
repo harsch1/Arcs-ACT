@@ -32,5 +32,5 @@ export function randomPointWithinSVG(
 
   point = point.matrixTransform(matrix.translate(0, -128))
 
-  return point
+  return { x: point.x, y: point.y }
 }
