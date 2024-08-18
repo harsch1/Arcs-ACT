@@ -7,8 +7,10 @@ import { exportArchive } from '@/lib/utils'
 import { useSystemsStore } from '@/stores/systems'
 import { useCardsStore } from '@/stores/cards'
 import { Archive, Color, Fate, Player, type SaveFile } from '@/Archive'
+import i18n from '@/i18n'
 
 import test from '@/stores/test.json'
+import type { ISOStringFormat } from 'date-fns'
 
 export type GameSettings = {
   id?: string
@@ -17,7 +19,6 @@ export type GameSettings = {
   firstRegent: string
 }
 
-// export const CAMPAIGN_COURT = 'campaign-court'
 // Prefix for the keys in storage
 export const GAME_SAVE_PREFIX = 'save_'
 export const GAME_TEST_ID = 'test'
@@ -121,7 +122,15 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  async function saveGame() {
+  /**
+   * Creates or updates a save file.
+   * When the ID is received updates the existing save,
+   * else it creates a new save.
+   *
+   * @param id ID of the current save
+   * @returns string: name or ID of the save
+   */
+  async function saveGame(id?: string) {
     // Populate the archive
     const archive = new Archive(players.value)
     const systemsResult = systems.save()
@@ -141,28 +150,38 @@ export const useGameStore = defineStore('game', () => {
       }
     }
 
-    // Create the file
-    // Remove the verb from the id
-    let id = humanId('_')
-    id = id.slice(0, id.lastIndexOf('_'))
+    let name: string, save: Partial<SaveFile>
+    if (!id) {
+      // Create the file
+      // Remove the verb from the id
+      let _id = humanId('_')
+      _id = _id.slice(0, _id.lastIndexOf('_'))
+      id = GAME_SAVE_PREFIX + _id
+      name = _id.replace(/_/g, ' ')
+      save = {
+        name,
+        timestamp: new Date().toISOString() as ISOStringFormat
+      }
+    } else {
+      const _save = await localforage.getItem<SaveFile>(id)
+      save = _save ?? {}
+    }
 
-    const save = {
-      id: GAME_SAVE_PREFIX + id,
-      name: id.replace(/_/g, ' '),
-      timestamp: new Date().toISOString(),
+    save = {
+      id,
+      ...save,
       ...archive
     }
 
     // Clone the archive to be able to save it to localforage
-    await localforage.setItem(GAME_SAVE_PREFIX + id, JSON.parse(JSON.stringify(save)))
+    await localforage.setItem(id, JSON.parse(JSON.stringify(save)))
 
     return save.name ?? save.id
   }
 
   function addPlayer(name: string, color: Color, fate?: Fate) {
     if (name === '') {
-      name = humanId(' ')
-      name = name.slice(name.indexOf(' ') + 1)
+      name = i18n.global.t(`colors.${color}`)
     }
     const player = new Player(name, color, fate ?? Fate.steward)
     players.value.push(player)

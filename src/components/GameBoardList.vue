@@ -121,7 +121,6 @@ function updateDialog(open: boolean) {
     v-if="activeSystem"
     :default-open="true"
     :system-id="activeSystem"
-    @confirm="$emit('close')"
     @update:open="updateDialog"
   >
   </SystemDialog>

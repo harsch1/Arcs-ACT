@@ -11,6 +11,8 @@ common:
   back: Back
   save: Save
   create: Create
+  update: Update
+  create_new: Save as new game
   view: View
 act: Act | Act {n} | Act {n}
 player: Player | Players
@@ -72,7 +74,8 @@ campaign:
   list_view: List view
 
 toast:
-  game_saved: Game saved to {id}!
+  game_saved: Game saved as {name}!
+  game_updated: '{name} updated!'
 
 load_dialog:
   title: Continue campaign
