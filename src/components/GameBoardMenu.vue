@@ -74,7 +74,7 @@ function onSelect(type: PieceType, color?: Color) {
       :style="triggerStyle"
     ></DropdownMenuTrigger>
     <DropdownMenuContent>
-      <OnClickOutside @trigger="emit('close')">
+      <OnClickOutside :options="{ ignore: ['.system-dialog'] }" @trigger="emit('close')">
         <DropdownMenuLabel>{{ $t('system_id', { id: activeSystem }) }}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuSub>

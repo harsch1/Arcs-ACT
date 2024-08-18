@@ -161,7 +161,7 @@ function updateState(update: UpdatePayload) {
     <DialogTrigger as-child>
       <slot></slot>
     </DialogTrigger>
-    <DialogContent class="px-2 pb-2 overflow-auto pt-11 max-sm:h-full max-sm:w-full">
+    <DialogContent class="px-2 pb-2 overflow-auto system-dialog pt-11 max-sm:h-full max-sm:w-full">
       <DialogHeader>
         <DialogTitle>
           <div class="flex items-center justify-between -mx-2">

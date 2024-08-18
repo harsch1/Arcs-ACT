@@ -7,6 +7,7 @@ import { exportArchive } from '@/lib/utils'
 import { useSystemsStore } from '@/stores/systems'
 import { useCardsStore } from '@/stores/cards'
 import { Archive, Color, Fate, Player, type SaveFile } from '@/Archive'
+import i18n from '@/i18n'
 
 import test from '@/stores/test.json'
 
@@ -17,7 +18,6 @@ export type GameSettings = {
   firstRegent: string
 }
 
-// export const CAMPAIGN_COURT = 'campaign-court'
 // Prefix for the keys in storage
 export const GAME_SAVE_PREFIX = 'save_'
 export const GAME_TEST_ID = 'test'
@@ -161,8 +161,7 @@ export const useGameStore = defineStore('game', () => {
 
   function addPlayer(name: string, color: Color, fate?: Fate) {
     if (name === '') {
-      name = humanId(' ')
-      name = name.slice(name.indexOf(' ') + 1)
+      name = i18n.global.t(`colors.${color}`)
     }
     const player = new Player(name, color, fate ?? Fate.steward)
     players.value.push(player)
