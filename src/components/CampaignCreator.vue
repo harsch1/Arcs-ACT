@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -11,6 +17,7 @@ import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { useI18n } from 'vue-i18n'
+import { ChevronDown } from 'lucide-vue-next'
 
 const props = withDefaults(
   defineProps<{
@@ -34,7 +41,14 @@ const gameStore = useGameStore()
 const { t } = useI18n()
 const { toast } = useToast()
 
-const players = ref<Color[]>([])
+const players = computed({
+  get() {
+    return gameStore.players.map((player) => player.color)
+  },
+  set(value: Color[]) {
+    gameStore.updatePlayers(value)
+  }
+})
 const currentScreen = ref(props.mode === 'create' ? Screen.Settings : Screen.Players)
 const currentPlayer = ref<Color | undefined>(players.value[0])
 const playerColors = Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
@@ -50,10 +64,6 @@ if (gameStore.players.length < 1) {
 }
 
 function advanceScreen(delta: number = 1) {
-  if (currentScreen.value === Screen.Settings) {
-    gameStore.updatePlayers(players.value)
-  }
-
   currentScreen.value += delta
 
   if (currentScreen.value === Screen.Players && currentPlayer.value === undefined) {
@@ -61,10 +71,10 @@ function advanceScreen(delta: number = 1) {
   }
 }
 
-async function save() {
-  const id = await gameStore.saveGame()
+async function save(id?: string) {
+  const name = await gameStore.saveGame(id)
   toast({
-    title: t('toast.game_saved', { id }),
+    title: id ? t('toast.game_updated', { name }) : t('toast.game_saved', { name }),
     duration: 5000
     // description: 'There was a problem with your request.',
     // action: h(ToastAction, {
@@ -190,6 +200,37 @@ async function save() {
     >
       {{ $t('common.next') }}
     </Button>
+    <div
+      v-else-if="gameStore.settings.id"
+      class="inline-flex items-center justify-center rounded-md"
+    >
+      <Button
+        class="rounded-r-none"
+        :disabled="!canSave"
+        @click="save(gameStore.settings.id)"
+      >
+        {{ $t('common.update') }}
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Button
+            class="rounded-l-none"
+            size="icon"
+          >
+            <ChevronDown />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          class="border-0 bg-primary text-primary-foreground"
+          side="top"
+          align="end"
+        >
+          <DropdownMenuItem @click="save()">
+            {{ $t('common.create_new') }}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
     <Button
       v-else
       :disabled="!canSave"
