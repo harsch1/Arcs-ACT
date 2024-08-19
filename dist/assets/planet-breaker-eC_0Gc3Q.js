@@ -1,0 +1,1 @@
+const t={gain:["02","03"],tuck:["F11-01A","04","05","06","07","08","09"]},e={completed:{scrap:["11","03"]},failed:{court:["11"],scrap:["04"]}},c={},s={setup_2:t,act_2:e,setup_3:c};export{e as act_2,s as default,t as setup_2,c as setup_3};

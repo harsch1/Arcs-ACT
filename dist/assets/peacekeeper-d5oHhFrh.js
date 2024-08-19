@@ -1,0 +1,1 @@
+const e={gain:["02","03"]},t={completed:{court:["05","06"]},failed:{scrap:["02"],court:["03"]}},c={rules:["08","09","10","11"]},s={setup_2:e,act_2:t,setup_3:c};export{t as act_2,s as default,e as setup_2,c as setup_3};
