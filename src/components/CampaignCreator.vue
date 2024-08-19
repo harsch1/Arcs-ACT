@@ -126,7 +126,7 @@ async function save(id?: string) {
           >
             <img
               class="agent-button"
-              :src="`/images/${color.toLowerCase()}_agent.png`"
+              :src="`./images/${color.toLowerCase()}_agent.png`"
             />
           </ToggleGroupItem>
         </ToggleGroup>
@@ -149,7 +149,7 @@ async function save(id?: string) {
           >
             <img
               class="h-12"
-              :src="`/images/${player.color.toLowerCase()}_agent.png`"
+              :src="`./images/${player.color.toLowerCase()}_agent.png`"
             />
           </TabsTrigger>
         </TabsList>
@@ -184,6 +184,7 @@ async function save(id?: string) {
   </div>
 
   <div
+    id="bottom-controls"
     class="fixed bottom-0 left-0 flex justify-between w-full pt-4 pb-safe-offset-4 px-safe-offset-4 bg-inherit"
   >
     <Button

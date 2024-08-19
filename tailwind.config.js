@@ -65,7 +65,8 @@ module.exports = {
           foreground: 'hsl(var(--card-foreground))'
         },
         empire: colors.purple,
-        free: colors.neutral
+        free: colors.neutral,
+        campaign: 'var(--color-campaign-background)'
       },
       borderRadius: {
         xl: 'calc(var(--radius) + 4px)',

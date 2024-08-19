@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import AppMenu from '@/components/AppMenu.vue'
 import { useGameStore } from '@/stores/game'
 import Toaster from '@/components/ui/toast/Toaster.vue'
+
+const router = useRouter()
 const gameStore = useGameStore()
 </script>
 
@@ -15,7 +17,10 @@ const gameStore = useGameStore()
     />
     <h1
       class="ml-4 text-lg font-bold"
-      :class="{ 'hidden md:block': gameStore.settings.name }"
+      :class="{
+        'hidden md:block': gameStore.settings.name,
+        hidden: router.currentRoute.value.name === 'home'
+      }"
     >
       {{ $t('arcs_cat') }}
     </h1>

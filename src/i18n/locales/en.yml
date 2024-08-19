@@ -1,4 +1,4 @@
-arcs_cat: Campaign Archival Tool
+arcs_cat: Campaign Archive Tool
 
 common:
   home: Home
@@ -72,6 +72,8 @@ campaign:
   latest: Latest campaign
   map_view: Map view
   list_view: List view
+  new_help_text: Save a campaign between Acts
+  load_help_text: Load from a campaign save
 
 toast:
   game_saved: Game saved as {name}!

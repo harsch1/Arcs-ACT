@@ -32,19 +32,19 @@ const pieceId = computed(() => {
 const src = computed(() => {
   if ('group' in props.pieceConfig) {
     if (Object.values(TokenType).includes(props.pieceConfig.type as TokenType)) {
-      return `/images/${props.pieceConfig.type?.toLowerCase()}.png`
+      return `./images/${props.pieceConfig.type?.toLowerCase()}.png`
     }
 
-    return `/images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
+    return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
   }
 
   if (Object.values(TokenType).includes(props.pieceConfig.type as TokenType)) {
-    return `/images/${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
+    return `./images/${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
   } else if (isFlagship(props.pieceConfig.type)) {
-    return `/images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
+    return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
   }
 
-  return `/images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
+  return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
 })
 
 const transform = computed(() => {

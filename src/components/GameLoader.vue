@@ -155,7 +155,7 @@ async function confirmSave(id: string) {
                   variant="ghost"
                   @click="toggleSave(save)"
                 >
-                  <Pencil :size="24" />
+                  <Pencil :size="16" />
                 </Button>
               </div>
               <div
@@ -163,6 +163,7 @@ async function confirmSave(id: string) {
                 class="flex items-center"
               >
                 <Input
+                  class="min-w-56"
                   :model-value="update.name"
                   @update:model-value="(value) => (update.name = value as string)"
                 />
