@@ -239,6 +239,7 @@ interface SaveFile {
    * @param edicts - Array of edict cards (implied cards from fate history are excluded)
    */
   edicts: Card[]
+  notes: string
 }
 
 class Archive {
@@ -256,6 +257,10 @@ class Archive {
    * @param edicts - Array of edict cards (implied cards from fate history are excluded)
    */
   edicts: Card[] = []
+  /**
+   * @param notes - String for details outside of the basic log scope
+   */
+  notes: string = ''
 
   constructor(players: Player[]) {
     this.players = players

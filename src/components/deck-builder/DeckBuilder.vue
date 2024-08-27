@@ -21,6 +21,8 @@ const props = defineProps<{
   tags?: string[]
   excludeTags?: string[]
   title?: string
+  // Add a button for this location
+  shortcut?: string
 }>()
 
 onMounted(() => {
@@ -58,6 +60,14 @@ const locations = computed(() =>
   gameDecks.concat(gameStore.players.map((player) => player.name)).filter((value) => !!value)
 )
 
+const shortcut = computed(() => {
+  if (!(props.shortcut && locations.value.includes(props.shortcut))) {
+    return undefined
+  }
+
+  return props.shortcut
+})
+
 function onMove(id: string, location: string) {
   cardsStore.moveCardTo(id, location)
 }
@@ -81,6 +91,7 @@ async function assignCards() {
     :columns="columns"
     :data="filteredDeck"
     :locations="locations"
+    :shortcut="shortcut"
     @move="onMove"
   ></DeckBuilderTable>
 

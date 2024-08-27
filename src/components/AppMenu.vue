@@ -113,7 +113,7 @@ function loadTestGame(id: string) {
 }
 
 .menu {
-  position: fixed;
+  /* position: fixed; */
   top: 8px;
   left: 8px;
 }

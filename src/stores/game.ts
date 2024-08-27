@@ -1,9 +1,8 @@
 // Main store
 import localforage from 'localforage'
-import { humanId } from 'human-id'
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
-import { exportArchive } from '@/lib/utils'
+import { exportArchive, generateName } from '@/lib/utils'
 import { useSystemsStore } from '@/stores/systems'
 import { useCardsStore } from '@/stores/cards'
 import { Archive, Color, Fate, Player, type SaveFile } from '@/Archive'
@@ -11,12 +10,14 @@ import i18n from '@/i18n'
 
 import test from '@/stores/test.json'
 import type { ISOStringFormat } from 'date-fns'
+import { snakeCase } from 'lodash'
 
 export type GameSettings = {
   id?: string
   name?: string
   act: number
   firstRegent: string
+  notes: string
 }
 
 // Prefix for the keys in storage
@@ -33,7 +34,8 @@ export const useGameStore = defineStore('game', () => {
     id: undefined,
     name: undefined,
     act: 1,
-    firstRegent: ''
+    firstRegent: '',
+    notes: ''
   })
 
   function $reset() {
@@ -42,6 +44,7 @@ export const useGameStore = defineStore('game', () => {
     settings.name = undefined
     settings.act = 1
     settings.firstRegent = ''
+    settings.notes = ''
   }
 
   // Parse the game json and initialize the stores
@@ -50,6 +53,7 @@ export const useGameStore = defineStore('game', () => {
     settings.name = archive.name
     settings.act = archive.act
     settings.firstRegent = archive.firstRegent
+    settings.notes = archive.notes
   }
 
   function initPlayers(playersJSON: SaveFile['players']) {
@@ -152,12 +156,8 @@ export const useGameStore = defineStore('game', () => {
 
     let name: string, save: Partial<SaveFile>
     if (!id) {
-      // Create the file
-      // Remove the verb from the id
-      let _id = humanId('_')
-      _id = _id.slice(0, _id.lastIndexOf('_'))
-      id = GAME_SAVE_PREFIX + _id
-      name = _id.replace(/_/g, ' ')
+      name = generateName()
+      id = GAME_SAVE_PREFIX + snakeCase(name)
       save = {
         name,
         timestamp: new Date().toISOString() as ISOStringFormat

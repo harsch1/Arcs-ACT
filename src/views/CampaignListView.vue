@@ -3,5 +3,7 @@ import GameBoardList from '@/components/GameBoardList.vue'
 </script>
 
 <template>
-  <GameBoardList />
+  <main class="viewport">
+    <GameBoardList />
+  </main>
 </template>

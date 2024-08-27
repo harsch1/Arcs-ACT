@@ -91,3 +91,8 @@ body {
 header.main {
   height: 64px;
 }
+
+body.app-body {
+  max-width: theme('maxWidth.md');
+  margin: 0 auto;
+}

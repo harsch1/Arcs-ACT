@@ -240,6 +240,7 @@ function addFate() {
       <DeckBuilder
         :title="$t('deck_builder.player_court')"
         :tags="[CardType.ability, CardType.guild, CardType.title, CardType.lore]"
+        :shortcut="player.name"
       />
     </TabsContent>
 

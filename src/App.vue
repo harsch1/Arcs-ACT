@@ -9,7 +9,7 @@ const gameStore = useGameStore()
 </script>
 
 <template>
-  <header class="flex flex-row-reverse items-center main">
+  <header class="flex flex-row-reverse items-center justify-between main">
     <img
       :alt="$t('arcs_cat')"
       class="logo -scale-x-100"
@@ -18,16 +18,18 @@ const gameStore = useGameStore()
     <h1
       class="ml-4 text-lg font-bold"
       :class="{
-        'hidden md:block': gameStore.settings.name,
-        hidden: router.currentRoute.value.name === 'home'
+        // 'hidden md:block': gameStore.settings.name,
+        hidden:
+          (gameStore.settings.id && gameStore.settings.name) ||
+          router.currentRoute.value.name === 'home'
       }"
     >
       {{ $t('arcs_cat') }}
     </h1>
 
     <h1
-      v-if="gameStore.settings.name"
-      class="ml-16 text-lg font-bold grow"
+      v-if="gameStore.settings.id && gameStore.settings.name"
+      class="text-lg font-bold grow"
     >
       {{ gameStore.settings.name }}
     </h1>

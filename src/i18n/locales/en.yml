@@ -67,6 +67,7 @@ campaign:
   which_act_just_ended?: Which act just ended?
   who_is_playing?: Who is playing?
   board_state_help: View or set the pieces within The Reach
+  notes: Campaign notes
   new: New campaign
   current: Current campaign
   latest: Latest campaign
@@ -74,6 +75,7 @@ campaign:
   list_view: List view
   new_help_text: Save a campaign between Acts
   load_help_text: Load from a campaign save
+  misc_help_text: Give your campaign a name and add any extra info (e.g. Ideal markers, extra Psionic resources, etc).
 
 toast:
   game_saved: Game saved as {name}!
@@ -146,7 +148,7 @@ deck_builder:
   table:
     id: ID
     name: Name
-    filter: Filter cards
+    filter: Search cards
     type: Type
     set: Set
     selected: '{count} of {size} selected'

@@ -51,7 +51,6 @@ function viewGame() {
   position: relative;
   overflow: auto;
   height: calc(100vh - 64px);
-  max-width: 420px;
   margin: 0 auto;
 }
 
