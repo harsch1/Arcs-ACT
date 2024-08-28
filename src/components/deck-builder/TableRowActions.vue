@@ -32,25 +32,6 @@ const emit = defineEmits<{
     <SquareX class="w-4 h-4" />
   </Button>
 
-  <template v-if="shortcut">
-    <Button
-      v-if="card.location !== shortcut"
-      variant="ghost"
-      class="w-8 h-8 p-0"
-      @click="emit('move', card.id, shortcut)"
-    >
-      <SquarePlus class="w-4 h-4" />
-    </Button>
-    <Button
-      v-else
-      variant="ghost"
-      class="w-8 h-8 p-0"
-      @click="emit('move', card.id, 'court')"
-    >
-      <SquareMinus class="w-4 h-4" />
-    </Button>
-  </template>
-
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <Button
@@ -73,4 +54,23 @@ const emit = defineEmits<{
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
+
+  <template v-if="shortcut">
+    <Button
+      v-if="card.location !== shortcut"
+      variant="ghost"
+      class="w-8 h-8 p-0"
+      @click="emit('move', card.id, shortcut)"
+    >
+      <SquarePlus class="w-4 h-4" />
+    </Button>
+    <Button
+      v-else
+      variant="ghost"
+      class="w-8 h-8 p-0"
+      @click="emit('move', card.id, 'court')"
+    >
+      <SquareMinus class="w-4 h-4" />
+    </Button>
+  </template>
 </template>

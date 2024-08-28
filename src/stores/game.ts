@@ -156,7 +156,7 @@ export const useGameStore = defineStore('game', () => {
 
     let name: string, save: Partial<SaveFile>
     if (!id) {
-      name = generateName()
+      name = settings.name ?? generateName()
       id = GAME_SAVE_PREFIX + snakeCase(name)
       save = {
         name,
@@ -176,7 +176,7 @@ export const useGameStore = defineStore('game', () => {
     // Clone the archive to be able to save it to localforage
     await localforage.setItem(id, JSON.parse(JSON.stringify(save)))
 
-    return save.name ?? save.id
+    return save
   }
 
   function addPlayer(name: string, color: Color, fate?: Fate) {

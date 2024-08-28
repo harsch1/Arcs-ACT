@@ -18,7 +18,7 @@ import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { useI18n } from 'vue-i18n'
-import { ChevronDown, Dices } from 'lucide-vue-next'
+import { ChevronDown, Dices, FileDown } from 'lucide-vue-next'
 import { Textarea } from '@/components/ui/textarea'
 import { generateName } from '@/lib/utils'
 
@@ -56,6 +56,7 @@ const players = computed({
 const currentScreen = ref(props.mode === 'create' ? Screen.Settings : Screen.Players)
 const currentPlayer = ref<Color | undefined>(players.value[0])
 const playerColors = Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
+const downloadId = ref<string>()
 
 const isEditing = computed(() => props.mode === 'edit')
 const canAdvance = computed(() => players.value.length > 0 && currentScreen.value < Screen._TOTAL_)
@@ -92,9 +93,12 @@ function advanceScreen(delta: number = 1) {
 }
 
 async function save(id?: string) {
-  const name = await gameStore.saveGame(id)
+  const save = await gameStore.saveGame(id)
+  downloadId.value = save.id
   toast({
-    title: id ? t('toast.game_updated', { name }) : t('toast.game_saved', { name }),
+    title: id
+      ? t('toast.game_updated', { name: save.name })
+      : t('toast.game_saved', { name: save.name }),
     duration: 5000
     // description: 'There was a problem with your request.',
     // action: h(ToastAction, {
@@ -137,7 +141,7 @@ async function save(id?: string) {
         <ToggleGroup
           v-model="players"
           type="multiple"
-          class="grid grid-cols-2 justify-stretch gap-y-8"
+          class="grid grid-cols-2 justify-stretch gap-y-4"
         >
           <div
             v-for="color in playerColors"
@@ -248,6 +252,16 @@ async function save(id?: string) {
         :model-value="gameStore.settings.notes"
         @update:model-value="(value) => updateCampaignNotes(value as string)"
       />
+
+      <div class="my-8 text-center">
+        <Button
+          v-if="downloadId"
+          @click="gameStore.exportGame(downloadId)"
+        >
+          {{ $t('common.download') }}
+          <FileDown />
+        </Button>
+      </div>
     </div>
   </main>
 

@@ -21,6 +21,7 @@ import type { Player } from '@/Archive'
 const props = defineProps<{
   player: Player
   act: number
+  unavailableFates?: Fate[]
 }>()
 
 const emit = defineEmits<{
@@ -41,8 +42,20 @@ const fatesByAct = computed(() => (act: number) => {
     Object.values(fateMeta)
       // Act is passed as 0-based
       .filter((meta) => meta.act <= act + 1)
-      .map((meta) => meta.id)
+      .map((meta) => meta.id) as Fate[]
   )
+})
+
+const isFateDisabled = computed(() => (fate: Fate) => {
+  // Check the fate history and enable the fate if the player completed
+  // the objective in a previous act
+  const playerFateSucceeded = props.player.fateHistory.find(
+    ([fateId, , succeeded]) => fate === fateId && succeeded
+  )
+
+  return playerFateSucceeded
+    ? false
+    : props.unavailableFates && props.unavailableFates.includes(fate)
 })
 
 function updateFate(
@@ -95,6 +108,7 @@ function addFate() {
                 v-for="fateId in fatesByAct(fateAct)"
                 :key="fateId"
                 :value="fateId"
+                :disabled="fate !== fateId && isFateDisabled(fateId)"
               >
                 <strong>{{ fateId }}</strong> {{ $t(`fates.${fateId}`) }}
               </SelectItem>

@@ -14,6 +14,7 @@ common:
   update: Update
   create_new: Save as new game
   view: View
+  download: Download
 act: Act | Act {n} | Act {n}
 player: Player | Players
 system: System

@@ -40,6 +40,7 @@ type FateResolution = {
 }
 
 export const CAMPAIGN_COURT = 'campaign-court'
+export const ACTION_CARDS = 'action-cards'
 
 export const useCardsStore = defineStore('cards', () => {
   const gameStore = useGameStore()
@@ -115,7 +116,8 @@ export const useCardsStore = defineStore('cards', () => {
 
   /**
    * Loads the decks based on the players in the game, taking into account their fate history.
-   * Also loads the campaign court deck by default and adds it to the 'court' location
+   * Loads the campaign court deck by default and adds it to the 'court' location.
+   * Loads the action cards by default and adds it to the pool.
    *
    * @param players Players to load their fates. If not provided loads the fates of the current players
    */
@@ -132,8 +134,8 @@ export const useCardsStore = defineStore('cards', () => {
       }, [] as Fate[])
       .filter((fate) => !!fate)
 
-    // Load the court deck too
-    const _pool = await loadDecks([CAMPAIGN_COURT, ...fates])
+    // Load the court and action cards deck too
+    const _pool = await loadDecks([ACTION_CARDS, CAMPAIGN_COURT, ...fates])
 
     // Init the court
     _pool.forEach((card) => {
