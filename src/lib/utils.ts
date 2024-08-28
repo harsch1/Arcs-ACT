@@ -8,6 +8,7 @@ import type { PieceState } from '@/stores/systems'
 import type { ClassValue } from 'clsx'
 import type { Updater } from '@tanstack/vue-table'
 import type { GameDeck } from '@/stores/cards'
+import humanId from 'human-id'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -128,6 +129,13 @@ export function exportArchive(save: SaveFile) {
 
   link.dispatchEvent(e)
   link.remove()
+}
+
+export function generateName() {
+  // Remove the verb from the id
+  let name = humanId(' ')
+  name = name.slice(0, name.lastIndexOf(' '))
+  return name
 }
 
 export function getFateName(fateId: string): Fate {

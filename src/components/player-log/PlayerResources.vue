@@ -49,7 +49,7 @@ const resourceOpen = ref(false)
               :value="resource"
             >
               <img
-                :src="`images/${resource.toLowerCase()}.png`"
+                :src="`./images/${resource.toLowerCase()}.png`"
                 :alt="resource"
                 class="h-6"
               />
@@ -73,7 +73,8 @@ const resourceOpen = ref(false)
         <CommandList
           avoid-collisions
           position="popper"
-          class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 min-h-[180px]"
+          :collision-padding="{ bottom: 180 }"
+          class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
           v-on-click-outside="
             () => {
               resourceOpen = false
@@ -96,7 +97,7 @@ const resourceOpen = ref(false)
             >
               <img
                 class="h-6 mr-2"
-                :src="`images/${resource.toLowerCase()}.png`"
+                :src="`./images/${resource.toLowerCase()}.png`"
                 :alt="resource"
               />
               {{ $t(`resources.${resource}`) }}

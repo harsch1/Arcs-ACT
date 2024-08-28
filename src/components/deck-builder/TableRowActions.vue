@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRightLeft, SquareX } from 'lucide-vue-next'
+import { ArrowRightLeft, SquareX, SquarePlus, SquareMinus } from 'lucide-vue-next'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import type { GameCard } from '@/stores/cards'
 defineProps<{
   card: GameCard
   locations: string[]
+  shortcut?: string
 }>()
 
 const emit = defineEmits<{
@@ -30,13 +31,14 @@ const emit = defineEmits<{
   >
     <SquareX class="w-4 h-4" />
   </Button>
+
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <Button
         variant="ghost"
         class="w-8 h-8 p-0"
       >
-        <span class="sr-only">{{ $t('deck_builder.scrap') }}</span>
+        <span class="sr-only">{{ $t('deck_builder.move_to') }}</span>
         <ArrowRightLeft class="w-4 h-4" />
       </Button>
     </DropdownMenuTrigger>
@@ -52,4 +54,23 @@ const emit = defineEmits<{
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
+
+  <template v-if="shortcut">
+    <Button
+      v-if="card.location !== shortcut"
+      variant="ghost"
+      class="w-8 h-8 p-0"
+      @click="emit('move', card.id, shortcut)"
+    >
+      <SquarePlus class="w-4 h-4" />
+    </Button>
+    <Button
+      v-else
+      variant="ghost"
+      class="w-8 h-8 p-0"
+      @click="emit('move', card.id, 'court')"
+    >
+      <SquareMinus class="w-4 h-4" />
+    </Button>
+  </template>
 </template>

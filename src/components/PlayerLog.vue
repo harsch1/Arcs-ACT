@@ -33,6 +33,15 @@ const playerColors = computed(() =>
   Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
 )
 
+// Removes fates already chosen by other players
+const unavailableFates = computed(() => {
+  const chosenFates: Fate[] = []
+  gameStore.players.forEach((player) =>
+    player.fateHistory.forEach(([fate]) => chosenFates.push(fate))
+  )
+  return chosenFates
+})
+
 if (props.act && props.player.fateHistory.length < props.act) {
   for (let i = props.player.fateHistory.length; i < props.act; i++) {
     addFate()
@@ -190,6 +199,7 @@ function addFate() {
           class="my-2"
           :player="player"
           :act="act"
+          :unavailableFates="unavailableFates"
           @add="
             () =>
               updatePlayer({
@@ -240,6 +250,7 @@ function addFate() {
       <DeckBuilder
         :title="$t('deck_builder.player_court')"
         :tags="[CardType.ability, CardType.guild, CardType.title, CardType.lore]"
+        :shortcut="player.name"
       />
     </TabsContent>
 

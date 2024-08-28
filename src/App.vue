@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import AppMenu from '@/components/AppMenu.vue'
 import { useGameStore } from '@/stores/game'
 import Toaster from '@/components/ui/toast/Toaster.vue'
+
+const router = useRouter()
 const gameStore = useGameStore()
 </script>
 
 <template>
-  <header class="flex flex-row-reverse items-center main">
+  <header class="flex flex-row-reverse items-center justify-between main">
     <img
       :alt="$t('arcs_cat')"
       class="logo -scale-x-100"
@@ -15,14 +17,19 @@ const gameStore = useGameStore()
     />
     <h1
       class="ml-4 text-lg font-bold"
-      :class="{ 'hidden md:block': gameStore.settings.name }"
+      :class="{
+        // 'hidden md:block': gameStore.settings.name,
+        hidden:
+          (gameStore.settings.id && gameStore.settings.name) ||
+          router.currentRoute.value.name === 'home'
+      }"
     >
       {{ $t('arcs_cat') }}
     </h1>
 
     <h1
-      v-if="gameStore.settings.name"
-      class="ml-16 text-lg font-bold grow"
+      v-if="gameStore.settings.id && gameStore.settings.name"
+      class="text-lg font-bold grow"
     >
       {{ gameStore.settings.name }}
     </h1>

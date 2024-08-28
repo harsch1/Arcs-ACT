@@ -86,7 +86,7 @@ function updateDialog(open: boolean) {
                   <li
                     v-for="([piece, count], i) in getSystemOverview(
                       systemsStore.systemState(system).pieces,
-                      { freshness: false }
+                      { freshness: true }
                     )"
                     :key="i"
                   >

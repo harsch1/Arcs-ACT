@@ -34,6 +34,8 @@
   --color-text: var(--vt-c-text-light-1);
 
   --section-gap: 160px;
+
+  --color-campaign-background: #411010;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -88,4 +90,9 @@ body {
 
 header.main {
   height: 64px;
+}
+
+body.app-body {
+  max-width: theme('maxWidth.md');
+  margin: 0 auto;
 }

@@ -38,6 +38,7 @@ const props = defineProps<{
   columns: ColumnDef<GameCard, GameCard>[]
   data: GameCard[]
   locations: string[]
+  shortcut?: string
 }>()
 
 const emit = defineEmits<{
@@ -157,6 +158,7 @@ function moveTo(id: string, location: string) {
               <TableRowActions
                 :card="row.original"
                 :locations="locations"
+                :shortcut="shortcut"
                 @move="moveTo"
               ></TableRowActions>
             </TableCell>

@@ -14,13 +14,17 @@ import { gameDecks } from '@/lib/utils'
 import { useGameStore } from '@/stores/game'
 import { useCardsStore } from '@/stores/cards'
 import columns from '@/components/deck-builder/columns'
+import list from '@/components/deck-builder/list'
 import DeckBuilderTable from '@/components/deck-builder/DeckBuilderTable.vue'
+import DeckBuilderList from '@/components/deck-builder/DeckBuilderList.vue'
 
 const props = defineProps<{
   // Types of cards to limit the selection to
   tags?: string[]
   excludeTags?: string[]
   title?: string
+  // Add a button for this location
+  shortcut?: string
 }>()
 
 onMounted(() => {
@@ -58,6 +62,14 @@ const locations = computed(() =>
   gameDecks.concat(gameStore.players.map((player) => player.name)).filter((value) => !!value)
 )
 
+const shortcut = computed(() => {
+  if (!(props.shortcut && locations.value.includes(props.shortcut))) {
+    return undefined
+  }
+
+  return props.shortcut
+})
+
 function onMove(id: string, location: string) {
   cardsStore.moveCardTo(id, location)
 }
@@ -77,12 +89,21 @@ async function assignCards() {
   </p>
   <Button @click="assignCards">ASSIGN</Button>
 
-  <DeckBuilderTable
+  <DeckBuilderList
+    :columns="list"
+    :data="filteredDeck"
+    :locations="locations"
+    :shortcut="shortcut"
+    @move="onMove"
+  />
+
+  <!-- <DeckBuilderTable
     :columns="columns"
     :data="filteredDeck"
     :locations="locations"
+    :shortcut="shortcut"
     @move="onMove"
-  ></DeckBuilderTable>
+  /> -->
 
   <AlertDialog v-model:open="alertOpen">
     <!-- <AlertDialogTrigger>Open</AlertDialogTrigger> -->
