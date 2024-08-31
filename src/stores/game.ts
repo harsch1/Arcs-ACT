@@ -1,7 +1,7 @@
 // Main store
 import localforage from 'localforage'
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { exportArchive, generateName } from '@/lib/utils'
 import { useSystemsStore } from '@/stores/systems'
 import { useCardsStore } from '@/stores/cards'
@@ -11,6 +11,7 @@ import i18n from '@/i18n'
 import test from '@/stores/test.json'
 import type { ISOStringFormat } from 'date-fns'
 import { snakeCase } from 'lodash'
+import { useUiStore } from '@/stores/ui'
 
 export type GameSettings = {
   id?: string
@@ -27,6 +28,7 @@ export const GAME_TEST_ID = 'test'
 export const useGameStore = defineStore('game', () => {
   const savedGames = ref(new Map<string, SaveFile>())
 
+  const ui = useUiStore()
   const cards = useCardsStore()
   const systems = useSystemsStore()
   const players = ref<Player[]>([])
@@ -37,6 +39,8 @@ export const useGameStore = defineStore('game', () => {
     firstRegent: '',
     notes: ''
   })
+
+  const isGameLoaded = computed(() => settings.id !== undefined)
 
   function $reset() {
     players.value = []
@@ -224,6 +228,7 @@ export const useGameStore = defineStore('game', () => {
     savedGames,
     settings,
     players,
+    isGameLoaded,
     deleteGame,
     listGames,
     loadGame,

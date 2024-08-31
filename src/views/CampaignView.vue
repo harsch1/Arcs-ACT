@@ -12,6 +12,7 @@ import GameBoard from '@/components/GameBoard.vue'
 .viewport {
   position: relative;
   overflow: auto;
-  height: calc(100vh - 64px);
+  height: calc(100% - 64px);
+  height: calc(100dvh - 64px);
 }
 </style>

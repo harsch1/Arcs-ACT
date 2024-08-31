@@ -24,7 +24,6 @@ type PieceType = BuildingType | ShipType | TokenType
 const props = defineProps<{
   activeSystem: SystemKey
   isOpen: boolean
-  isFull: boolean
   pointerPosition: {
     x: number
     y: number
@@ -74,7 +73,10 @@ function onSelect(type: PieceType, color?: Color) {
       :style="triggerStyle"
     ></DropdownMenuTrigger>
     <DropdownMenuContent>
-      <OnClickOutside :options="{ ignore: ['.system-dialog'] }" @trigger="emit('close')">
+      <OnClickOutside
+        :options="{ ignore: ['.system-dialog'] }"
+        @trigger="emit('close')"
+      >
         <DropdownMenuLabel>{{ $t('system_id', { id: activeSystem }) }}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
@@ -106,10 +108,7 @@ function onSelect(type: PieceType, color?: Color) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger
-            class="data-[disabled]:opacity-50"
-            :disabled="isFull"
-          >
+          <DropdownMenuSubTrigger class="data-[disabled]:opacity-50">
             {{ $t('system_menu.add_city') }}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -124,10 +123,7 @@ function onSelect(type: PieceType, color?: Color) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger
-            class="data-[disabled]:opacity-50"
-            :disabled="isFull"
-          >
+          <DropdownMenuSubTrigger class="data-[disabled]:opacity-50">
             {{ $t('system_menu.add_starport') }}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -151,6 +147,11 @@ function onSelect(type: PieceType, color?: Color) {
               :key="token"
               @select="onSelect(token)"
             >
+              <img
+                :src="`./images/tokens/${token.toLowerCase()}.png`"
+                :alt="token"
+                class="h-6 mr-2"
+              />
               {{ $t(`pieces.${token}`) }}
             </DropdownMenuItem>
           </DropdownMenuSubContent>

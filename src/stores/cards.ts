@@ -71,6 +71,10 @@ export const useCardsStore = defineStore('cards', () => {
 
     const setups = await loadSetups(fates.map((f) => f[1]))
 
+    if (Object.keys(setups).length <= 0) {
+      return [`Player doesn't have a Fate selected`]
+    }
+
     fates.forEach(([playerName, fate, succeeded, act]) => {
       const fateId = getFateId(fate)
       const resolution = succeeded !== undefined ? `act_${act}` : undefined

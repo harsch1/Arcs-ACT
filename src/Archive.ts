@@ -332,7 +332,20 @@ enum TokenType {
   blight = 'BLIGHT',
   portal = 'PORTAL',
   banner = 'BANNER',
-  brokenWorld = 'BROKEN_WORLD'
+  brokenWorld = 'BROKEN_WORLD',
+  golemHarvester = 'GOLEM_HARVESTER',
+  golemProtector = 'GOLEM_PROTECTOR',
+  golemSeeker = 'GOLEM_SEEKER',
+  golemWarrior = 'GOLEM_WARRIOR',
+  hammerFragment = 'HAMMER_FRAGMENT',
+  seat1 = 'SEAT_1',
+  seat2 = 'SEAT_2',
+  seat3 = 'SEAT_3',
+  seat4 = 'SEAT_4',
+  seat5 = 'SEAT_5',
+  seat6 = 'SEAT_6',
+  wisdomIdeal = 'WISDOM_IDEAL',
+  zealIdeal = 'ZEAL_IDEAL'
 }
 
 enum Fate {

@@ -1,5 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useGameStore } from '@/stores/game'
 import HomeView from '@/views/HomeView.vue'
+
+import type { RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router'
+import { Screen } from '@/stores/ui'
+
+function checkGameLoaded(to: RouteLocationNormalized, from: RouteLocationNormalizedLoaded) {
+  const gameStore = useGameStore()
+
+  if (to.name !== 'home' && to.name !== 'campaign' && !gameStore.settings.id) {
+    return { name: 'home' }
+  }
+}
+
+function setCampaignQuery(to: RouteLocationNormalized) {
+  const gameStore = useGameStore()
+
+  to.query = {
+    mode: to.query.mode ?? gameStore.isGameLoaded ? 'edit' : 'create',
+    screen: to.query.screen ?? `${Screen.Settings}`,
+    ...to.query
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +29,10 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
+      meta: {
+        hideNavigation: true
+      }
     },
     {
       path: '/map_debug',
@@ -26,17 +51,19 @@ const router = createRouter({
       path: '/campaign',
       name: 'campaign',
       component: () => import('@/views/CampaignCreatorView.vue'),
-      props: (route) => ({ mode: route.query.mode })
+      beforeEnter: setCampaignQuery
     },
     {
       path: '/map',
       name: 'map',
-      component: () => import('@/views/CampaignView.vue')
+      component: () => import('@/views/CampaignView.vue'),
+      beforeEnter: checkGameLoaded
     },
     {
       path: '/list',
       name: 'list_view',
-      component: () => import('@/views/CampaignListView.vue')
+      component: () => import('@/views/CampaignListView.vue'),
+      beforeEnter: checkGameLoaded
     }
   ]
 })

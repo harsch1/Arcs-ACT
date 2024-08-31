@@ -2,18 +2,15 @@
 import { ref } from 'vue'
 import { Input } from '@/components/ui/input'
 import {
-  FlexRender,
   getCoreRowModel,
   useVueTable,
   getFilteredRowModel,
   getSortedRowModel,
   getFacetedUniqueValues
 } from '@tanstack/vue-table'
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { valueUpdater } from '@/lib/utils'
-
 import ListFilterDialog from '@/components/deck-builder/ListFilterDialog.vue'
-import TableRowActions from '@/components/deck-builder/TableRowActions.vue'
+import SwipableRow from '@/components/deck-builder/SwipableRow.vue'
 
 import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/vue-table'
 import type { GameCard } from '@/stores/cards'
@@ -87,7 +84,7 @@ function moveTo(id: string, location: string) {
 </script>
 
 <template>
-  <div class="sticky top-0 z-10 flex items-center py-4 bg-black search-bar">
+  <div class="sticky top-0 z-10 flex items-center px-4 py-4 -mx-4 bg-black search-bar">
     <Input
       class="max-w-sm"
       :placeholder="$t('deck_builder.table.filter')"
@@ -101,8 +98,7 @@ function moveTo(id: string, location: string) {
     />
   </div>
 
-  <Table>
-    <!-- <TableHeader>
+  <!-- <TableHeader>
       <TableRow
         v-for="headerGroup in table.getHeaderGroups()"
         :key="headerGroup.id"
@@ -140,50 +136,33 @@ function moveTo(id: string, location: string) {
         <TableHead></TableHead>
       </TableRow>
     </TableHeader> -->
-    <TableBody>
-      <template v-if="table.getRowModel().rows?.length">
-        <TableRow
-          v-for="row in table.getRowModel().rows"
-          :key="row.id"
+  <div class="-mx-4 overflow-x-hidden">
+    <template v-if="table.getRowModel().rows?.length">
+      <template
+        v-for="row in table.getRowModel().rows"
+        :key="row.id"
+      >
+        <SwipableRow
+          :height="64"
+          :row="row"
           :data-state="row.getIsSelected() ? 'selected' : undefined"
-        >
-          <TableCell
-            v-for="cell in row.getVisibleCells()"
-            :key="cell.id"
-          >
-            <FlexRender
-              :render="cell.column.columnDef.cell"
-              :props="cell.getContext()"
-            />
-          </TableCell>
-          <!-- Actions -->
-          <TableCell class="text-right whitespace-nowrap">
-            <TableRowActions
-              :card="row.original"
-              :locations="locations"
-              :shortcut="shortcut"
-              @move="moveTo"
-            ></TableRowActions>
-          </TableCell>
-        </TableRow>
+          :locations="locations"
+          :shortcut="shortcut"
+          @move="moveTo"
+        />
       </template>
-      <template v-else>
-        <TableRow>
-          <TableCell
-            :colspan="columns.length"
-            class="h-24 text-center"
-          >
-            No results.
-          </TableCell>
-        </TableRow>
-      </template>
-    </TableBody>
-  </Table>
+    </template>
+    <template v-else>
+      <div class="h-24 text-lg text-center">
+        {{ $t('deck_builder.no_results') }}
+      </div>
+    </template>
+  </div>
 </template>
 
 <style scoped>
 .search-bar {
   background-image: url('/images/background.png');
-  background-size: contain;
+  background-size: cover;
 }
 </style>

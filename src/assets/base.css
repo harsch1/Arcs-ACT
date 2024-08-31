@@ -61,10 +61,11 @@
 }
 
 body {
+  min-height: 100%;
   min-height: 100vh;
   color: var(--color-text);
   background-image: url('/images/background.png');
-  background-size: contain;
+  background-size: cover;
   transition:
     color 0.5s,
     background-color 0.5s;
@@ -95,4 +96,11 @@ header.main {
 body.app-body {
   max-width: theme('maxWidth.md');
   margin: 0 auto;
+}
+
+.viewport {
+  /* Header and footer into account */
+  height: calc(100% - 64px - 68px - env(safe-area-inset-bottom));
+  height: calc(100dvh - 64px - 68px - env(safe-area-inset-bottom));
+  overflow: auto;
 }

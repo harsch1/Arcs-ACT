@@ -15,6 +15,12 @@ common:
   create_new: Save as new game
   view: View
   download: Download
+navigation:
+  settings: Settings
+  players: Players
+  map: Map
+  deck: Cards
+  campaign: Extra
 act: Act | Act {n} | Act {n}
 player: Player | Players
 system: System
@@ -53,8 +59,20 @@ pieces:
   BLIGHT: Blight
   PORTAL: Portal
   BANNER: Banner
-  BROKEN_WORLD: Broken world
-  GOLEM: Golem
+  BROKEN_WORLD: Broken World
+  GOLEM_HARVESTER: Harvester
+  GOLEM_PROTECTOR: Protector
+  GOLEM_SEEKER: Seeker
+  GOLEM_WARRIOR: Warrior
+  HAMMER_FRAGMENT: Hammer Fragment
+  SEAT_1: Seat 1st
+  SEAT_2: Seat 2nd
+  SEAT_3: Seat 3rd
+  SEAT_4: Seat 4th
+  SEAT_5: Seat 5th
+  SEAT_6: Seat 6th
+  WISDOM_IDEAL: Wisdom Ideal
+  ZEAL_IDEAL: Zeal Ideal
 colors:
   BLUE: Blue
   RED: Red
@@ -109,12 +127,6 @@ dialog:
   search_token: Search token...
   help_text: Add pieces present on the system
 
-tokens:
-  BLIGHT: Blight
-  PORTAL: Portal
-  BANNER: Banner
-  BROKEN_WORLD: Broken world
-
 resources:
   MATERIAL: Material
   FUEL: Fuel
@@ -146,6 +158,12 @@ empire_status:
 deck_builder:
   title: Manage the cards in the campaign
   player_court: Manage the player court
+  no_results: No cards match
+  no_fates_selected: Player doesn't have a Fate selected
+  swipe_help: Swipe right to scrap the card.
+  assign_help: Some cards can be automatically assigned. This will change the location of the cards.
+  assign_action: Click on {action} to perform it.
+  assign: Auto assign
   table:
     id: ID
     name: Name
@@ -163,6 +181,7 @@ deck_builder:
     EDICT: Edict
     TITLE: Title
   move_to: Move to
+  move_to_location: Move to {location}
   search: Type to search
   result: Result
   deck: Deck
@@ -195,3 +214,7 @@ fates:
   F22: Gate Wraith
   F23: Conspirator
   F24: Judge
+
+validations:
+  choose_players: Choose players
+  choose_fates: Choose fates

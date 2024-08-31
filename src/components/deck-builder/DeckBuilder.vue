@@ -17,12 +17,14 @@ import columns from '@/components/deck-builder/columns'
 import list from '@/components/deck-builder/list'
 import DeckBuilderTable from '@/components/deck-builder/DeckBuilderTable.vue'
 import DeckBuilderList from '@/components/deck-builder/DeckBuilderList.vue'
+import { I18nT } from 'vue-i18n'
 
 const props = defineProps<{
   // Types of cards to limit the selection to
   tags?: string[]
   excludeTags?: string[]
   title?: string
+  description?: string
   // Add a button for this location
   shortcut?: string
 }>()
@@ -33,7 +35,7 @@ onMounted(() => {
 
 const gameStore = useGameStore()
 const cardsStore = useCardsStore()
-const alertOpen = ref(false)
+const assignAlertOpen = ref(false)
 const result = ref()
 
 // Filter by act number and also by 'tags' if present
@@ -76,7 +78,7 @@ function onMove(id: string, location: string) {
 
 async function assignCards() {
   result.value = await cardsStore.autoAssign()
-  alertOpen.value = true
+  assignAlertOpen.value = true
 }
 </script>
 
@@ -87,7 +89,22 @@ async function assignCards() {
   >
     {{ title }}
   </p>
-  <Button @click="assignCards">ASSIGN</Button>
+
+  <p
+    v-if="description"
+    class="w-full py-2 text-md"
+  >
+    {{ description }}
+  </p>
+
+  <p>
+    <Button
+      variant="secondary"
+      @click="assignAlertOpen = true"
+    >
+      {{ $t('deck_builder.assign') }}
+    </Button>
+  </p>
 
   <DeckBuilderList
     :columns="list"
@@ -105,20 +122,48 @@ async function assignCards() {
     @move="onMove"
   /> -->
 
-  <AlertDialog v-model:open="alertOpen">
+  <AlertDialog v-model:open="assignAlertOpen">
     <!-- <AlertDialogTrigger>Open</AlertDialogTrigger> -->
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>{{ $t('deck_builder.result') }}</AlertDialogTitle>
+        <AlertDialogTitle>
+          {{ $t('deck_builder.assign') }}
+        </AlertDialogTitle>
+
         <AlertDialogDescription>
-          <ul>
-            <li
-              v-for="(log, i) in result"
-              :key="i"
-              v-html="log"
-              class="capitalize"
-            ></li>
-          </ul>
+          <p class="mb-4 text-left">{{ $t('deck_builder.assign_help') }}</p>
+
+          <i18n-t
+            keypath="deck_builder.assign_action"
+            tag="p"
+            class="text-left"
+          >
+            <template #action>
+              <Button
+                variant="secondary"
+                size="sm"
+                class="mx-2"
+                @click="assignCards()"
+              >
+                {{ $t('deck_builder.assign') }}
+              </Button>
+            </template>
+          </i18n-t>
+
+          <div
+            v-if="result"
+            class="text-left"
+          >
+            <p class="mt-4 text-lg font-bold">{{ $t('deck_builder.result') }}</p>
+            <ul>
+              <li
+                v-for="(log, i) in result"
+                :key="i"
+                v-html="log"
+                class="capitalize"
+              ></li>
+            </ul>
+          </div>
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

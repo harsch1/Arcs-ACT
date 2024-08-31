@@ -164,7 +164,7 @@ function preview() {
         >
           {{ $t('common.view') }}
         </DropdownMenuItem>
-        <DropdownMenuItem @select="onRemove">
+        <DropdownMenuItem @select="onRemove()">
           {{ $t('piece_menu.remove') }}
         </DropdownMenuItem>
       </template>

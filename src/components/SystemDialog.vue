@@ -317,7 +317,12 @@ function updateState(update: UpdatePayload) {
                 :key="token"
                 :value="token"
               >
-                <span class="ml-2 mr-1">{{ $t(`tokens.${token}`) }}</span>
+                <img
+                  :src="`./images/tokens/${token.toLowerCase()}.png`"
+                  :alt="token"
+                  class="h-6"
+                />
+                <span class="ml-2 mr-1">{{ $t(`pieces.${token}`) }}</span>
                 <TagsInputItemDelete @click="updateTokens(token, true)" />
               </TagsInputItem>
             </div>
@@ -334,9 +339,10 @@ function updateState(update: UpdatePayload) {
 
         <ComboboxPortal disabled>
           <CommandList
-            avoid-collisions
             position="popper"
-            class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 min-h-[128px]"
+            class="w-[--radix-popper-anchor-width] rounded-md mt-2 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+            :collision-padding="{ bottom: 180 }"
+            avoid-collisions
             v-on-click-outside="
               () => {
                 tokenComboboxOpen = false
@@ -359,7 +365,12 @@ function updateState(update: UpdatePayload) {
                   }
                 "
               >
-                {{ $t(`tokens.${token}`) }}
+                <img
+                  :src="`./images/tokens/${token.toLowerCase()}.png`"
+                  :alt="token"
+                  class="h-6 mr-2"
+                />
+                {{ $t(`pieces.${token}`) }}
               </CommandItem>
             </CommandGroup>
           </CommandList>

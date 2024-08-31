@@ -64,6 +64,7 @@ const resourceOpen = ref(false)
           >
             <TagsInputInput
               class="w-full px-0"
+              readonly
               @keydown.enter.prevent
             />
           </ComboboxInput>

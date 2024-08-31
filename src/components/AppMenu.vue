@@ -16,7 +16,7 @@ import { GAME_TEST_ID, useGameStore } from '@/stores/game'
 import { ref } from 'vue'
 
 const router = useRouter()
-const store = useGameStore()
+const gameStore = useGameStore()
 const open = ref(false)
 
 function viewGame() {
@@ -28,7 +28,7 @@ function viewGame() {
 }
 
 function loadTestGame(id: string) {
-  store.loadGame(id)
+  gameStore.loadGame(id)
   viewGame()
 }
 </script>
@@ -37,7 +37,7 @@ function loadTestGame(id: string) {
   <Sheet v-model:open="open">
     <SheetTrigger as-child>
       <Button
-        class="w-12 h-12 p-2 menu"
+        class="w-12 h-12 p-2 ml-2 menu"
         size="icon"
         variant="ghost"
       >
@@ -65,7 +65,7 @@ function loadTestGame(id: string) {
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/campaign">
+          <RouterLink :to="{ path: '/campaign', query: { mode: 'create' } }">
             {{ $t('campaign.new') }}
           </RouterLink>
         </li>

@@ -27,7 +27,10 @@ function updateDialog(open: boolean) {
 <template>
   <div class="px-4">
     <p class="w-full py-2 text-lg">{{ $t('campaign.board_state_help') }}</p>
-    <Accordion type="multiple">
+    <Accordion
+      type="multiple"
+      :default-value="['1', '2', '3', '4', '5', '6']"
+    >
       <AccordionItem
         v-for="(systems, cluster) in systemsStore.clusters"
         :key="cluster"
@@ -74,6 +77,7 @@ function updateDialog(open: boolean) {
                   </span>
                 </div>
                 <Button
+                  size="icon"
                   variant="ghost"
                   class="self-end"
                   @click.stop="activeSystem = system"

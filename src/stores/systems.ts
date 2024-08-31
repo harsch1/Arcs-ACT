@@ -175,21 +175,24 @@ export const useSystemsStore = defineStore('systems', () => {
       ...piece
     }
 
+    let isPositioned = false
     if (Object.values(BuildingType).includes(piece.type as BuildingType)) {
       // Fill the first empty slot
       const slot = activeSystem.slots.find((s) => s.isEmpty)
-      if (!slot) {
-        console.info('No free slots')
-        return
+      if (slot) {
+        // TODO: System coordinates need to be added to the slot
+        pieceState.slot = slot
+        pieceState.position = {
+          x: slot.position.x + activeSystem.config.position.x,
+          y: slot.position.y + activeSystem.config.position.y
+        }
+        slot.isEmpty = false
+        isPositioned = true
       }
-      // TODO: System coordinates need to be added to the slot
-      pieceState.slot = slot
-      pieceState.position = {
-        x: slot.position.x + activeSystem.config.position.x,
-        y: slot.position.y + activeSystem.config.position.y
-      }
-      slot.isEmpty = false
-    } else {
+    }
+
+    // Ensure the piece was positioned
+    if (!isPositioned) {
       pieceState.position = position ??
         randomPointWithinSVG(
           activeSystem.config.el!,

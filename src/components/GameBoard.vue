@@ -4,6 +4,8 @@ import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
 import { pausableFilter, useMouse } from '@vueuse/core'
+import { Button } from '@/components/ui/button'
+import { ZoomIn, ZoomOut } from 'lucide-vue-next'
 
 import { BuildingType } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
@@ -15,6 +17,7 @@ import { ShipType, type Color, type SystemKey, type TokenType } from '@/Archive'
 import type { PieceState, SystemUiConfig, PieceStateGroup, SystemConfig } from '@/stores/systems'
 import type { CSSProperties } from 'vue'
 import { transform } from 'lodash'
+import { isBuilding, isToken, isUniqueToken } from '@/lib/utils'
 
 const dragControl = pausableFilter()
 dragControl.pause()
@@ -28,17 +31,22 @@ const draggedPieceOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 })
 
 const wrapperStyle = computed<CSSProperties>(() => ({
   width: 'max-content',
-  transform: `translate(${wrapperPosition.x}px, ${wrapperPosition.y}px)`
+  // transform: `translate(${wrapperPosition.x}px, ${wrapperPosition.y}px)`
+  transformOrigin: 'top left',
+  scale: scale.value
 }))
 
 // Handle board movement
 const wrapperEl = ref<HTMLDivElement>()
+const scale = ref(1)
 
 function onPieceMoveEnd(piece: PieceState | PieceStateGroup, e: DragEvent) {
   const boardRect = wrapperEl.value?.getBoundingClientRect()!
 
-  piece.position.x = e.clientX - draggedPieceOffset.value.x + boardRect.x * -1
-  piece.position.y = e.clientY - draggedPieceOffset.value.y + boardRect.y * -1
+  piece.position.x =
+    e.clientX / scale.value - draggedPieceOffset.value.x + (boardRect.x / scale.value) * -1
+  piece.position.y =
+    e.clientY / scale.value - draggedPieceOffset.value.y + (boardRect.y / scale.value) * -1
   draggedPiece.value = undefined
 }
 
@@ -47,8 +55,18 @@ function onPieceMoveStart(piece: PieceState | PieceStateGroup, e: DragEvent) {
 
   draggedPiece.value = piece
   draggedPieceOffset.value = {
-    x: e.clientX - targetRect.x - targetRect.width / 2,
-    y: e.clientY - targetRect.y - targetRect.height / 2
+    x: e.clientX - targetRect.x - (targetRect.width / 2) * scale.value,
+    y: e.clientY - targetRect.y - (targetRect.height / 2) * scale.value
+  }
+}
+
+function zoom(delta: number) {
+  scale.value += delta
+
+  if (scale.value < 0.3) {
+    scale.value = 0.3
+  } else if (scale.value > 2) {
+    scale.value = 2
   }
 }
 
@@ -100,10 +118,11 @@ const pieces = computed(() => {
   const grouped = new Map<string, PieceState | PieceStateGroup>()
   systemsStore.pieces.forEach((piece) => {
     const key = `${piece.system} ${piece.color} ${piece.type}`
-    // Buildings and Flagships are not grouped
+    // Buildings, Flagships, and unique tokens are not grouped
     if (
-      Object.values(BuildingType).includes(piece.type as BuildingType) ||
-      piece.type === ShipType.flagship
+      isBuilding(piece.type) ||
+      piece.type === ShipType.flagship ||
+      (isToken(piece.type) && isUniqueToken(piece.type))
     ) {
       grouped.set(key + piece.id, piece)
       return
@@ -172,8 +191,10 @@ function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
       color
     },
     {
-      x: menuPosition.x - x,
-      y: menuPosition.y - y
+      x: menuPosition.x / scale.value - x / scale.value,
+      y: menuPosition.y / scale.value - y / scale.value
+      // x: menuPosition.x * 2 - x,
+      // y: menuPosition.y * 2 - y - 64
     }
   )
 }
@@ -244,12 +265,29 @@ function togglePreview(open: boolean) {
     />
   </div>
 
+  <!-- Map controls -->
+  <div class="map-controls">
+    <Button
+      size="icon"
+      variant="outline"
+      @click="zoom(0.1)"
+    >
+      <ZoomIn />
+    </Button>
+    <Button
+      size="icon"
+      variant="outline"
+      @click="zoom(-0.1)"
+    >
+      <ZoomOut />
+    </Button>
+  </div>
+
   <!-- The dropdown is reused based on the clicked system -->
   <GameBoardMenu
     v-if="activeSystem"
     :active-system="activeSystem"
     :is-open="isBoardMenuOpen"
-    :is-full="systemsStore.isSystemFull(activeSystem)"
     :pointer-position="menuPosition"
     @select="addPiece"
     @close="closeBoardMenu"
@@ -268,4 +306,13 @@ function togglePreview(open: boolean) {
     @preview="togglePreview(true)"
   />
 </template>
-j
+
+<style scoped>
+.map-controls {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+}
+</style>

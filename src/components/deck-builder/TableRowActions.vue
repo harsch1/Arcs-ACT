@@ -16,6 +16,8 @@ defineProps<{
   card: GameCard
   locations: string[]
   shortcut?: string
+  hideScrap?: boolean
+  hideMove?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -25,6 +27,7 @@ const emit = defineEmits<{
 
 <template>
   <Button
+    v-if="!hideScrap"
     variant="ghost"
     class="w-8 h-8 p-0"
     @click="emit('move', card.id, 'scrap')"
@@ -32,7 +35,7 @@ const emit = defineEmits<{
     <SquareX class="w-4 h-4" />
   </Button>
 
-  <DropdownMenu>
+  <DropdownMenu v-if="!hideMove">
     <DropdownMenuTrigger as-child>
       <Button
         variant="ghost"

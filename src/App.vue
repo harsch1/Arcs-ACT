@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router'
 import AppMenu from '@/components/AppMenu.vue'
+import AppNavigation from '@/components/AppNavigation.vue'
 import { useGameStore } from '@/stores/game'
 import Toaster from '@/components/ui/toast/Toaster.vue'
 
@@ -38,6 +39,8 @@ const gameStore = useGameStore()
   </header>
 
   <RouterView />
+
+  <AppNavigation v-if="!router.currentRoute.value.meta.hideNavigation" />
   <Toaster />
 </template>
 

@@ -38,12 +38,17 @@ const canAddFate = computed(() => {
 })
 
 const fatesByAct = computed(() => (act: number) => {
-  return (
-    Object.values(fateMeta)
+  return Object.values(fateMeta)
+    .filter((meta) => {
       // Act is passed as 0-based
-      .filter((meta) => meta.act <= act + 1)
-      .map((meta) => meta.id) as Fate[]
-  )
+      // Check the fate history and enable the fate if the player completed
+      // the objective in a previous act
+      return (
+        meta.act === act + 1 ||
+        props.player.fateHistory.find(([fateId, , succeeded]) => meta.id === fateId && succeeded)
+      )
+    })
+    .map((meta) => meta.id) as Fate[]
 })
 
 const isFateDisabled = computed(() => (fate: Fate) => {

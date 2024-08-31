@@ -14,10 +14,10 @@ const columns: ColumnDef<GameCard>[] = [
     enableColumnFilter: false,
     header: () => h('div', { class: 'text-left' }, i18n.global.t('deck_builder.table.id')),
     cell: ({ row }) => {
-      // return h('div', { class: 'font-medium' }, row.getValue('id'))
-      return h('div', { class: 'flex flex-col' }, [
+      // return h('div', { class: 'font-medium w-[68px]' }, row.getValue('id'))
+      return h('div', { class: 'flex flex-col w-[88px]' }, [
         h('span', {}, row.getValue('id')),
-        h('span', {}, row.getValue('set'))
+        h('span', { class: 'italic text-xs' }, row.getValue('set'))
       ])
     }
   },
@@ -26,9 +26,10 @@ const columns: ColumnDef<GameCard>[] = [
     enableColumnFilter: false,
     header: () => h('div', { class: 'text-left' }, i18n.global.t('deck_builder.table.name')),
     cell: ({ row }) => {
-      return h('div', { class: 'flex flex-col' }, [
+      return h('div', { class: 'flex flex-col grow' }, [
         h('span', {}, row.getValue('name')),
-        h('span', { class: 'italic' }, row.getValue('location'))
+        // h('span', { class: 'italic text-sm' }, row.getValue('set')),
+        h('span', { class: 'font-bold' }, row.getValue('location'))
       ])
     }
   },
