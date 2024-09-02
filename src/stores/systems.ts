@@ -8,6 +8,7 @@ import { getSystemOverview } from '@/lib/utils'
 import { cloneDeep, cloneDeepWith, groupBy } from 'lodash'
 
 import type { Color, MapPiece, Multi, SaveFile, ShipType, System, SystemKey } from '@/Archive'
+import { useUiStore } from '@/stores/ui'
 
 export type SystemUiConfig = {
   el: SVGSVGElement
@@ -76,6 +77,8 @@ const _initialSystemsState = systemsUiConfig.reduce(
 )
 
 export const useSystemsStore = defineStore('systems', () => {
+  const uiStore = useUiStore()
+
   // Simple id
   const id = ref(0)
   // Init based on the configuration
@@ -197,7 +200,8 @@ export const useSystemsStore = defineStore('systems', () => {
         randomPointWithinSVG(
           activeSystem.config.el!,
           activeSystem.config.shape!,
-          activeSystem.config.bounds
+          activeSystem.config.bounds,
+          uiStore.mapScale
         ) ?? {
           x: getRandomInt(activeSystem.config.position.x, activeSystem.config.position.x + 100),
           y: getRandomInt(activeSystem.config.position.y, activeSystem.config.position.y + 100)

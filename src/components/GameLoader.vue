@@ -118,7 +118,7 @@ async function confirmSave(id: string) {
     <AlertDialogTrigger as-child>
       <slot></slot>
     </AlertDialogTrigger>
-    <AlertDialogContent class="max-sm:h-full max-sm:w-full max-w-[800px]">
+    <AlertDialogContent class="max-h-full max-sm:w-full max-w-[800px] overflow-auto">
       <AlertDialogHeader>
         <AlertDialogTitle>{{ $t('load_dialog.title') }}</AlertDialogTitle>
         <AlertDialogDescription>

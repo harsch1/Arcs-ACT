@@ -47,14 +47,6 @@ function viewGame() {
 </template>
 
 <style scoped>
-.viewport {
-  position: relative;
-  overflow: auto;
-  height: calc(100% - 64px);
-  height: calc(100dvh - 64px);
-  margin: 0 auto;
-}
-
 .subtitle {
   word-spacing: 100vw;
 }

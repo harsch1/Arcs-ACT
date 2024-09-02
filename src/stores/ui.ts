@@ -14,6 +14,7 @@ export enum Screen {
 export const useUiStore = defineStore('ui', () => {
   const gameStore = useGameStore()
 
+  const mapScale = ref(0.5)
   const currentScreen = ref(Screen.Settings)
   const showNext = computed(() => currentScreen.value < Screen._TOTAL_ - 1)
   // const showBack = computed(() => currentScreen.value < Screen._TOTAL_)
@@ -60,5 +61,5 @@ export const useUiStore = defineStore('ui', () => {
     }
   }
 
-  return { showNext, canNext, canBack, currentScreen, advance, go, validate }
+  return { mapScale, showNext, canNext, canBack, currentScreen, advance, go, validate }
 })

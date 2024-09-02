@@ -63,7 +63,9 @@
 body {
   min-height: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--color-text);
+  background-color: theme('backgroundColor.background');
   background-image: url('/images/background.png');
   background-size: cover;
   transition:

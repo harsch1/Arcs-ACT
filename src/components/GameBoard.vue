@@ -18,7 +18,9 @@ import type { PieceState, SystemUiConfig, PieceStateGroup, SystemConfig } from '
 import type { CSSProperties } from 'vue'
 import { transform } from 'lodash'
 import { isBuilding, isToken, isUniqueToken } from '@/lib/utils'
+import { useUiStore } from '@/stores/ui'
 
+const uiStore = useUiStore()
 const dragControl = pausableFilter()
 dragControl.pause()
 const { x: dx, y: dy } = useMouse({ type: 'movement', eventFilter: dragControl.eventFilter })
@@ -29,44 +31,80 @@ const systemClientPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
 const draggedPiece = ref<PieceState | PieceStateGroup>()
 const draggedPieceOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 })
 
-const wrapperStyle = computed<CSSProperties>(() => ({
-  width: 'max-content',
-  // transform: `translate(${wrapperPosition.x}px, ${wrapperPosition.y}px)`
-  transformOrigin: 'top left',
-  scale: scale.value
-}))
-
 // Handle board movement
+const boardImg = ref<HTMLImageElement>(new Image())
+boardImg.value.src = boardImage
+const boardDimensions = reactive({
+  width: 0,
+  height: 0
+})
 const wrapperEl = ref<HTMLDivElement>()
-const scale = ref(1)
+const wrapperStyle = computed<CSSProperties>(() => {
+  return {
+    // width: 'max-content',
+    // height: 'max-content',
+    // transform: `translate(${wrapperPosition.x}px, ${wrapperPosition.y}px)`
+    transformOrigin: 'top left',
+    scale: uiStore.mapScale,
+    width: boardDimensions.width * uiStore.mapScale,
+    height: boardDimensions.height * uiStore.mapScale
+  }
+})
 
-function onPieceMoveEnd(piece: PieceState | PieceStateGroup, e: DragEvent) {
+function onPieceMove(piece: PieceState | PieceStateGroup, e: DragEvent | Touch) {
   const boardRect = wrapperEl.value?.getBoundingClientRect()!
 
   piece.position.x =
-    e.clientX / scale.value - draggedPieceOffset.value.x + (boardRect.x / scale.value) * -1
+    e.clientX / uiStore.mapScale -
+    draggedPieceOffset.value.x +
+    (boardRect.x / uiStore.mapScale) * -1
   piece.position.y =
-    e.clientY / scale.value - draggedPieceOffset.value.y + (boardRect.y / scale.value) * -1
+    e.clientY / uiStore.mapScale -
+    draggedPieceOffset.value.y +
+    (boardRect.y / uiStore.mapScale) * -1
+}
+
+function onPieceMoveEnd(piece: PieceState | PieceStateGroup, e?: DragEvent | Touch) {
+  // This shouldn't happen but guard it just in case
+  if (!e) {
+    return
+  }
+
+  const boardRect = wrapperEl.value?.getBoundingClientRect()!
+
+  piece.position.x =
+    e.clientX / uiStore.mapScale -
+    draggedPieceOffset.value.x +
+    (boardRect.x / uiStore.mapScale) * -1
+  piece.position.y =
+    e.clientY / uiStore.mapScale -
+    draggedPieceOffset.value.y +
+    (boardRect.y / uiStore.mapScale) * -1
   draggedPiece.value = undefined
 }
 
-function onPieceMoveStart(piece: PieceState | PieceStateGroup, e: DragEvent) {
+function onPieceMoveStart(piece: PieceState | PieceStateGroup, e: DragEvent | Touch) {
   const targetRect = (e.target as HTMLElement)?.getBoundingClientRect()
 
   draggedPiece.value = piece
   draggedPieceOffset.value = {
-    x: e.clientX - targetRect.x - (targetRect.width / 2) * scale.value,
-    y: e.clientY - targetRect.y - (targetRect.height / 2) * scale.value
+    x: e.clientX - targetRect.x - (targetRect.width / 2) * uiStore.mapScale,
+    y: e.clientY - targetRect.y - (targetRect.height / 2) * uiStore.mapScale
   }
 }
 
-function zoom(delta: number) {
-  scale.value += delta
+function getDimensions() {
+  boardDimensions.height = boardImg.value.height
+  boardDimensions.width = boardImg.value.width
+}
 
-  if (scale.value < 0.3) {
-    scale.value = 0.3
-  } else if (scale.value > 2) {
-    scale.value = 2
+function zoom(delta: number) {
+  uiStore.mapScale += delta
+
+  if (uiStore.mapScale < 0.3) {
+    uiStore.mapScale = 0.3
+  } else if (uiStore.mapScale > 2) {
+    uiStore.mapScale = 2
   }
 }
 
@@ -191,8 +229,8 @@ function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
       color
     },
     {
-      x: menuPosition.x / scale.value - x / scale.value,
-      y: menuPosition.y / scale.value - y / scale.value
+      x: menuPosition.x / uiStore.mapScale - x / uiStore.mapScale,
+      y: menuPosition.y / uiStore.mapScale - y / uiStore.mapScale
       // x: menuPosition.x * 2 - x,
       // y: menuPosition.y * 2 - y - 64
     }
@@ -237,6 +275,7 @@ function togglePreview(open: boolean) {
       alt="Arcs"
       class="max-w-max"
       draggable="false"
+      @load="getDimensions"
     />
     <SystemComponent
       v-for="system in systemsUiConfig"
@@ -259,9 +298,13 @@ function togglePreview(open: boolean) {
       :open-preview="showPreview && activePieceIndex === i"
       draggable="false"
       @click="onPieceClick(piece, i, $event)"
+      @preview-close="togglePreview(false)"
       @dragstart="onPieceMoveStart(piece, $event)"
       @dragend="onPieceMoveEnd(piece, $event)"
-      @previewClose="togglePreview(false)"
+      @press-start="onPieceMoveStart(piece, $event)"
+      @press-move="onPieceMove(piece, $event)"
+      @press-end="onPieceMoveEnd(piece, $event)"
+      @press-drop="dropInSystem($event)"
     />
   </div>
 
@@ -309,10 +352,10 @@ function togglePreview(open: boolean) {
 
 <style scoped>
 .map-controls {
+  @apply pb-safe-offset-2 px-safe-offset-2 right-0;
   display: flex;
   flex-direction: column;
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 68px;
 }
 </style>

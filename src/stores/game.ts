@@ -1,7 +1,7 @@
 // Main store
 import localforage from 'localforage'
 import { defineStore } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
 import { exportArchive, generateName } from '@/lib/utils'
 import { useSystemsStore } from '@/stores/systems'
 import { useCardsStore } from '@/stores/cards'
@@ -49,6 +49,7 @@ export const useGameStore = defineStore('game', () => {
     settings.act = 1
     settings.firstRegent = ''
     settings.notes = ''
+    systems.$reset()
   }
 
   // Parse the game json and initialize the stores
@@ -98,13 +99,14 @@ export const useGameStore = defineStore('game', () => {
 
     // Clear the previous archive
     $reset()
-    systems.$reset()
 
-    initSettings(archive)
-    initPlayers(archive.players)
-    // @ts-expect-error TODO: Why is this property needed?
-    initSystems(archive.board._systems)
-    cards.initPool(archive.players)
+    nextTick(() => {
+      initSettings(archive)
+      initPlayers(archive.players)
+      // @ts-expect-error TODO: Why is this property needed?
+      initSystems(archive.board._systems)
+      cards.initPool(archive.players)
+    })
   }
 
   async function exportGame(id: string) {
