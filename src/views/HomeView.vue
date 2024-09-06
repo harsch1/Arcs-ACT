@@ -17,7 +17,7 @@ function viewGame() {
       alt="Arcs"
     />
     <h1 class="mt-2 text-4xl font-bold subtitle">
-      {{ $t('arcs_cat') }}
+      {{ $t('arcs_act') }}
     </h1>
     <!-- <div class="h-[100px]">
       <img

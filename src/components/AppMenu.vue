@@ -47,11 +47,11 @@ function loadTestGame(id: string) {
     <SheetContent side="left">
       <SheetHeader>
         <SheetTitle>
-          {{ $t('arcs_cat') }}
+          {{ $t('arcs_act') }}
         </SheetTitle>
         <SheetDescription>
           <img
-            :alt="$t('arcs_cat')"
+            :alt="$t('arcs_act')"
             class="logo"
             src="@/assets/images/archivist.png"
           />

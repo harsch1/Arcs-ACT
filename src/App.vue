@@ -12,7 +12,7 @@ const gameStore = useGameStore()
 <template>
   <header class="flex flex-row-reverse items-center justify-between main">
     <img
-      :alt="$t('arcs_cat')"
+      :alt="$t('arcs_act')"
       class="logo -scale-x-100"
       src="@/assets/images/archivist.png"
     />
@@ -25,7 +25,7 @@ const gameStore = useGameStore()
           router.currentRoute.value.name === 'home'
       }"
     >
-      {{ $t('arcs_cat') }}
+      {{ $t('arcs_act') }}
     </h1>
 
     <h1
