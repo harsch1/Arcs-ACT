@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef } from 'vue'
+import { computed, onMounted, ref, toRef } from 'vue'
 import { TokenType, ShipType, Color, BuildingType, type SystemKey } from '@/Archive'
 import { Redo, Sparkles } from 'lucide-vue-next'
 import PlayerFlagshipPreview from '@/components/PlayerFlagshipPreview.vue'
@@ -18,48 +18,45 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  reposition: [system: SystemKey]
   previewClose: []
+  pressClick: [e: Touch]
   pressStart: [e: Touch]
   pressMove: [e: Touch]
   pressEnd: [e?: Touch]
   pressDrop: [system: SystemKey]
 }>()
 
-const pieceConfigRef = toRef(props.pieceConfig)
-
-const firstTouch = ref<Touch>()
-const lastTouch = ref<Touch>()
-
 const pieceId = computed(() => {
-  if (pieceConfigRef.value.color) {
-    return `${pieceConfigRef.value.type}-${pieceConfigRef.value.color}-${pieceConfigRef.value.system}`
+  if (props.pieceConfig.color) {
+    return `${props.pieceConfig.type}-${props.pieceConfig.color}-${props.pieceConfig.system}`
   }
 
-  return `${pieceConfigRef.value.type}-${pieceConfigRef.value.system}`
+  return `${props.pieceConfig.type}-${props.pieceConfig.system}`
 })
 
 const src = computed(() => {
-  if ('group' in pieceConfigRef.value) {
-    if (Object.values(TokenType).includes(pieceConfigRef.value.type as TokenType)) {
-      return `./images/tokens/${pieceConfigRef.value.type?.toLowerCase()}.png`
+  if ('group' in props.pieceConfig) {
+    if (Object.values(TokenType).includes(props.pieceConfig.type as TokenType)) {
+      return `./images/tokens/${props.pieceConfig.type?.toLowerCase()}.png`
     }
 
-    return `./images/${pieceConfigRef.value.color?.toLowerCase()}_${pieceConfigRef.value.type?.toLowerCase()}.png`
+    return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
   }
 
-  if (Object.values(TokenType).includes(pieceConfigRef.value.type as TokenType)) {
-    return `./images/tokens/${pieceConfigRef.value.type?.toLowerCase()}${!pieceConfigRef.value.isFresh ? '_flip' : ''}.png`
-  } else if (isFlagship(pieceConfigRef.value.type)) {
-    return `./images/${pieceConfigRef.value.color?.toLowerCase()}_${pieceConfigRef.value.type?.toLowerCase()}.png`
+  if (Object.values(TokenType).includes(props.pieceConfig.type as TokenType)) {
+    return `./images/tokens/${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
+  } else if (isFlagship(props.pieceConfig.type)) {
+    return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
   }
 
-  return `./images/${pieceConfigRef.value.color?.toLowerCase()}_${pieceConfigRef.value.type?.toLowerCase()}${!pieceConfigRef.value.isFresh ? '_flip' : ''}.png`
+  return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
 })
 
 const transform = computed(() => {
   const toTranslate = {
-    x: pieceConfigRef.value.position.x,
-    y: pieceConfigRef.value.position.y // Take navbar into account
+    x: props.pieceConfig.position.x,
+    y: props.pieceConfig.position.y // Take navbar into account
   }
 
   let value = `translate(${toTranslate.x}px, ${toTranslate.y}px) scale(${props.scale ?? 0.4})`
@@ -68,7 +65,7 @@ const transform = computed(() => {
   // TODO: Normalize building slots position to account translation
   if (
     !Object.values<BuildingType | TokenType | ShipType>(BuildingType).includes(
-      pieceConfigRef.value.type
+      props.pieceConfig.type
     )
   ) {
     value = 'translate(-50%, -50%) ' + value
@@ -76,9 +73,9 @@ const transform = computed(() => {
   }
 
   if (
-    pieceConfigRef.value.type === ShipType.ship &&
-    'isFresh' in pieceConfigRef.value &&
-    !pieceConfigRef.value.isFresh
+    props.pieceConfig.type === ShipType.ship &&
+    'isFresh' in props.pieceConfig &&
+    !props.pieceConfig.isFresh
   ) {
     value = `${value} translate(100%, 100%) rotate(180deg)`
   }
@@ -90,17 +87,17 @@ const styles = computed<CSSProperties>(() => {
   return {
     left: 0,
     top: 0,
-    zIndex: pieceConfigRef.value.type === ShipType.ship ? 1 : 'auto',
+    zIndex: props.pieceConfig.type === ShipType.ship ? 1 : 'auto',
     transform: transform.value
   }
 })
 
 const pieceWidth = computed(() => {
-  if (pieceConfigRef.value.color === Color.free) {
+  if (props.pieceConfig.color === Color.free) {
     return 300
   }
 
-  if (isFlagship(pieceConfigRef.value.type)) {
+  if (isFlagship(props.pieceConfig.type)) {
     return 332
   }
 
@@ -112,14 +109,27 @@ function fallbackHandler() {
   isFallback.value = true
 }
 
+const firstTouch = ref<Touch>()
+const lastTouch = ref<Touch>()
+const touchTimer = ref<number>(0)
+const ignoreMove = ref(true)
+const clickDelay = 300
+
 function onPieceMoveStart(e: TouchEvent) {
   e.preventDefault()
   const touch = e.touches[0]
+  touchTimer.value = Date.now()
   firstTouch.value = touch
   emit('pressStart', touch)
+
+  setTimeout(() => (ignoreMove.value = false), clickDelay)
 }
 
 function onPieceMove(e: TouchEvent) {
+  if (ignoreMove.value) {
+    return
+  }
+
   e.preventDefault()
   const touch = e.touches[0]
   lastTouch.value = touch
@@ -128,10 +138,19 @@ function onPieceMove(e: TouchEvent) {
 
 function onPieceMoveEnd(e: TouchEvent) {
   e.preventDefault()
+  ignoreMove.value = true
+
+  // Fake click event on mobile
+  if (Date.now() - touchTimer.value < clickDelay) {
+    e.stopPropagation()
+    emit('pressClick', firstTouch.value!)
+    return
+  }
+
   const el =
     lastTouch.value &&
     document
-      .elementsFromPoint(lastTouch.value?.clientX, lastTouch.value?.clientY)
+      .elementsFromPoint(lastTouch.value.clientX, lastTouch.value.clientY)
       .find((el) => el.getAttribute('data-path-system-id'))
 
   // Piece was moved over a valid system
@@ -144,11 +163,11 @@ function onPieceMoveEnd(e: TouchEvent) {
 }
 
 const canBeMoved = computed(() => {
-  if (!isBuilding(pieceConfigRef.value.type)) {
+  if (!isBuilding(props.pieceConfig.type)) {
     return true
   }
 
-  if (!('group' in pieceConfigRef.value) && !pieceConfigRef.value.slot) {
+  if (!('group' in props.pieceConfig) && !props.pieceConfig.slot) {
     return true
   }
 
@@ -160,6 +179,13 @@ const eventHandlers = {
   touchmove: canBeMoved.value ? onPieceMove : null,
   touchend: canBeMoved.value ? onPieceMoveEnd : null
 }
+
+onMounted(() => {
+  // Negative position means the piece wasn't positioned when added
+  if (props.pieceConfig.position.x < 0 && props.pieceConfig.position.y < 0) {
+    emit('reposition', props.pieceConfig.system!)
+  }
+})
 </script>
 
 <template>
@@ -192,31 +218,31 @@ const eventHandlers = {
         dominant-baseline="middle"
         text-anchor="middle"
       >
-        {{ pieceConfigRef.type }}
+        {{ pieceConfig.type }}
       </text>
     </svg>
     <div
-      v-if="!isBuilding(pieceConfigRef.type)"
+      v-if="!isBuilding(pieceConfig.type)"
       class="absolute flex items-center pointer-events-none right-10 -bottom-6"
     >
       <div class="grid grid-flow-col px-4 py-2 bg-black shrink-0 rounded-xl">
         <span class="mr-2 text-5xl">
-          {{ pieceConfigRef.system?.charAt(0) }}
+          {{ props.pieceConfig.system?.charAt(0) }}
         </span>
         <img
-          v-if="pieceConfigRef.system?.charAt(1) === 'A'"
+          v-if="props.pieceConfig.system?.charAt(1) === 'A'"
           class="h-[3rem]"
           src="/images/symbol_arrow.png"
           alt="Arrow"
         />
         <img
-          v-else-if="pieceConfigRef.system?.charAt(1) === 'H'"
+          v-else-if="props.pieceConfig.system?.charAt(1) === 'H'"
           class="h-[3rem]"
           src="/images/symbol_hex.png"
           alt="Hex"
         />
         <img
-          v-else-if="pieceConfigRef.system?.charAt(1) === 'C'"
+          v-else-if="props.pieceConfig.system?.charAt(1) === 'C'"
           class="h-[3rem]"
           src="/images/symbol_moon.png"
           alt="Moon"
@@ -228,27 +254,27 @@ const eventHandlers = {
           G
         </span>
       </div>
-      <template v-if="'group' in pieceConfigRef && !isFlagship(pieceConfigRef.type)">
+      <template v-if="'group' in pieceConfig && !isFlagship(pieceConfig.type)">
         <div
-          v-if="pieceConfigRef.group.damaged.length > 0"
+          v-if="pieceConfig.group.damaged.length > 0"
           class="flex items-center px-4 py-2 ml-2 bg-black pointer-events-none rounded-xl"
         >
-          <span class="mr-2 text-5xl">{{ pieceConfigRef.group.damaged.length }}</span>
+          <span class="mr-2 text-5xl">{{ pieceConfig.group.damaged.length }}</span>
           <Redo :size="40" />
         </div>
         <div
-          v-if="pieceConfigRef.group.fresh.length > 0"
+          v-if="pieceConfig.group.fresh.length > 0"
           class="flex items-center px-4 py-2 ml-2 bg-black pointer-events-none rounded-xl"
         >
-          <span class="mr-2 text-5xl">{{ pieceConfigRef.group.fresh.length }}</span>
+          <span class="mr-2 text-5xl">{{ pieceConfig.group.fresh.length }}</span>
           <Sparkles :size="40" />
         </div>
       </template>
     </div>
 
     <PlayerFlagshipPreview
-      v-if="isFlagship(pieceConfigRef.type) && openPreview"
-      :piece="pieceConfigRef"
+      v-if="isFlagship(pieceConfig.type) && openPreview"
+      :piece="pieceConfig"
       :piece-id="pieceId"
       @close="emit('previewClose')"
     />

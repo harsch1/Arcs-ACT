@@ -49,8 +49,6 @@ if (props.act && props.player.fateHistory.length < props.act) {
 }
 
 function updateFirstRegent(value: boolean) {
-  console.log(value)
-
   const currentRegent = gameStore.settings.firstRegent
   // No first regent
   if (currentRegent === props.player.name && !value) {

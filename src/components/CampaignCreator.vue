@@ -199,6 +199,7 @@ watch(players, () => {
           class="max-w-sm"
           :model-value="gameStore.settings.name"
           :placeholder="$t('campaign.name')"
+          @update:model-value="(value) => (gameStore.settings.name = value as string)"
         />
         <Button
           variant="ghost"

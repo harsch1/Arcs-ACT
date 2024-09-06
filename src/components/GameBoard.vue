@@ -3,14 +3,14 @@ import { computed, reactive, ref } from 'vue'
 import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
-import { pausableFilter, useMouse } from '@vueuse/core'
+import { pausableFilter } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { ZoomIn, ZoomOut } from 'lucide-vue-next'
 
 import { BuildingType } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
 import GamePiece from '@/components/GamePiece.vue'
-import GameBoardMenu from '@/components/GameBoardMenu.vue'
+import GameSystemMenu from '@/components/GameSystemMenu.vue'
 import GamePieceMenu from '@/components/GamePieceMenu.vue'
 
 import { ShipType, type Color, type SystemKey, type TokenType } from '@/Archive'
@@ -18,15 +18,11 @@ import type { PieceState, SystemUiConfig, PieceStateGroup, SystemConfig } from '
 import type { CSSProperties } from 'vue'
 import { transform } from 'lodash'
 import { isBuilding, isToken, isUniqueToken } from '@/lib/utils'
-import { useUiStore } from '@/stores/ui'
+import { Menu, useUiStore } from '@/stores/ui'
 
 const uiStore = useUiStore()
 const dragControl = pausableFilter()
 dragControl.pause()
-const { x: dx, y: dy } = useMouse({ type: 'movement', eventFilter: dragControl.eventFilter })
-const menuPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
-const wrapperPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
-const systemClientPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
 
 const draggedPiece = ref<PieceState | PieceStateGroup>()
 const draggedPieceOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -109,8 +105,6 @@ function zoom(delta: number) {
 }
 
 // Menus interaction
-const isBoardMenuOpen = ref(false)
-const isPieceMenuOpen = ref(false)
 const activeSystem = ref<SystemKey>()
 const activePiece = ref<PieceState | PieceStateGroup>()
 const activeSystemPosition = computed(() =>
@@ -120,28 +114,25 @@ const activeSystemPosition = computed(() =>
 )
 
 function onSystemClick(id: SystemKey, e: PointerEvent) {
-  let systemRect = (e.target as SVGElement | null)?.getBoundingClientRect() ?? { x: 0, y: 0 }
-  systemClientPosition.x = systemRect.x
-  systemClientPosition.y = systemRect.y
-  menuPosition.x = e.clientX
-  menuPosition.y = e.clientY
   activeSystem.value = id
-  isBoardMenuOpen.value = true
-}
-
-function onPieceOpenChange(e: boolean) {
-  setTimeout(() => {
-    isPieceMenuOpen.value = e
+  uiStore.updateMenu({
+    type: Menu.System,
+    id: id,
+    position: {
+      x: e.clientX,
+      y: e.clientY
+    }
   })
 }
 
-function closeBoardMenu() {
-  // Wrapped in a timeout to prevent opening the menu after clicking
-  // on a system when the menu was already opened
+function closeMenu(type: Menu) {
+  activeSystem.value = undefined
+  activePiece.value = undefined
+  activePieceIndex.value = -1
+
   setTimeout(() => {
-    isBoardMenuOpen.value = false
-    activeSystem.value = undefined
-  })
+    uiStore.updateMenu({ isOpen: false })
+  }, 100)
 }
 
 // Piece handling
@@ -204,13 +195,18 @@ const pieces = computed(() => {
   return Array.from(grouped.values())
 })
 
-function onPieceClick(piece: PieceState | PieceStateGroup, i: number, e: PointerEvent) {
-  menuPosition.x = e.clientX
-  menuPosition.y = e.clientY
+function onPieceClick(piece: PieceState | PieceStateGroup, i: number, e: PointerEvent | Touch) {
   activePiece.value = piece
   activePieceIndex.value = i
   activeSystem.value = piece.system
-  isPieceMenuOpen.value = true
+  uiStore.updateMenu({
+    type: Menu.Piece,
+    id: i,
+    position: {
+      x: e.clientX,
+      y: e.clientY
+    }
+  })
 }
 
 function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
@@ -229,8 +225,8 @@ function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
       color
     },
     {
-      x: menuPosition.x / uiStore.mapScale - x / uiStore.mapScale,
-      y: menuPosition.y / uiStore.mapScale - y / uiStore.mapScale
+      x: uiStore.currentMenu.position.x / uiStore.mapScale - x / uiStore.mapScale,
+      y: uiStore.currentMenu.position.y / uiStore.mapScale - y / uiStore.mapScale
       // x: menuPosition.x * 2 - x,
       // y: menuPosition.y * 2 - y - 64
     }
@@ -249,9 +245,14 @@ function flipPiece(isFresh: boolean) {
   }
 }
 
+function repositionPiece(piece: PieceState | PieceStateGroup, system: SystemKey) {
+  const pieceSystem = systemsStore.systems[system]
+  systemsStore.positionPiece(pieceSystem, piece)
+}
+
 function dropInSystem(system: SystemKey) {
   if (draggedPiece.value) {
-    systemsStore.movePiece(draggedPiece.value, system)
+    systemsStore.movePiece(draggedPiece.value, system, draggedPiece.value.position)
   }
 }
 
@@ -297,10 +298,12 @@ function togglePreview(open: boolean) {
       :system-position="activeSystemPosition"
       :open-preview="showPreview && activePieceIndex === i"
       draggable="false"
+      @reposition="repositionPiece(piece, $event)"
       @click="onPieceClick(piece, i, $event)"
       @preview-close="togglePreview(false)"
       @dragstart="onPieceMoveStart(piece, $event)"
       @dragend="onPieceMoveEnd(piece, $event)"
+      @press-click="onPieceClick(piece, i, $event)"
       @press-start="onPieceMoveStart(piece, $event)"
       @press-move="onPieceMove(piece, $event)"
       @press-end="onPieceMoveEnd(piece, $event)"
@@ -327,26 +330,24 @@ function togglePreview(open: boolean) {
   </div>
 
   <!-- The dropdown is reused based on the clicked system -->
-  <GameBoardMenu
-    v-if="activeSystem"
+  <GameSystemMenu
+    v-if="activeSystem && uiStore.currentMenu.type === Menu.System"
     :active-system="activeSystem"
-    :is-open="isBoardMenuOpen"
-    :pointer-position="menuPosition"
+    :pointer-position="uiStore.currentMenu.position"
     @select="addPiece"
-    @close="closeBoardMenu"
+    @close="closeMenu(Menu.System)"
   />
 
   <!-- The dropdown is reused based on the clicked piece -->
   <GamePieceMenu
-    v-if="activePiece"
+    v-if="activePiece && uiStore.currentMenu.type === Menu.Piece"
     :active-piece="activePiece"
-    :is-open="isPieceMenuOpen"
-    :pointer-position="menuPosition"
+    :pointer-position="uiStore.currentMenu.position"
     @add="addPiece"
     @remove="removePiece"
     @flip="flipPiece"
-    @update="onPieceOpenChange"
     @preview="togglePreview(true)"
+    @close="closeMenu(Menu.Piece)"
   />
 </template>
 

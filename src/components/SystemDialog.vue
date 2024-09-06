@@ -44,9 +44,10 @@ const props = defineProps<{
   defaultOpen?: boolean
 }>()
 
-// const emit = defineEmits<{
-//   confirm: []
-// }>()
+const emit = defineEmits<{
+  // confirm: []
+  close: []
+}>()
 
 const gameStore = useGameStore()
 const systemsStore = useSystemsStore()
@@ -382,8 +383,10 @@ function updateState(update: UpdatePayload) {
           <Button
             variant="link"
             class="mr-2"
-            >{{ $t('common.close') }}</Button
+            @click="emit('close')"
           >
+            {{ $t('common.close') }}
+          </Button>
         </DialogClose>
         <!-- <DialogClose as-child>
           <Button

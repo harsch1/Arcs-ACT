@@ -164,7 +164,7 @@ export const useSystemsStore = defineStore('systems', () => {
 
   function addPiece(
     system: SystemKey,
-    piece: MapPiece,
+    piece: MapPiece | PieceState,
     position?: { x: number; y: number }
   ): PieceState | undefined {
     const activeSystem = systems.value[system]
@@ -178,7 +178,8 @@ export const useSystemsStore = defineStore('systems', () => {
       ...piece
     }
 
-    let isPositioned = false
+    let isPositioned = pieceState.position.x > -1 && pieceState.position.y > -1
+
     if (Object.values(BuildingType).includes(piece.type as BuildingType)) {
       // Fill the first empty slot
       const slot = activeSystem.slots.find((s) => s.isEmpty)
@@ -194,21 +195,11 @@ export const useSystemsStore = defineStore('systems', () => {
       }
     }
 
-    // Ensure the piece was positioned
     if (!isPositioned) {
-      pieceState.position = position ??
-        randomPointWithinSVG(
-          activeSystem.config.el!,
-          activeSystem.config.shape!,
-          activeSystem.config.bounds,
-          uiStore.mapScale
-        ) ?? {
-          x: getRandomInt(activeSystem.config.position.x, activeSystem.config.position.x + 100),
-          y: getRandomInt(activeSystem.config.position.y, activeSystem.config.position.y + 100)
-        }
+      positionPiece(activeSystem, pieceState, position)
     }
 
-    pieceState.id = id.value++
+    pieceState.id = pieceState.id ?? id.value++
     pieceState.isFresh = pieceState.isFresh ?? true
     // Keep reference of system
     pieceState.system = system
@@ -217,15 +208,16 @@ export const useSystemsStore = defineStore('systems', () => {
     return pieceState
   }
 
-  function removePiece(piece: PieceState, isFresh: boolean) {
+  function removePiece(piece: PieceState, isFresh: boolean, id?: number) {
     if (!piece.system) {
       return
     }
 
     const activeSystem = systems.value[piece.system]
-    // const pieceIndex = activeSystem.pieces.findIndex((p) => p === piece)
-    const pieceIndex = activeSystem.pieces.findIndex(
-      (p) => p.type === piece.type && p.color === piece.color && p.isFresh === isFresh
+    const pieceIndex = activeSystem.pieces.findIndex((p) =>
+      id !== undefined
+        ? p.id === id
+        : p.type === piece.type && p.color === piece.color && p.isFresh === isFresh
     )
 
     if (pieceIndex < 0) {
@@ -261,8 +253,85 @@ export const useSystemsStore = defineStore('systems', () => {
     }
   }
 
-  function movePiece(piece: PieceState | PieceStateGroup, destination: SystemKey) {
-    piece.system = destination
+  function movePiece(
+    piece: PieceState | PieceStateGroup,
+    destination: SystemKey,
+    position?: { x: number; y: number }
+  ) {
+    if (piece.system && piece.system !== destination) {
+      const pieceSystem = systems.value[piece.system]
+
+      if ('group' in piece) {
+        piece.group.fresh.forEach((freshPiece) => {
+          const toMove = pieceSystem.pieces.find((p) => p.id === freshPiece.id)
+
+          if (toMove) {
+            toMove.position = position ?? { x: -1, y: -1 }
+            removePiece(toMove, true, toMove.id)
+            addPiece(destination, toMove)
+          }
+        })
+
+        piece.group.damaged.forEach((damagedPiece) => {
+          const toMove = pieceSystem.pieces.find((p) => p.id === damagedPiece.id)
+
+          if (toMove) {
+            toMove.position = position ?? { x: -1, y: -1 }
+            removePiece(toMove, true, toMove.id)
+            addPiece(destination, toMove)
+          }
+        })
+      } else {
+        piece.position = position ?? { x: -1, y: -1 }
+        removePiece(piece, !!piece.isFresh, piece.id)
+        addPiece(destination, piece, position)
+      }
+    }
+  }
+
+  function positionPiece(
+    system: SystemInfo,
+    piece: PieceState | PieceStateGroup,
+    position?: { x: number; y: number }
+  ) {
+    if (position) {
+      piece.position = position
+      return
+    }
+
+    if (system.config.el) {
+      const position = randomPointWithinSVG(
+        system.config.el,
+        system.config.shape!,
+        system.config.bounds,
+        uiStore.mapScale
+      ) ?? {
+        x: getRandomInt(system.config.position.x, system.config.position.x + 100),
+        y: getRandomInt(system.config.position.y, system.config.position.y + 100)
+      }
+
+      if ('group' in piece) {
+        const pieceSystem = systems.value[piece.system!]
+
+        piece.group.fresh.forEach((freshPiece) => {
+          const toPosition = pieceSystem.pieces.find((p) => p.id === freshPiece.id)
+
+          if (toPosition) {
+            toPosition.position = position
+          }
+        })
+
+        piece.group.damaged.forEach((damagedPiece) => {
+          const toPosition = pieceSystem.pieces.find((p) => p.id === damagedPiece.id)
+
+          if (toPosition) {
+            toPosition.position = position
+          }
+        })
+      }
+
+      piece.position = position
+    }
   }
 
   function parse(systemsConfig: SaveFile['board']['systems']) {
@@ -323,6 +392,7 @@ export const useSystemsStore = defineStore('systems', () => {
     parse,
     save,
     setSystemUi,
+    positionPiece,
     isSystemFull,
     $reset
   }

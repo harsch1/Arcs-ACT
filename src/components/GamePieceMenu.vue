@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Redo, Sparkles } from 'lucide-vue-next'
 import { Color, ShipType, TokenType } from '@/Archive'
+import { OnClickOutside } from '@vueuse/components'
 import { isFlagship } from '@/lib/utils'
 
 import type { PieceState, PieceStateGroup } from '@/stores/systems'
 
 const props = defineProps<{
   activePiece: PieceState | PieceStateGroup
-  isOpen: boolean
   pointerPosition: {
     x: number
     y: number
@@ -25,12 +25,11 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  update: [value: boolean]
-  // select: [type: BuildingType, color: Color]
   add: [type: TokenType | ShipType, color?: Color]
   remove: [isFresh: boolean]
   flip: [isFresh: boolean]
   preview: []
+  close: []
 }>()
 
 const { t } = useI18n()
@@ -63,10 +62,6 @@ const hasDamaged = computed(() => {
   return !props.activePiece.isFresh
 })
 
-function onOpenChange(e: boolean) {
-  emit('update', e)
-}
-
 function onAdd() {
   if (props.activePiece.color) {
     emit('add', props.activePiece.type as ShipType, props.activePiece.color)
@@ -90,84 +85,87 @@ function preview() {
 
 <template>
   <DropdownMenu
-    :open="isOpen"
-    @update:open="onOpenChange"
+    :default-open="true"
+    :modal="false"
+    @update:open="emit('close')"
   >
     <DropdownMenuTrigger
       class="fixed dropdown-trigger"
       :style="triggerStyle"
     ></DropdownMenuTrigger>
     <DropdownMenuContent>
-      <DropdownMenuLabel>{{ pieceId }}</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <!-- PieceStateGroup menu -->
-      <template v-if="'group' in activePiece">
-        <DropdownMenuItem @select="onAdd">
-          <Sparkles
-            class="mr-2"
-            :size="16"
-          />
-          {{ $t('piece_menu.add') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          v-if="hasFresh"
-          @select="onFlip(true)"
-        >
-          <Sparkles
-            class="mr-2"
-            :size="16"
-          />
-          {{ $t('piece_menu.damage_fresh') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          v-if="hasFresh"
-          @select="onRemove(true)"
-        >
-          <Sparkles
-            class="mr-2"
-            :size="16"
-          />
-          {{ $t('piece_menu.remove_fresh') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          v-if="hasDamaged"
-          @select="onFlip(false)"
-        >
-          <Redo
-            class="mr-2"
-            :size="16"
-          />
-          {{ $t('piece_menu.repair_damaged') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          v-if="hasDamaged"
-          @select="onRemove(false)"
-        >
-          <Redo
-            class="mr-2"
-            :size="16"
-          />
-          {{ $t('piece_menu.remove_damaged') }}
-        </DropdownMenuItem>
-      </template>
-      <!-- PieceState menu -->
-      <template v-else>
-        <DropdownMenuItem
-          v-if="!isFlagship(activePiece.type)"
-          @select="onFlip(activePiece.isFresh)"
-        >
-          {{ activePiece.isFresh ? $t('piece_menu.damage') : $t('piece_menu.repair') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          v-if="isFlagship(activePiece.type)"
-          @select="preview()"
-        >
-          {{ $t('common.view') }}
-        </DropdownMenuItem>
-        <DropdownMenuItem @select="onRemove()">
-          {{ $t('piece_menu.remove') }}
-        </DropdownMenuItem>
-      </template>
+      <OnClickOutside @trigger="emit('close')">
+        <DropdownMenuLabel>{{ pieceId }}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <!-- PieceStateGroup menu -->
+        <template v-if="'group' in activePiece">
+          <DropdownMenuItem @select="onAdd">
+            <Sparkles
+              class="mr-2"
+              :size="16"
+            />
+            {{ $t('piece_menu.add') }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="hasFresh"
+            @select="onFlip(true)"
+          >
+            <Sparkles
+              class="mr-2"
+              :size="16"
+            />
+            {{ $t('piece_menu.damage_fresh') }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="hasFresh"
+            @select="onRemove(true)"
+          >
+            <Sparkles
+              class="mr-2"
+              :size="16"
+            />
+            {{ $t('piece_menu.remove_fresh') }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="hasDamaged"
+            @select="onFlip(false)"
+          >
+            <Redo
+              class="mr-2"
+              :size="16"
+            />
+            {{ $t('piece_menu.repair_damaged') }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="hasDamaged"
+            @select="onRemove(false)"
+          >
+            <Redo
+              class="mr-2"
+              :size="16"
+            />
+            {{ $t('piece_menu.remove_damaged') }}
+          </DropdownMenuItem>
+        </template>
+        <!-- PieceState menu -->
+        <template v-else>
+          <DropdownMenuItem
+            v-if="!isFlagship(activePiece.type)"
+            @select="onFlip(activePiece.isFresh)"
+          >
+            {{ activePiece.isFresh ? $t('piece_menu.damage') : $t('piece_menu.repair') }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="isFlagship(activePiece.type)"
+            @select="preview()"
+          >
+            {{ $t('common.view') }}
+          </DropdownMenuItem>
+          <DropdownMenuItem @select="onRemove(activePiece.isFresh)">
+            {{ $t('piece_menu.remove') }}
+          </DropdownMenuItem>
+        </template>
+      </OnClickOutside>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

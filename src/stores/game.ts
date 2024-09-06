@@ -121,6 +121,7 @@ export const useGameStore = defineStore('game', () => {
 
   function deleteGame(id: string) {
     localforage.removeItem(id)
+    savedGames.value.delete(id)
   }
 
   async function updateGame(id: string, payload: SaveFile) {

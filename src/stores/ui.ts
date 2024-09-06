@@ -1,6 +1,7 @@
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { useGameStore } from './game'
+import { useThrottleFn } from '@vueuse/core'
+import { useGameStore } from '@/stores/game'
 
 export enum Screen {
   Settings,
@@ -11,9 +12,28 @@ export enum Screen {
   _TOTAL_
 }
 
+export enum Menu {
+  System,
+  Piece
+}
+
+type CurrentMenu = {
+  type?: Menu
+  id?: string | number
+  position: {
+    x: number
+    y: number
+  }
+}
+
 export const useUiStore = defineStore('ui', () => {
   const gameStore = useGameStore()
 
+  const currentMenu = reactive<CurrentMenu>({
+    type: undefined,
+    id: undefined,
+    position: { x: -1, y: -1 }
+  })
   const mapScale = ref(0.5)
   const currentScreen = ref(Screen.Settings)
   const showNext = computed(() => currentScreen.value < Screen._TOTAL_ - 1)
@@ -61,5 +81,34 @@ export const useUiStore = defineStore('ui', () => {
     }
   }
 
-  return { mapScale, showNext, canNext, canBack, currentScreen, advance, go, validate }
+  const updateMenu = useThrottleFn(
+    ({ type, id, position, isOpen }: Partial<CurrentMenu> & { isOpen?: boolean }) => {
+      if (currentMenu.type === type && currentMenu.id === id) {
+        currentMenu.type = undefined
+        currentMenu.id = undefined
+        return
+      }
+
+      currentMenu.type = type
+      currentMenu.id = id
+      // Don't update the position when closing to avoid jumping
+      if (isOpen !== false) {
+        currentMenu.position = position ?? { x: -1, y: -1 }
+      }
+    },
+    200
+  )
+
+  return {
+    currentMenu,
+    mapScale,
+    showNext,
+    canNext,
+    canBack,
+    currentScreen,
+    advance,
+    go,
+    validate,
+    updateMenu
+  }
 })

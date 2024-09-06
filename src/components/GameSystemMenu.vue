@@ -23,7 +23,6 @@ type PieceType = BuildingType | ShipType | TokenType
 
 const props = defineProps<{
   activeSystem: SystemKey
-  isOpen: boolean
   pointerPosition: {
     x: number
     y: number
@@ -31,7 +30,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  update: [value: boolean]
   select: [type: PieceType, color?: Color]
   close: []
 }>()
@@ -53,20 +51,16 @@ const triggerStyle = computed(() => ({
   top: `${props.pointerPosition.y}px`
 }))
 
-function onOpenChange(e: boolean) {
-  emit('update', e)
-}
-
 function onSelect(type: PieceType, color?: Color) {
   emit('select', type, color)
-  emit('close')
 }
 </script>
 
 <template>
   <DropdownMenu
-    :open="isOpen"
-    @update:open="onOpenChange"
+    :default-open="true"
+    :modal="false"
+    @update:open="emit('close')"
   >
     <DropdownMenuTrigger
       class="fixed dropdown-trigger"
@@ -159,6 +153,7 @@ function onSelect(type: PieceType, color?: Color) {
         <DropdownMenuSeparator />
         <SystemDialog
           :system-id="activeSystem"
+          @close="$emit('close')"
           @confirm="$emit('close')"
         >
           <DropdownMenuItem @select.prevent>
