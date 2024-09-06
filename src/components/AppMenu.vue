@@ -46,7 +46,7 @@ function loadTestGame(id: string) {
     </SheetTrigger>
     <SheetContent side="left">
       <SheetHeader>
-        <SheetTitle>
+        <SheetTitle class="text-center">
           {{ $t('arcs_act') }}
         </SheetTitle>
         <SheetDescription>

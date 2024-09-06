@@ -5,7 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
-import { Settings } from 'lucide-vue-next'
+import { Settings, Map } from 'lucide-vue-next'
 import Button from '@/components/ui/button/Button.vue'
 import SystemDialog from '@/components/SystemDialog.vue'
 
@@ -13,6 +13,7 @@ import { useSystemsStore } from '@/stores/systems'
 import { ref } from 'vue'
 import { getSystemOverview } from '@/lib/utils'
 import type { SystemKey } from '@/Archive'
+import { RouterLink } from 'vue-router'
 
 const systemsStore = useSystemsStore()
 const activeSystem = ref<SystemKey | null>()
@@ -25,7 +26,7 @@ function updateDialog(open: boolean) {
 </script>
 
 <template>
-  <div class="px-4">
+  <div class="px-4 pb-10">
     <p class="w-full py-2 text-lg">{{ $t('campaign.board_state_help') }}</p>
     <Accordion
       type="multiple"
@@ -121,6 +122,22 @@ function updateDialog(open: boolean) {
     </Accordion>
   </div>
 
+  <!-- Float button -->
+  <div class="space-y-1 map-controls">
+    <RouterLink
+      :to="{ name: 'map' }"
+      v-slot="{ navigate }"
+      custom
+    >
+      <Button
+        size="icon"
+        @click="navigate"
+      >
+        <Map />
+      </Button>
+    </RouterLink>
+  </div>
+
   <SystemDialog
     v-if="activeSystem"
     :default-open="true"
@@ -129,3 +146,13 @@ function updateDialog(open: boolean) {
   >
   </SystemDialog>
 </template>
+
+<style scoped>
+.map-controls {
+  @apply pb-safe-offset-2 px-safe-offset-2 right-0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  bottom: 68px;
+}
+</style>

@@ -9,9 +9,9 @@ import { Archive, Color, Fate, Player, type SaveFile } from '@/Archive'
 import i18n from '@/i18n'
 
 import test from '@/stores/test.json'
-import type { ISOStringFormat } from 'date-fns'
 import { snakeCase } from 'lodash'
 import { useUiStore } from '@/stores/ui'
+import type { ISOStringFormat } from 'date-fns'
 
 export type GameSettings = {
   id?: string
@@ -107,6 +107,8 @@ export const useGameStore = defineStore('game', () => {
       initSystems(archive.board._systems)
       cards.initPool(archive.players)
     })
+
+    return archive.id
   }
 
   async function exportGame(id: string) {

@@ -7,8 +7,9 @@ import { Screen } from '@/stores/ui'
 
 function checkGameLoaded(to: RouteLocationNormalized, from: RouteLocationNormalizedLoaded) {
   const gameStore = useGameStore()
+  const hasGameId = gameStore.settings.id || to.query.id !== undefined
 
-  if (to.name !== 'home' && to.name !== 'campaign' && !gameStore.settings.id) {
+  if (to.name !== 'home' && to.name !== 'campaign' && !hasGameId) {
     return { name: 'home' }
   }
 }
@@ -56,16 +57,25 @@ const router = createRouter({
     {
       path: '/map',
       name: 'map',
-      component: () => import('@/views/CampaignView.vue'),
-      beforeEnter: checkGameLoaded
+      component: () => import('@/views/CampaignView.vue')
+      // beforeEnter: checkGameLoaded
     },
     {
       path: '/list',
       name: 'list_view',
-      component: () => import('@/views/CampaignListView.vue'),
-      beforeEnter: checkGameLoaded
+      component: () => import('@/views/CampaignListView.vue')
+      // beforeEnter: checkGameLoaded
     }
   ]
+})
+
+router.beforeEach((to) => {
+  const gameStore = useGameStore()
+
+  // Keep the game id if loaded
+  if (to.query.id === undefined && gameStore.settings.id) {
+    return { name: to.name, replace: true, query: { ...to.query, id: gameStore.settings.id } }
+  }
 })
 
 export default router

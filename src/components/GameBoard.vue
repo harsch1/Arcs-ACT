@@ -5,7 +5,8 @@ import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
 import { pausableFilter } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
-import { ZoomIn, ZoomOut } from 'lucide-vue-next'
+import { ZoomIn, ZoomOut, ListCollapse } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
 
 import { BuildingType } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
@@ -18,7 +19,7 @@ import type { PieceState, SystemUiConfig, PieceStateGroup, SystemConfig } from '
 import type { CSSProperties } from 'vue'
 import { transform } from 'lodash'
 import { isBuilding, isToken, isUniqueToken } from '@/lib/utils'
-import { Menu, useUiStore } from '@/stores/ui'
+import { Menu, Screen, useUiStore } from '@/stores/ui'
 
 const uiStore = useUiStore()
 const dragControl = pausableFilter()
@@ -257,10 +258,8 @@ function dropInSystem(system: SystemKey) {
 }
 
 const activePieceIndex = ref<number>(-1)
-const showPreview = ref(false)
 function togglePreview(open: boolean) {
-  activePieceIndex.value = open ? activePieceIndex.value : -1
-  showPreview.value = open
+  uiStore.piecePreview = open ? activePieceIndex.value : undefined
 }
 </script>
 
@@ -296,7 +295,7 @@ function togglePreview(open: boolean) {
       :key="`${piece.type}${piece.color ? `-${piece.color}` : ''}-${piece.system}`"
       :piece-config="piece"
       :system-position="activeSystemPosition"
-      :open-preview="showPreview && activePieceIndex === i"
+      :open-preview="uiStore.piecePreview === i"
       draggable="false"
       @reposition="repositionPiece(piece, $event)"
       @click="onPieceClick(piece, i, $event)"
@@ -312,21 +311,31 @@ function togglePreview(open: boolean) {
   </div>
 
   <!-- Map controls -->
-  <div class="map-controls">
+  <div class="space-y-1 map-controls">
     <Button
       size="icon"
-      variant="outline"
       @click="zoom(0.1)"
     >
       <ZoomIn />
     </Button>
     <Button
       size="icon"
-      variant="outline"
       @click="zoom(-0.1)"
     >
       <ZoomOut />
     </Button>
+    <RouterLink
+      :to="{ name: 'campaign', query: { screen: Screen.Map } }"
+      v-slot="{ navigate }"
+      custom
+    >
+      <Button
+        size="icon"
+        @click="navigate"
+      >
+        <ListCollapse />
+      </Button>
+    </RouterLink>
   </div>
 
   <!-- The dropdown is reused based on the clicked system -->

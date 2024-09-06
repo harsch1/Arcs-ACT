@@ -36,6 +36,7 @@ export const useUiStore = defineStore('ui', () => {
   })
   const mapScale = ref(0.5)
   const currentScreen = ref(Screen.Settings)
+  const piecePreview = ref<number | string | undefined>()
   const showNext = computed(() => currentScreen.value < Screen._TOTAL_ - 1)
   // const showBack = computed(() => currentScreen.value < Screen._TOTAL_)
   const canNext = computed(() => {
@@ -106,6 +107,7 @@ export const useUiStore = defineStore('ui', () => {
     canNext,
     canBack,
     currentScreen,
+    piecePreview,
     advance,
     go,
     validate,

@@ -1,12 +1,29 @@
 <script setup lang="ts">
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import AppMenu from '@/components/AppMenu.vue'
 import AppNavigation from '@/components/AppNavigation.vue'
 import { useGameStore } from '@/stores/game'
 import Toaster from '@/components/ui/toast/Toaster.vue'
+import { Screen } from '@/stores/ui'
 
 const router = useRouter()
+const route = useRoute()
 const gameStore = useGameStore()
+
+router
+  .isReady()
+  .then(() => {
+    if (route.query.id) {
+      return gameStore.loadGame(route.query.id as string)
+    }
+  })
+  .then((loaded) => {
+    if (loaded) {
+      return router.replace({ name: 'campaign', query: { screen: Screen.Map } })
+    }
+
+    return router.replace({ name: 'home', query: {} })
+  })
 </script>
 
 <template>
