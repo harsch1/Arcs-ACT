@@ -45,6 +45,7 @@ function advance(delta: number = 1) {
 
 async function save(id?: string) {
   const save = await gameStore.saveGame(id)
+  gameStore.loadGame(save.id)
   // downloadId.value = save.id
   toast({
     title: id
@@ -68,7 +69,8 @@ async function save(id?: string) {
   >
     <template v-if="gameStore.isGameLoaded">
       <Button
-        class="flex flex-col items-center h-auto"
+        class="flex flex-col items-center h-auto hover:bg-slate-100 hover:text-slate-800"
+        :class="{ 'bg-slate-100 text-slate-800': uiStore.currentScreen === Screen.Players }"
         variant="ghost"
         @click="router.push({ name: 'campaign', query: { screen: Screen.Players } })"
       >
@@ -77,7 +79,8 @@ async function save(id?: string) {
       </Button>
 
       <Button
-        class="flex flex-col items-center h-auto"
+        class="flex flex-col items-center h-auto hover:bg-slate-100 hover:text-slate-800"
+        :class="{ 'bg-slate-100 text-slate-800': uiStore.currentScreen === Screen.Map }"
         variant="ghost"
         @click="router.push({ name: 'campaign', query: { screen: Screen.Map } })"
       >
@@ -86,7 +89,8 @@ async function save(id?: string) {
       </Button>
 
       <Button
-        class="flex flex-col items-center h-auto"
+        class="flex flex-col items-center h-auto hover:bg-slate-100 hover:text-slate-800"
+        :class="{ 'bg-slate-100 text-slate-800': uiStore.currentScreen === Screen.Deck }"
         variant="ghost"
         @click="router.push({ name: 'campaign', query: { screen: Screen.Deck } })"
       >
@@ -95,7 +99,8 @@ async function save(id?: string) {
       </Button>
 
       <Button
-        class="flex flex-col items-center h-auto"
+        class="flex flex-col items-center h-auto hover:bg-slate-100 hover:text-slate-800"
+        :class="{ 'bg-slate-100 text-slate-800': uiStore.currentScreen === Screen.Misc }"
         variant="ghost"
         @click="router.push({ name: 'campaign', query: { screen: Screen.Misc } })"
       >

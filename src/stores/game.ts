@@ -183,7 +183,7 @@ export const useGameStore = defineStore('game', () => {
     // Clone the archive to be able to save it to localforage
     await localforage.setItem(id, JSON.parse(JSON.stringify(save)))
 
-    return save
+    return save as Required<SaveFile>
   }
 
   function addPlayer(name: string, color: Color, fate?: Fate) {

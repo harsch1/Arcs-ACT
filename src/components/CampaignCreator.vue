@@ -31,7 +31,7 @@ const players = computed({
 const currentScreen = computed(() => uiStore.currentScreen)
 const currentPlayer = ref<Color | undefined>(players.value[0])
 const playerColors = Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
-const downloadId = ref<string>()
+const downloadId = computed(() => gameStore.settings.id)
 
 function updatePlayer(color: Color, update: Partial<Player>) {
   const payload = {
@@ -210,8 +210,6 @@ watch(players, () => {
           <Dices :size="24" />
         </Button>
       </div>
-      <!-- :model-value="globalFilter"
-        @update:model-value="(value) => (globalFilter = String(value))" -->
 
       <Textarea
         class="my-2 min-h-40"
@@ -226,7 +224,7 @@ watch(players, () => {
           @click="gameStore.exportGame(downloadId)"
         >
           {{ $t('common.download') }}
-          <FileDown />
+          <FileDown class="ml-2" />
         </Button>
       </div>
     </div>
