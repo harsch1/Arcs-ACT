@@ -60,10 +60,18 @@ watch(
   }
 )
 
-watch(players, () => {
+watch([players, () => gameStore.settings.act], () => {
   if (currentPlayer.value === undefined || !players.value.includes(currentPlayer.value)) {
     currentPlayer.value = players.value[0]
   }
+
+  // When moving to players screen need to ensure the correct
+  // number of fates has been added
+  gameStore.players.forEach((player) => {
+    player.fateHistory = Array(gameStore.settings.act)
+      .fill([])
+      .map((val, i) => player.fateHistory[i] ?? val)
+  })
 })
 </script>
 
@@ -86,7 +94,7 @@ watch(players, () => {
             :key="i"
             :value="`${i}`"
             size="lg"
-            class="mx-1"
+            class="mx-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground bg-accent"
           >
             {{ $t('act', { n: i }) }}
           </ToggleGroupItem>

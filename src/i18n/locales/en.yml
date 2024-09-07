@@ -217,5 +217,5 @@ fates:
 
 validations:
   choose_players: Choose players
-  choose_fates: Choose fates
+  choose_fates: Choose fates for all players
   name_already_exists: Campaign name already exists

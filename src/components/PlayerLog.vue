@@ -42,12 +42,6 @@ const unavailableFates = computed(() => {
   return chosenFates
 })
 
-if (props.act && props.player.fateHistory.length < props.act) {
-  for (let i = props.player.fateHistory.length; i < props.act; i++) {
-    addFate()
-  }
-}
-
 function updateFirstRegent(value: boolean) {
   const currentRegent = gameStore.settings.firstRegent
   // No first regent
@@ -90,14 +84,6 @@ function updateFate(
   update.power = history.reduce((acc, [, power]) => ((acc += power ?? 0), acc), 0)
 
   updatePlayer(update)
-}
-
-function addFate() {
-  updatePlayer({
-    color: props.player.color,
-    // @ts-ignore WIP
-    fateHistory: [...props.player.fateHistory, []]
-  })
 }
 </script>
 
