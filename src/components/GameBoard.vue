@@ -220,16 +220,14 @@ function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
 
   systemsStore.addPiece(
     activeSystem.value,
+    // @ts-ignore
     {
       type,
-      // @ts-ignore
       color
     },
     {
       x: uiStore.currentMenu.position.x / uiStore.mapScale - x / uiStore.mapScale,
       y: uiStore.currentMenu.position.y / uiStore.mapScale - y / uiStore.mapScale
-      // x: menuPosition.x * 2 - x,
-      // y: menuPosition.y * 2 - y - 64
     }
   )
 }
