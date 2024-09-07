@@ -45,10 +45,6 @@ export const useUiStore = defineStore('ui', () => {
   const piecePreview = ref<number | string | undefined>()
   const showNext = computed(() => currentScreen.value < Screen._TOTAL_ - 1)
   // const showBack = computed(() => currentScreen.value < Screen._TOTAL_)
-  const canNext = computed(() => {
-    // If there are no validations allow advancing by
-    return screenValidations[currentScreen.value]?.() ?? true
-  })
   const canBack = computed(() => currentScreen.value > 0)
 
   async function advance(delta: number = 1) {
@@ -121,7 +117,6 @@ export const useUiStore = defineStore('ui', () => {
     currentMenu,
     mapScale,
     showNext,
-    canNext,
     canBack,
     currentScreen,
     piecePreview,

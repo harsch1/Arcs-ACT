@@ -359,13 +359,3 @@ function togglePreview(open: boolean) {
     @close="closeMenu(Menu.Piece)"
   />
 </template>
-
-<style scoped>
-.map-controls {
-  @apply pb-safe-offset-2 px-safe-offset-2 right-0;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  bottom: 68px;
-}
-</style>

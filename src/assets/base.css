@@ -106,3 +106,17 @@ body.app-body {
   height: calc(100dvh - 64px - 68px - env(safe-area-inset-bottom));
   overflow: auto;
 }
+
+.map-controls {
+  @apply pb-safe-offset-2 px-safe-offset-2 right-0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  bottom: 68px;
+}
+
+@screen sm {
+  .map-controls {
+    margin-right: calc(50% - theme('maxWidth.md') / 2);
+  }
+}
