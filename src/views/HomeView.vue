@@ -6,7 +6,7 @@ import GameLoader from '@/components/GameLoader.vue'
 const router = useRouter()
 
 function viewGame() {
-  router.push('list')
+  router.push({ name: 'map' })
 }
 </script>
 

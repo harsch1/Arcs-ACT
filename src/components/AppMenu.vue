@@ -23,8 +23,8 @@ const open = ref(false)
 function viewGame() {
   open.value = false
 
-  if (route.name !== 'list_view' && route.name !== 'map') {
-    router.push('list')
+  if (route.name !== 'map') {
+    router.push({ name: 'map' })
   }
 }
 

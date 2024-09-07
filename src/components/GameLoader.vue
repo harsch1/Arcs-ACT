@@ -233,7 +233,7 @@ async function confirmSave(id: string) {
       >
       </Textarea>
 
-      <AlertDialogFooter class="max-sm:px-4 position-sticky -bottom-14">
+      <AlertDialogFooter class="sticky max-sm:px-4 -bottom-14">
         <AlertDialogCancel as-child>
           <Button
             variant="link"

@@ -5,14 +5,19 @@ import { Settings, Users, Map, Layers, NotebookText } from 'lucide-vue-next'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { useI18n } from 'vue-i18n'
 import { useGameStore } from '@/stores/game'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 const { toast } = useToast()
 const router = useRouter()
-
+const route = useRoute()
 const gameStore = useGameStore()
 const uiStore = useUiStore()
+
+const isMapView = computed(() => {
+  return uiStore.currentScreen === Screen.Map || route.name === 'map'
+})
 
 function showError(messages: string[]) {
   toast({
@@ -74,7 +79,7 @@ async function save(id?: string) {
 
       <Button
         class="flex flex-col items-center h-auto hover:bg-slate-100 hover:text-slate-800"
-        :class="{ 'bg-slate-100 text-slate-800': uiStore.currentScreen === Screen.Map }"
+        :class="{ 'bg-slate-100 text-slate-800': isMapView }"
         variant="ghost"
         @click="router.push({ name: 'campaign', query: { screen: Screen.Map } })"
       >

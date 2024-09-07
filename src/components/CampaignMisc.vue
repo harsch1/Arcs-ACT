@@ -18,7 +18,7 @@ import { generateName } from '@/lib/utils'
 const gameStore = useGameStore()
 const { t } = useI18n()
 const { toast } = useToast()
-const downloadId = computed(() => gameStore.settings.id)
+const gameId = computed(() => gameStore.settings.id)
 const nameAlreadyExists = ref(false)
 
 function updateCampaignNotes(notes: string) {
@@ -83,12 +83,12 @@ async function save(id?: string) {
     @update:model-value="(value) => updateCampaignNotes(value as string)"
   />
 
-  <div class="my-16 space-x-4 text-center">
+  <div
+    v-if="gameId"
+    class="my-16 space-x-4 text-center"
+  >
     <!-- Download button -->
-    <Button
-      v-if="downloadId"
-      @click="gameStore.exportGame(downloadId)"
-    >
+    <Button @click="gameStore.exportGame(gameId)">
       {{ $t('common.download') }}
     </Button>
 
