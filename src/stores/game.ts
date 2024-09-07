@@ -167,6 +167,13 @@ export const useGameStore = defineStore('game', () => {
     if (!id) {
       name = settings.name ?? generateName()
       id = GAME_SAVE_PREFIX + snakeCase(name)
+
+      // Validate unique name
+      const _exists = await localforage.getItem<SaveFile>(id)
+      if (_exists !== null) {
+        throw new Error('NAME_ALREADY_EXISTS')
+      }
+
       save = {
         name,
         timestamp: new Date().toISOString() as ISOStringFormat
@@ -177,9 +184,10 @@ export const useGameStore = defineStore('game', () => {
     }
 
     save = {
-      id,
       ...save,
-      ...archive
+      ...archive,
+      ...settings,
+      id
     }
 
     // Clone the archive to be able to save it to localforage

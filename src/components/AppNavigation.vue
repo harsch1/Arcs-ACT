@@ -1,13 +1,7 @@
 <script lang="ts" setup>
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Screen, useUiStore } from '@/stores/ui'
-import { ChevronDown, Settings, Users, Map, Layers, NotebookText } from 'lucide-vue-next'
+import { Settings, Users, Map, Layers, NotebookText } from 'lucide-vue-next'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { useI18n } from 'vue-i18n'
 import { useGameStore } from '@/stores/game'
@@ -163,36 +157,6 @@ async function save(id?: string) {
       >
         {{ $t('common.next') }}
       </Button>
-      <div
-        v-else-if="gameStore.settings.id"
-        class="inline-flex items-center justify-center rounded-md"
-      >
-        <Button
-          class="rounded-r-none"
-          @click="save(gameStore.settings.id)"
-        >
-          {{ $t('common.update') }}
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button
-              class="rounded-l-none"
-              size="icon"
-            >
-              <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            class="border-0 bg-primary text-primary-foreground"
-            side="top"
-            align="end"
-          >
-            <DropdownMenuItem @click="save()">
-              {{ $t('common.create_new') }}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
       <Button
         v-else
         @click="save()"

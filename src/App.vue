@@ -25,7 +25,7 @@ router
       })
     }
 
-    return router.replace({ name: 'home', query: {} })
+    return router.replace({ name: route.name === 'campaign' ? 'campaign' : 'home', query: {} })
   })
 </script>
 

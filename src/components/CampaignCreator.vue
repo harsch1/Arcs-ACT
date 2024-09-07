@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { computed, ref, watch } from 'vue'
 import { CardType, Color, Player } from '@/Archive'
-import PlayerLog from '@/components/PlayerLog.vue'
-import GameBoardList from '@/components/GameBoardList.vue'
 import { useGameStore } from '@/stores/game'
-import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
 import { useRoute, useRouter } from 'vue-router'
-
-import { Dices, FileDown } from 'lucide-vue-next'
-import { Textarea } from '@/components/ui/textarea'
-import { generateName } from '@/lib/utils'
 import { Screen, useUiStore } from '@/stores/ui'
+import PlayerLog from '@/components/PlayerLog.vue'
+import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
+import GameBoardList from '@/components/GameBoardList.vue'
+import CampaignMisc from '@/components/CampaignMisc.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -32,7 +28,6 @@ const players = computed({
 const currentScreen = computed(() => uiStore.currentScreen)
 const currentPlayer = ref<Color | undefined>(players.value[0])
 const playerColors = Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
-const downloadId = computed(() => gameStore.settings.id)
 
 function updatePlayer(color: Color, update: Partial<Player>) {
   const payload = {
@@ -40,14 +35,6 @@ function updatePlayer(color: Color, update: Partial<Player>) {
     color
   }
   gameStore.updatePlayer(payload)
-}
-
-function updateCampaignNotes(notes: string) {
-  gameStore.settings.notes = notes
-}
-
-function randomName() {
-  gameStore.settings.name = generateName()
 }
 
 watch(
@@ -196,43 +183,7 @@ watch(players, () => {
       v-if="currentScreen === Screen.Misc"
       class="p-4"
     >
-      <p class="w-full py-2 text-lg">
-        {{ $t('campaign.misc_help_text') }}
-      </p>
-
-      <div class="flex mt-2">
-        <Input
-          class="max-w-sm"
-          :model-value="gameStore.settings.name"
-          :placeholder="$t('campaign.name')"
-          @update:model-value="(value) => (gameStore.settings.name = value as string)"
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          class="ml-2"
-          @click="randomName"
-        >
-          <Dices :size="24" />
-        </Button>
-      </div>
-
-      <Textarea
-        class="my-2 min-h-40"
-        :placeholder="$t('campaign.notes')"
-        :model-value="gameStore.settings.notes"
-        @update:model-value="(value) => updateCampaignNotes(value as string)"
-      />
-
-      <div class="my-8 text-center">
-        <Button
-          v-if="downloadId"
-          @click="gameStore.exportGame(downloadId)"
-        >
-          {{ $t('common.download') }}
-          <FileDown class="ml-2" />
-        </Button>
-      </div>
+      <CampaignMisc />
     </div>
   </main>
 </template>

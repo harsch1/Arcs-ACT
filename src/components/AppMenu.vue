@@ -7,7 +7,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from '@/components/ui/sheet'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Menu } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import GameLoader from '@/components/GameLoader.vue'
@@ -16,13 +16,14 @@ import { GAME_TEST_ID, useGameStore } from '@/stores/game'
 import { ref } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
 const gameStore = useGameStore()
 const open = ref(false)
 
 function viewGame() {
   open.value = false
 
-  if (router.currentRoute.value.name !== 'list_view' && router.currentRoute.value.name !== 'map') {
+  if (route.name !== 'list_view' && route.name !== 'map') {
     router.push('list')
   }
 }
@@ -69,7 +70,7 @@ function loadTestGame(id: string) {
             {{ $t('campaign.new') }}
           </RouterLink>
         </li>
-        <li>
+        <!-- <li>
           <RouterLink :to="{ path: '/campaign', query: { mode: 'edit' } }">
             {{ $t('campaign.current') }}
           </RouterLink>
@@ -83,7 +84,7 @@ function loadTestGame(id: string) {
           <RouterLink to="/list">
             {{ $t('campaign.list_view') }}
           </RouterLink>
-        </li>
+        </li> -->
         <li>
           <GameLoader @loaded="viewGame">
             <Button

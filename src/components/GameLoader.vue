@@ -118,7 +118,9 @@ async function confirmSave(id: string) {
     <AlertDialogTrigger as-child>
       <slot></slot>
     </AlertDialogTrigger>
-    <AlertDialogContent class="max-h-full max-sm:w-full max-w-[800px] overflow-auto">
+    <AlertDialogContent
+      class="p-4 max-h-full max-sm:w-full max-w-[800px] overflow-auto max-sm:px-0"
+    >
       <AlertDialogHeader>
         <AlertDialogTitle>{{ $t('load_dialog.title') }}</AlertDialogTitle>
         <AlertDialogDescription>
@@ -231,13 +233,14 @@ async function confirmSave(id: string) {
       >
       </Textarea>
 
-      <AlertDialogFooter class="">
+      <AlertDialogFooter class="max-sm:px-4 position-sticky -bottom-14">
         <AlertDialogCancel as-child>
           <Button
             variant="link"
             class="!mt-2"
-            >{{ $t('common.cancel') }}</Button
           >
+            {{ $t('common.cancel') }}
+          </Button>
         </AlertDialogCancel>
 
         <Button
