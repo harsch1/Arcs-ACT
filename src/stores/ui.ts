@@ -2,6 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useThrottleFn } from '@vueuse/core'
 import { useGameStore } from '@/stores/game'
+import { useRouter, useRoute } from 'vue-router'
 
 export enum Screen {
   Settings,
@@ -27,6 +28,8 @@ type CurrentMenu = {
 }
 
 export const useUiStore = defineStore('ui', () => {
+  const router = useRouter()
+  const route = useRoute()
   const gameStore = useGameStore()
 
   const currentMenu = reactive<CurrentMenu>({
@@ -35,7 +38,10 @@ export const useUiStore = defineStore('ui', () => {
     position: { x: -1, y: -1 }
   })
   const mapScale = ref(0.5)
-  const currentScreen = ref(Screen.Settings)
+  const currentScreen = computed<Screen>(() => {
+    const screen = Number(route.query.screen as string)
+    return isNaN(screen) ? Screen.Settings : screen
+  })
   const piecePreview = ref<number | string | undefined>()
   const showNext = computed(() => currentScreen.value < Screen._TOTAL_ - 1)
   // const showBack = computed(() => currentScreen.value < Screen._TOTAL_)
@@ -45,12 +51,23 @@ export const useUiStore = defineStore('ui', () => {
   })
   const canBack = computed(() => currentScreen.value > 0)
 
-  function advance(delta: number = 1) {
-    currentScreen.value += delta
+  async function advance(delta: number = 1) {
+    await router.push({
+      query: {
+        ...route.query,
+        screen: currentScreen.value + delta
+      }
+    })
   }
 
-  function go(screen: Screen) {
-    currentScreen.value = screen
+  async function go(screen: Screen) {
+    await router.push({
+      ...route,
+      query: {
+        ...route.query,
+        screen: screen
+      }
+    })
   }
 
   // When `null` is returned, everything is fine

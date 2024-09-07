@@ -28,16 +28,16 @@ function showError(messages: string[]) {
   })
 }
 
-function advance(delta: number = 1) {
+async function advance(delta: number = 1) {
   // Only validate moving forward
   if (delta < 0) {
-    return uiStore.advance(delta)
+    return await uiStore.advance(delta)
   }
 
   const err = uiStore.validate()
 
   if (!err) {
-    return uiStore.advance(delta)
+    return await uiStore.advance(delta)
   }
 
   showError(err)

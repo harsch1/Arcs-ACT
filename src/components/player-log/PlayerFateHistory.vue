@@ -85,66 +85,68 @@ function addFate() {
 </script>
 
 <template>
-  <div
-    v-for="([fate, power, succeeded], fateAct) in player.fateHistory"
-    :key="fate"
-    class="flex flex-row px-3 py-2 border rounded border-neutral-400 fate-wrapper"
-  >
-    <div class="flex flex-col items-center justify-center mr-4 grow-0">
-      <span>Act</span><span class="font-serif text-xl">{{ romanNumerals[fateAct + 1] }}</span>
-    </div>
-    <div class="grow">
-      <div class="flex flex-row">
-        <div class="mr-2 grow">
-          <Label :for="`player-fate-${fateAct}`">{{ $t('player_area.fate') }}</Label>
-          <Select
-            :id="`player-fate-${fateAct}`"
-            :model-value="fate"
-            @update:model-value="(value) => updateFate(value as Fate, fateAct)"
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent
-              :collision-padding="{ top: 64, bottom: 200 }"
-              avoid-collisions
-            >
-              <SelectItem
-                v-for="fateId in fatesByAct(fateAct)"
-                :key="fateId"
-                :value="fateId"
-                :disabled="fate !== fateId && isFateDisabled(fateId)"
-              >
-                <strong>{{ fateId }}</strong> {{ $t(`fates.${fateId}`) }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div class="w-16 ml-2">
-          <Label :for="`player-power-${fateAct}`">{{ $t('player_area.power') }}</Label>
-          <NumberField
-            :id="`player-power-${fateAct}`"
-            :model-value="power"
-            @update:model-value="(value) => updateFate(fate, fateAct, { power: value })"
-          >
-            <NumberFieldContent>
-              <NumberFieldInput></NumberFieldInput>
-            </NumberFieldContent>
-          </NumberField>
-        </div>
+  <div v-bind="$attrs">
+    <div
+      v-for="([fate, power, succeeded], fateAct) in player.fateHistory"
+      :key="fate"
+      class="flex flex-row px-3 py-2 border rounded border-neutral-400 fate-wrapper"
+    >
+      <div class="flex flex-col items-center justify-center mr-4 grow-0">
+        <span>Act</span><span class="font-serif text-xl">{{ romanNumerals[fateAct + 1] }}</span>
       </div>
-      <div class="flex items-center mt-2">
-        <Checkbox
-          :id="`player-fate-succeeded-${fateAct}`"
-          :checked="succeeded"
-          @update:checked="(value) => updateFate(fate, fateAct, { succeeded: value })"
-        />
-        <Label
-          :for="`player-fate-succeeded-${fateAct}`"
-          class="ml-2"
-        >
-          {{ $t('player_area.completed_objective') }}
-        </Label>
+      <div class="grow">
+        <div class="flex flex-row">
+          <div class="mr-2 grow">
+            <Label :for="`player-fate-${fateAct}`">{{ $t('player_area.fate') }}</Label>
+            <Select
+              :id="`player-fate-${fateAct}`"
+              :model-value="fate"
+              @update:model-value="(value) => updateFate(value as Fate, fateAct)"
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent
+                :collision-padding="{ top: 64, bottom: 200 }"
+                avoid-collisions
+              >
+                <SelectItem
+                  v-for="fateId in fatesByAct(fateAct)"
+                  :key="fateId"
+                  :value="fateId"
+                  :disabled="fate !== fateId && isFateDisabled(fateId)"
+                >
+                  <strong>{{ fateId }}</strong> {{ $t(`fates.${fateId}`) }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="w-16 ml-2">
+            <Label :for="`player-power-${fateAct}`">{{ $t('player_area.power') }}</Label>
+            <NumberField
+              :id="`player-power-${fateAct}`"
+              :model-value="power"
+              @update:model-value="(value) => updateFate(fate, fateAct, { power: value })"
+            >
+              <NumberFieldContent>
+                <NumberFieldInput></NumberFieldInput>
+              </NumberFieldContent>
+            </NumberField>
+          </div>
+        </div>
+        <div class="flex items-center mt-2">
+          <Checkbox
+            :id="`player-fate-succeeded-${fateAct}`"
+            :checked="succeeded"
+            @update:checked="(value) => updateFate(fate, fateAct, { succeeded: value })"
+          />
+          <Label
+            :for="`player-fate-succeeded-${fateAct}`"
+            class="ml-2"
+          >
+            {{ $t('player_area.completed_objective') }}
+          </Label>
+        </div>
       </div>
     </div>
   </div>

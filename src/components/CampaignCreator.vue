@@ -9,13 +9,14 @@ import PlayerLog from '@/components/PlayerLog.vue'
 import GameBoardList from '@/components/GameBoardList.vue'
 import { useGameStore } from '@/stores/game'
 import DeckBuilder from '@/components/deck-builder/DeckBuilder.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { Dices, FileDown } from 'lucide-vue-next'
 import { Textarea } from '@/components/ui/textarea'
 import { generateName } from '@/lib/utils'
 import { Screen, useUiStore } from '@/stores/ui'
 
+const router = useRouter()
 const route = useRoute()
 const gameStore = useGameStore()
 const uiStore = useUiStore()
@@ -51,15 +52,20 @@ function randomName() {
 
 watch(
   route,
-  ({ query }) => {
-    if (query.mode === 'create') {
+  async ({ query }) => {
+    if (query.mode === 'create' && gameStore.settings.id) {
       gameStore.$reset()
-      uiStore.go(Screen.Settings)
-      return
-    }
-
-    if (query.screen) {
-      uiStore.go(parseInt(query.screen as string))
+      // remove the id from the url if it is present
+      if (query.id) {
+        await router.replace({
+          name: 'campaign',
+          query: {
+            ...query,
+            screen: Screen.Settings,
+            id: undefined
+          }
+        })
+      }
     }
   },
   {

@@ -19,7 +19,10 @@ router
   })
   .then((loaded) => {
     if (loaded) {
-      return router.replace({ name: 'campaign', query: { screen: Screen.Map } })
+      return router.replace({
+        name: 'campaign',
+        query: { screen: route.query.screen ?? Screen.Map }
+      })
     }
 
     return router.replace({ name: 'home', query: {} })
@@ -34,7 +37,7 @@ router
       src="@/assets/images/archivist.png"
     />
     <h1
-      class="ml-4 text-lg font-bold"
+      class="ml-2 text-lg font-bold grow"
       :class="{
         // 'hidden md:block': gameStore.settings.name,
         hidden:
@@ -47,7 +50,7 @@ router
 
     <h1
       v-if="gameStore.settings.id && gameStore.settings.name"
-      class="text-lg font-bold grow"
+      class="ml-2 text-lg font-bold grow"
     >
       {{ gameStore.settings.name }}
     </h1>
