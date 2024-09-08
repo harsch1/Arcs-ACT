@@ -1,1 +1,0 @@
-import{_ as e}from"./GameBoardList.vue_vue_type_script_setup_true_lang-Cw5qbqMK.js";import{d as a,c as o,e as t,o as s}from"./index-BE_JS3LM.js";const n={class:"viewport"},p=a({__name:"CampaignListView",setup(c){return(r,_)=>(s(),o("main",n,[t(e)]))}});export{p as default};
