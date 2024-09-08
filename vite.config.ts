@@ -21,7 +21,7 @@ export default defineConfig({
     }),
     vueDevTools()
   ],
-  base: process.env.NODE_ENV === 'production' ? '/Arcs-CAT/' : '/',
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src')
