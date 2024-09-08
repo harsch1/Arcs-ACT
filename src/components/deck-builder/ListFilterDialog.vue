@@ -10,9 +10,9 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import type { Table } from '@tanstack/vue-table'
+import type { Column, Table } from '@tanstack/vue-table'
 import { Filter, Check } from 'lucide-vue-next'
-import { reactive } from 'vue'
+import { computed, reactive } from 'vue'
 
 defineProps<{
   table: Table<any>
@@ -24,11 +24,12 @@ const emit = defineEmits<{
 
 const selected = reactive<Record<string, string[]>>({})
 
-// const values = computed(() =>
-//   Array.from(props.column.getFacetedUniqueValues().keys())
-//     .filter((value) => !!value)
-//     .sort()
-// )
+const values = computed(
+  () => (column: Column<any, unknown>) =>
+    Array.from(column.getFacetedUniqueValues().keys())
+      .filter((value) => !!value)
+      .sort()
+)
 
 function update(column: string, value: string | string[]) {
   selected[column] = Array.isArray(value) ? value : [value]
@@ -55,7 +56,7 @@ function update(column: string, value: string | string[]) {
             class="flex-col items-start justify-start text-left"
           >
             <ToggleGroupItem
-              v-for="value in column.getFacetedUniqueValues().keys()"
+              v-for="value in values(column)"
               :key="value"
               :value="value"
               :aria-label="`Toggle ${value}`"

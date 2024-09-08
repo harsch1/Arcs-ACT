@@ -112,6 +112,7 @@ export default defineComponent({
             style: {
               pointerEvents: 'all'
             },
+            'data-path-system-id': props.systemConfig.id,
             onClick: (e: PointerEvent) => {
               onClick(e)
             },

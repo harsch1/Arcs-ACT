@@ -3,58 +3,109 @@ import { computed, reactive, ref } from 'vue'
 import boardImage from '@/assets/images/board-2.jpg'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
-import { pausableFilter, useMouse } from '@vueuse/core'
+import { pausableFilter } from '@vueuse/core'
+import { Button } from '@/components/ui/button'
+import { ZoomIn, ZoomOut, ListCollapse } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
 
 import { BuildingType } from '@/Archive'
 import SystemComponent from '@/components/game/shapes/SystemComponent'
 import GamePiece from '@/components/GamePiece.vue'
-import GameBoardMenu from '@/components/GameBoardMenu.vue'
+import GameSystemMenu from '@/components/GameSystemMenu.vue'
 import GamePieceMenu from '@/components/GamePieceMenu.vue'
 
 import { ShipType, type Color, type SystemKey, type TokenType } from '@/Archive'
 import type { PieceState, SystemUiConfig, PieceStateGroup, SystemConfig } from '@/stores/systems'
 import type { CSSProperties } from 'vue'
 import { transform } from 'lodash'
+import { isBuilding, isToken, isUniqueToken } from '@/lib/utils'
+import { Menu, Screen, useUiStore } from '@/stores/ui'
 
+const uiStore = useUiStore()
 const dragControl = pausableFilter()
 dragControl.pause()
-const { x: dx, y: dy } = useMouse({ type: 'movement', eventFilter: dragControl.eventFilter })
-const menuPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
-const wrapperPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
-const systemClientPosition: { x: number; y: number } = reactive({ x: 0, y: 0 })
 
 const draggedPiece = ref<PieceState | PieceStateGroup>()
 const draggedPieceOffset = ref<{ x: number; y: number }>({ x: 0, y: 0 })
 
-const wrapperStyle = computed<CSSProperties>(() => ({
-  width: 'max-content',
-  transform: `translate(${wrapperPosition.x}px, ${wrapperPosition.y}px)`
-}))
-
 // Handle board movement
+const boardImg = ref<HTMLImageElement>(new Image())
+boardImg.value.src = boardImage
+const boardDimensions = reactive({
+  width: 0,
+  height: 0
+})
 const wrapperEl = ref<HTMLDivElement>()
+const wrapperStyle = computed<CSSProperties>(() => {
+  return {
+    // width: 'max-content',
+    // height: 'max-content',
+    // transform: `translate(${wrapperPosition.x}px, ${wrapperPosition.y}px)`
+    transformOrigin: 'top left',
+    scale: uiStore.mapScale,
+    width: boardDimensions.width * uiStore.mapScale,
+    height: boardDimensions.height * uiStore.mapScale
+  }
+})
 
-function onPieceMoveEnd(piece: PieceState | PieceStateGroup, e: DragEvent) {
+function onPieceMove(piece: PieceState | PieceStateGroup, e: DragEvent | Touch) {
   const boardRect = wrapperEl.value?.getBoundingClientRect()!
 
-  piece.position.x = e.clientX - draggedPieceOffset.value.x + boardRect.x * -1
-  piece.position.y = e.clientY - draggedPieceOffset.value.y + boardRect.y * -1
+  piece.position.x =
+    e.clientX / uiStore.mapScale -
+    draggedPieceOffset.value.x +
+    (boardRect.x / uiStore.mapScale) * -1
+  piece.position.y =
+    e.clientY / uiStore.mapScale -
+    draggedPieceOffset.value.y +
+    (boardRect.y / uiStore.mapScale) * -1
+}
+
+function onPieceMoveEnd(piece: PieceState | PieceStateGroup, e?: DragEvent | Touch) {
+  // This shouldn't happen but guard it just in case
+  if (!e) {
+    return
+  }
+
+  const boardRect = wrapperEl.value?.getBoundingClientRect()!
+
+  piece.position.x =
+    e.clientX / uiStore.mapScale -
+    draggedPieceOffset.value.x +
+    (boardRect.x / uiStore.mapScale) * -1
+  piece.position.y =
+    e.clientY / uiStore.mapScale -
+    draggedPieceOffset.value.y +
+    (boardRect.y / uiStore.mapScale) * -1
   draggedPiece.value = undefined
 }
 
-function onPieceMoveStart(piece: PieceState | PieceStateGroup, e: DragEvent) {
+function onPieceMoveStart(piece: PieceState | PieceStateGroup, e: DragEvent | Touch) {
   const targetRect = (e.target as HTMLElement)?.getBoundingClientRect()
 
   draggedPiece.value = piece
   draggedPieceOffset.value = {
-    x: e.clientX - targetRect.x - targetRect.width / 2,
-    y: e.clientY - targetRect.y - targetRect.height / 2
+    x: e.clientX - targetRect.x - (targetRect.width / 2) * uiStore.mapScale,
+    y: e.clientY - targetRect.y - (targetRect.height / 2) * uiStore.mapScale
+  }
+}
+
+function getDimensions() {
+  boardDimensions.height = boardImg.value.height
+  boardDimensions.width = boardImg.value.width
+}
+
+function zoom(delta: number) {
+  uiStore.mapScale += delta
+
+  if (uiStore.mapScale < 0.3) {
+    uiStore.mapScale = 0.3
+  } else if (uiStore.mapScale > 2) {
+    uiStore.mapScale = 2
   }
 }
 
 // Menus interaction
-const isBoardMenuOpen = ref(false)
-const isPieceMenuOpen = ref(false)
 const activeSystem = ref<SystemKey>()
 const activePiece = ref<PieceState | PieceStateGroup>()
 const activeSystemPosition = computed(() =>
@@ -64,28 +115,25 @@ const activeSystemPosition = computed(() =>
 )
 
 function onSystemClick(id: SystemKey, e: PointerEvent) {
-  let systemRect = (e.target as SVGElement | null)?.getBoundingClientRect() ?? { x: 0, y: 0 }
-  systemClientPosition.x = systemRect.x
-  systemClientPosition.y = systemRect.y
-  menuPosition.x = e.clientX
-  menuPosition.y = e.clientY
   activeSystem.value = id
-  isBoardMenuOpen.value = true
-}
-
-function onPieceOpenChange(e: boolean) {
-  setTimeout(() => {
-    isPieceMenuOpen.value = e
+  uiStore.updateMenu({
+    type: Menu.System,
+    id: id,
+    position: {
+      x: e.clientX,
+      y: e.clientY
+    }
   })
 }
 
-function closeBoardMenu() {
-  // Wrapped in a timeout to prevent opening the menu after clicking
-  // on a system when the menu was already opened
+function closeMenu(type: Menu) {
+  activeSystem.value = undefined
+  activePiece.value = undefined
+  activePieceIndex.value = -1
+
   setTimeout(() => {
-    isBoardMenuOpen.value = false
-    activeSystem.value = undefined
-  })
+    uiStore.updateMenu({ isOpen: false })
+  }, 100)
 }
 
 // Piece handling
@@ -100,10 +148,11 @@ const pieces = computed(() => {
   const grouped = new Map<string, PieceState | PieceStateGroup>()
   systemsStore.pieces.forEach((piece) => {
     const key = `${piece.system} ${piece.color} ${piece.type}`
-    // Buildings and Flagships are not grouped
+    // Buildings, Flagships, and unique tokens are not grouped
     if (
-      Object.values(BuildingType).includes(piece.type as BuildingType) ||
-      piece.type === ShipType.flagship
+      isBuilding(piece.type) ||
+      piece.type === ShipType.flagship ||
+      (isToken(piece.type) && isUniqueToken(piece.type))
     ) {
       grouped.set(key + piece.id, piece)
       return
@@ -147,13 +196,18 @@ const pieces = computed(() => {
   return Array.from(grouped.values())
 })
 
-function onPieceClick(piece: PieceState | PieceStateGroup, i: number, e: PointerEvent) {
-  menuPosition.x = e.clientX
-  menuPosition.y = e.clientY
+function onPieceClick(piece: PieceState | PieceStateGroup, i: number, e: PointerEvent | Touch) {
   activePiece.value = piece
   activePieceIndex.value = i
   activeSystem.value = piece.system
-  isPieceMenuOpen.value = true
+  uiStore.updateMenu({
+    type: Menu.Piece,
+    id: i,
+    position: {
+      x: e.clientX,
+      y: e.clientY
+    }
+  })
 }
 
 function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
@@ -166,14 +220,14 @@ function addPiece(type: BuildingType | ShipType | TokenType, color?: Color) {
 
   systemsStore.addPiece(
     activeSystem.value,
+    // @ts-ignore
     {
       type,
-      // @ts-ignore
       color
     },
     {
-      x: menuPosition.x - x,
-      y: menuPosition.y - y
+      x: uiStore.currentMenu.position.x / uiStore.mapScale - x / uiStore.mapScale,
+      y: uiStore.currentMenu.position.y / uiStore.mapScale - y / uiStore.mapScale
     }
   )
 }
@@ -190,17 +244,20 @@ function flipPiece(isFresh: boolean) {
   }
 }
 
+function repositionPiece(piece: PieceState | PieceStateGroup, system: SystemKey) {
+  const pieceSystem = systemsStore.systems[system]
+  systemsStore.positionPiece(pieceSystem, piece)
+}
+
 function dropInSystem(system: SystemKey) {
   if (draggedPiece.value) {
-    systemsStore.movePiece(draggedPiece.value, system)
+    systemsStore.movePiece(draggedPiece.value, system, draggedPiece.value.position)
   }
 }
 
 const activePieceIndex = ref<number>(-1)
-const showPreview = ref(false)
 function togglePreview(open: boolean) {
-  activePieceIndex.value = open ? activePieceIndex.value : -1
-  showPreview.value = open
+  uiStore.piecePreview = open ? activePieceIndex.value : undefined
 }
 </script>
 
@@ -216,6 +273,7 @@ function togglePreview(open: boolean) {
       alt="Arcs"
       class="max-w-max"
       draggable="false"
+      @load="getDimensions"
     />
     <SystemComponent
       v-for="system in systemsUiConfig"
@@ -235,37 +293,67 @@ function togglePreview(open: boolean) {
       :key="`${piece.type}${piece.color ? `-${piece.color}` : ''}-${piece.system}`"
       :piece-config="piece"
       :system-position="activeSystemPosition"
-      :open-preview="showPreview && activePieceIndex === i"
+      :open-preview="uiStore.piecePreview === i"
       draggable="false"
+      @reposition="repositionPiece(piece, $event)"
       @click="onPieceClick(piece, i, $event)"
+      @preview-close="togglePreview(false)"
       @dragstart="onPieceMoveStart(piece, $event)"
       @dragend="onPieceMoveEnd(piece, $event)"
-      @previewClose="togglePreview(false)"
+      @press-click="onPieceClick(piece, i, $event)"
+      @press-start="onPieceMoveStart(piece, $event)"
+      @press-move="onPieceMove(piece, $event)"
+      @press-end="onPieceMoveEnd(piece, $event)"
+      @press-drop="dropInSystem($event)"
     />
   </div>
 
+  <!-- Map controls -->
+  <div class="space-y-1 map-controls">
+    <Button
+      size="icon"
+      @click="zoom(0.1)"
+    >
+      <ZoomIn />
+    </Button>
+    <Button
+      size="icon"
+      @click="zoom(-0.1)"
+    >
+      <ZoomOut />
+    </Button>
+    <RouterLink
+      :to="{ name: 'campaign', query: { screen: Screen.Map } }"
+      v-slot="{ navigate }"
+      custom
+    >
+      <Button
+        size="icon"
+        @click="navigate"
+      >
+        <ListCollapse />
+      </Button>
+    </RouterLink>
+  </div>
+
   <!-- The dropdown is reused based on the clicked system -->
-  <GameBoardMenu
-    v-if="activeSystem"
+  <GameSystemMenu
+    v-if="activeSystem && uiStore.currentMenu.type === Menu.System"
     :active-system="activeSystem"
-    :is-open="isBoardMenuOpen"
-    :is-full="systemsStore.isSystemFull(activeSystem)"
-    :pointer-position="menuPosition"
+    :pointer-position="uiStore.currentMenu.position"
     @select="addPiece"
-    @close="closeBoardMenu"
+    @close="closeMenu(Menu.System)"
   />
 
   <!-- The dropdown is reused based on the clicked piece -->
   <GamePieceMenu
-    v-if="activePiece"
+    v-if="activePiece && uiStore.currentMenu.type === Menu.Piece"
     :active-piece="activePiece"
-    :is-open="isPieceMenuOpen"
-    :pointer-position="menuPosition"
+    :pointer-position="uiStore.currentMenu.position"
     @add="addPiece"
     @remove="removePiece"
     @flip="flipPiece"
-    @update="onPieceOpenChange"
     @preview="togglePreview(true)"
+    @close="closeMenu(Menu.Piece)"
   />
 </template>
-j

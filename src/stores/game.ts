@@ -1,7 +1,7 @@
 // Main store
 import localforage from 'localforage'
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
 import { exportArchive, generateName } from '@/lib/utils'
 import { useSystemsStore } from '@/stores/systems'
 import { useCardsStore } from '@/stores/cards'
@@ -9,8 +9,9 @@ import { Archive, Color, Fate, Player, type SaveFile } from '@/Archive'
 import i18n from '@/i18n'
 
 import test from '@/stores/test.json'
-import type { ISOStringFormat } from 'date-fns'
 import { snakeCase } from 'lodash'
+import { useUiStore } from '@/stores/ui'
+import type { ISOStringFormat } from 'date-fns'
 
 export type GameSettings = {
   id?: string
@@ -27,6 +28,7 @@ export const GAME_TEST_ID = 'test'
 export const useGameStore = defineStore('game', () => {
   const savedGames = ref(new Map<string, SaveFile>())
 
+  const ui = useUiStore()
   const cards = useCardsStore()
   const systems = useSystemsStore()
   const players = ref<Player[]>([])
@@ -38,6 +40,8 @@ export const useGameStore = defineStore('game', () => {
     notes: ''
   })
 
+  const isGameLoaded = computed(() => settings.id !== undefined)
+
   function $reset() {
     players.value = []
     settings.id = undefined
@@ -45,6 +49,7 @@ export const useGameStore = defineStore('game', () => {
     settings.act = 1
     settings.firstRegent = ''
     settings.notes = ''
+    systems.$reset()
   }
 
   // Parse the game json and initialize the stores
@@ -94,13 +99,16 @@ export const useGameStore = defineStore('game', () => {
 
     // Clear the previous archive
     $reset()
-    systems.$reset()
 
-    initSettings(archive)
-    initPlayers(archive.players)
-    // @ts-expect-error TODO: Why is this property needed?
-    initSystems(archive.board._systems)
-    cards.initPool(archive.players)
+    nextTick(() => {
+      initSettings(archive)
+      initPlayers(archive.players)
+      // @ts-expect-error TODO: Why is this property needed?
+      initSystems(archive.board._systems)
+      cards.initPool(archive.players)
+    })
+
+    return archive.id
   }
 
   async function exportGame(id: string) {
@@ -115,6 +123,7 @@ export const useGameStore = defineStore('game', () => {
 
   function deleteGame(id: string) {
     localforage.removeItem(id)
+    savedGames.value.delete(id)
   }
 
   async function updateGame(id: string, payload: SaveFile) {
@@ -158,6 +167,13 @@ export const useGameStore = defineStore('game', () => {
     if (!id) {
       name = settings.name ?? generateName()
       id = GAME_SAVE_PREFIX + snakeCase(name)
+
+      // Validate unique name
+      const _exists = await localforage.getItem<SaveFile>(id)
+      if (_exists !== null) {
+        throw new Error('NAME_ALREADY_EXISTS')
+      }
+
       save = {
         name,
         timestamp: new Date().toISOString() as ISOStringFormat
@@ -168,15 +184,16 @@ export const useGameStore = defineStore('game', () => {
     }
 
     save = {
-      id,
       ...save,
-      ...archive
+      ...archive,
+      ...settings,
+      id
     }
 
     // Clone the archive to be able to save it to localforage
     await localforage.setItem(id, JSON.parse(JSON.stringify(save)))
 
-    return save
+    return save as Required<SaveFile>
   }
 
   function addPlayer(name: string, color: Color, fate?: Fate) {
@@ -224,6 +241,7 @@ export const useGameStore = defineStore('game', () => {
     savedGames,
     settings,
     players,
+    isGameLoaded,
     deleteGame,
     listGames,
     loadGame,

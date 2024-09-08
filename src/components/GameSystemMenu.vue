@@ -23,8 +23,6 @@ type PieceType = BuildingType | ShipType | TokenType
 
 const props = defineProps<{
   activeSystem: SystemKey
-  isOpen: boolean
-  isFull: boolean
   pointerPosition: {
     x: number
     y: number
@@ -32,7 +30,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  update: [value: boolean]
   select: [type: PieceType, color?: Color]
   close: []
 }>()
@@ -54,27 +51,26 @@ const triggerStyle = computed(() => ({
   top: `${props.pointerPosition.y}px`
 }))
 
-function onOpenChange(e: boolean) {
-  emit('update', e)
-}
-
 function onSelect(type: PieceType, color?: Color) {
   emit('select', type, color)
-  emit('close')
 }
 </script>
 
 <template>
   <DropdownMenu
-    :open="isOpen"
-    @update:open="onOpenChange"
+    :default-open="true"
+    :modal="false"
+    @update:open="emit('close')"
   >
     <DropdownMenuTrigger
       class="fixed dropdown-trigger"
       :style="triggerStyle"
     ></DropdownMenuTrigger>
     <DropdownMenuContent>
-      <OnClickOutside :options="{ ignore: ['.system-dialog'] }" @trigger="emit('close')">
+      <OnClickOutside
+        :options="{ ignore: ['.system-dialog'] }"
+        @trigger="emit('close')"
+      >
         <DropdownMenuLabel>{{ $t('system_id', { id: activeSystem }) }}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
@@ -106,10 +102,7 @@ function onSelect(type: PieceType, color?: Color) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger
-            class="data-[disabled]:opacity-50"
-            :disabled="isFull"
-          >
+          <DropdownMenuSubTrigger class="data-[disabled]:opacity-50">
             {{ $t('system_menu.add_city') }}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -124,10 +117,7 @@ function onSelect(type: PieceType, color?: Color) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger
-            class="data-[disabled]:opacity-50"
-            :disabled="isFull"
-          >
+          <DropdownMenuSubTrigger class="data-[disabled]:opacity-50">
             {{ $t('system_menu.add_starport') }}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -151,6 +141,11 @@ function onSelect(type: PieceType, color?: Color) {
               :key="token"
               @select="onSelect(token)"
             >
+              <img
+                :src="`./images/tokens/${token.toLowerCase()}.png`"
+                :alt="token"
+                class="h-6 mr-2"
+              />
               {{ $t(`pieces.${token}`) }}
             </DropdownMenuItem>
           </DropdownMenuSubContent>
@@ -158,6 +153,7 @@ function onSelect(type: PieceType, color?: Color) {
         <DropdownMenuSeparator />
         <SystemDialog
           :system-id="activeSystem"
+          @close="$emit('close')"
           @confirm="$emit('close')"
         >
           <DropdownMenuItem @select.prevent>

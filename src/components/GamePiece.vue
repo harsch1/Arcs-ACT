@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { TokenType, ShipType, Color, BuildingType } from '@/Archive'
+import { computed, onMounted, ref, toRef } from 'vue'
+import { TokenType, ShipType, Color, BuildingType, type SystemKey } from '@/Archive'
 import { Redo, Sparkles } from 'lucide-vue-next'
 import PlayerFlagshipPreview from '@/components/PlayerFlagshipPreview.vue'
 
@@ -18,7 +18,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  reposition: [system: SystemKey]
   previewClose: []
+  pressClick: [e: Touch]
+  pressStart: [e: Touch]
+  pressMove: [e: Touch]
+  pressEnd: [e?: Touch]
+  pressDrop: [system: SystemKey]
 }>()
 
 const pieceId = computed(() => {
@@ -32,14 +38,14 @@ const pieceId = computed(() => {
 const src = computed(() => {
   if ('group' in props.pieceConfig) {
     if (Object.values(TokenType).includes(props.pieceConfig.type as TokenType)) {
-      return `./images/${props.pieceConfig.type?.toLowerCase()}.png`
+      return `./images/tokens/${props.pieceConfig.type?.toLowerCase()}.png`
     }
 
     return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
   }
 
   if (Object.values(TokenType).includes(props.pieceConfig.type as TokenType)) {
-    return `./images/${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
+    return `./images/tokens/${props.pieceConfig.type?.toLowerCase()}${!props.pieceConfig.isFresh ? '_flip' : ''}.png`
   } else if (isFlagship(props.pieceConfig.type)) {
     return `./images/${props.pieceConfig.color?.toLowerCase()}_${props.pieceConfig.type?.toLowerCase()}.png`
   }
@@ -102,6 +108,84 @@ const isFallback = ref(false)
 function fallbackHandler() {
   isFallback.value = true
 }
+
+const firstTouch = ref<Touch>()
+const lastTouch = ref<Touch>()
+const touchTimer = ref<number>(0)
+const ignoreMove = ref(true)
+const clickDelay = 300
+
+function onPieceMoveStart(e: TouchEvent) {
+  e.preventDefault()
+  const touch = e.touches[0]
+  touchTimer.value = Date.now()
+  firstTouch.value = touch
+  emit('pressStart', touch)
+
+  setTimeout(() => (ignoreMove.value = false), clickDelay)
+}
+
+function onPieceMove(e: TouchEvent) {
+  if (ignoreMove.value) {
+    return
+  }
+
+  e.preventDefault()
+  const touch = e.touches[0]
+  lastTouch.value = touch
+  emit('pressMove', touch)
+}
+
+function onPieceMoveEnd(e: TouchEvent) {
+  e.preventDefault()
+  ignoreMove.value = true
+
+  // Fake click event on mobile
+  if (Date.now() - touchTimer.value < clickDelay) {
+    e.stopPropagation()
+    emit('pressClick', firstTouch.value!)
+    return
+  }
+
+  const el =
+    lastTouch.value &&
+    document
+      .elementsFromPoint(lastTouch.value.clientX, lastTouch.value.clientY)
+      .find((el) => el.getAttribute('data-path-system-id'))
+
+  // Piece was moved over a valid system
+  if (el) {
+    const system = el.getAttribute('data-path-system-id') as SystemKey
+    emit('pressDrop', system)
+  } else {
+    emit('pressEnd', firstTouch.value)
+  }
+}
+
+const canBeMoved = computed(() => {
+  if (!isBuilding(props.pieceConfig.type)) {
+    return true
+  }
+
+  if (!('group' in props.pieceConfig) && !props.pieceConfig.slot) {
+    return true
+  }
+
+  return false
+})
+
+const eventHandlers = {
+  touchstart: canBeMoved.value ? onPieceMoveStart : null,
+  touchmove: canBeMoved.value ? onPieceMove : null,
+  touchend: canBeMoved.value ? onPieceMoveEnd : null
+}
+
+onMounted(() => {
+  // Negative position means the piece wasn't positioned when added
+  if (props.pieceConfig.position.x < 0 && props.pieceConfig.position.y < 0) {
+    emit('reposition', props.pieceConfig.system!)
+  }
+})
 </script>
 
 <template>
@@ -112,9 +196,11 @@ function fallbackHandler() {
   >
     <img
       v-if="!isFallback"
+      :style="{ maxWidth: 'initial' }"
       :src="src"
       :width="pieceWidth"
-      :draggable="!isBuilding(pieceConfig.type)"
+      :draggable="canBeMoved"
+      v-on="eventHandlers"
       @error="fallbackHandler"
     />
     <svg
@@ -137,26 +223,26 @@ function fallbackHandler() {
     </svg>
     <div
       v-if="!isBuilding(pieceConfig.type)"
-      class="absolute flex items-center right-10 -bottom-6"
+      class="absolute flex items-center pointer-events-none right-10 -bottom-6"
     >
       <div class="grid grid-flow-col px-4 py-2 bg-black shrink-0 rounded-xl">
         <span class="mr-2 text-5xl">
-          {{ pieceConfig.system?.charAt(0) }}
+          {{ props.pieceConfig.system?.charAt(0) }}
         </span>
         <img
-          v-if="pieceConfig.system?.charAt(1) === 'A'"
+          v-if="props.pieceConfig.system?.charAt(1) === 'A'"
           class="h-[3rem]"
           src="/images/symbol_arrow.png"
           alt="Arrow"
         />
         <img
-          v-else-if="pieceConfig.system?.charAt(1) === 'H'"
+          v-else-if="props.pieceConfig.system?.charAt(1) === 'H'"
           class="h-[3rem]"
           src="/images/symbol_hex.png"
           alt="Hex"
         />
         <img
-          v-else-if="pieceConfig.system?.charAt(1) === 'C'"
+          v-else-if="props.pieceConfig.system?.charAt(1) === 'C'"
           class="h-[3rem]"
           src="/images/symbol_moon.png"
           alt="Moon"
@@ -171,14 +257,14 @@ function fallbackHandler() {
       <template v-if="'group' in pieceConfig && !isFlagship(pieceConfig.type)">
         <div
           v-if="pieceConfig.group.damaged.length > 0"
-          class="flex items-center px-4 py-2 ml-2 bg-black rounded-xl"
+          class="flex items-center px-4 py-2 ml-2 bg-black pointer-events-none rounded-xl"
         >
           <span class="mr-2 text-5xl">{{ pieceConfig.group.damaged.length }}</span>
           <Redo :size="40" />
         </div>
         <div
           v-if="pieceConfig.group.fresh.length > 0"
-          class="flex items-center px-4 py-2 ml-2 bg-black rounded-xl"
+          class="flex items-center px-4 py-2 ml-2 bg-black pointer-events-none rounded-xl"
         >
           <span class="mr-2 text-5xl">{{ pieceConfig.group.fresh.length }}</span>
           <Sparkles :size="40" />

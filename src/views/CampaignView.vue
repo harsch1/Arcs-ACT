@@ -7,11 +7,3 @@ import GameBoard from '@/components/GameBoard.vue'
     <GameBoard />
   </main>
 </template>
-
-<style scoped>
-.viewport {
-  position: relative;
-  overflow: auto;
-  height: calc(100vh - 64px);
-}
-</style>

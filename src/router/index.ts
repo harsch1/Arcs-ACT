@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useGameStore } from '@/stores/game'
 import HomeView from '@/views/HomeView.vue'
 
 const router = createRouter({
@@ -7,7 +8,10 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomeView,
+      meta: {
+        hideNavigation: true
+      }
     },
     {
       path: '/map_debug',
@@ -25,8 +29,7 @@ const router = createRouter({
     {
       path: '/campaign',
       name: 'campaign',
-      component: () => import('@/views/CampaignCreatorView.vue'),
-      props: (route) => ({ mode: route.query.mode })
+      component: () => import('@/views/CampaignCreatorView.vue')
     },
     {
       path: '/map',
@@ -39,6 +42,15 @@ const router = createRouter({
       component: () => import('@/views/CampaignListView.vue')
     }
   ]
+})
+
+router.beforeEach((to) => {
+  const gameStore = useGameStore()
+
+  // Keep the game id if loaded
+  if (to.query.id === undefined && gameStore.settings.id) {
+    return { name: to.name, replace: true, query: { ...to.query, id: gameStore.settings.id } }
+  }
 })
 
 export default router

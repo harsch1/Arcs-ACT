@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge'
 import { Fate, Resource } from '@/Archive'
 
 import type { Ref } from 'vue'
-import { type Color, BuildingType, ShipType, type TokenType, type SaveFile } from '@/Archive'
+import { type Color, BuildingType, ShipType, TokenType, type SaveFile } from '@/Archive'
 import type { PieceState } from '@/stores/systems'
 import type { ClassValue } from 'clsx'
 import type { Updater } from '@tanstack/vue-table'
@@ -161,6 +161,15 @@ export function isBuilding(piece: unknown): piece is BuildingType {
   return Object.values(BuildingType).includes(piece as BuildingType)
 }
 
+export function isToken(piece: unknown): piece is TokenType {
+  return Object.values(TokenType).includes(piece as TokenType)
+}
+
 export function isFlagship(piece: unknown): piece is ShipType.flagship {
   return piece === ShipType.flagship
+}
+
+// TODO: Specify tokens
+export function isUniqueToken(piece: unknown): boolean {
+  return piece !== TokenType.blight
 }

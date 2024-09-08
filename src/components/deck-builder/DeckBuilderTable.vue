@@ -170,7 +170,7 @@ function moveTo(id: string, location: string) {
               :colspan="columns.length"
               class="h-24 text-center"
             >
-              No results.
+              {{ $t('deck_builder.no_results') }}
             </TableCell>
           </TableRow>
         </template>

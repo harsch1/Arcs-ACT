@@ -6,7 +6,7 @@ import GameLoader from '@/components/GameLoader.vue'
 const router = useRouter()
 
 function viewGame() {
-  router.push('list')
+  router.push({ name: 'map' })
 }
 </script>
 
@@ -17,7 +17,7 @@ function viewGame() {
       alt="Arcs"
     />
     <h1 class="mt-2 text-4xl font-bold subtitle">
-      {{ $t('arcs_cat') }}
+      {{ $t('arcs_act') }}
     </h1>
     <!-- <div class="h-[100px]">
       <img
@@ -47,13 +47,6 @@ function viewGame() {
 </template>
 
 <style scoped>
-.viewport {
-  position: relative;
-  overflow: auto;
-  height: calc(100vh - 64px);
-  margin: 0 auto;
-}
-
 .subtitle {
   word-spacing: 100vw;
 }

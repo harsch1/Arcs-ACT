@@ -7,7 +7,8 @@ export function getRandomInt(min: number, max: number) {
 export function randomPointWithinSVG(
   svg: SVGSVGElement,
   shape: SVGPathElement,
-  bounds?: SVGPathElement
+  bounds?: SVGPathElement,
+  scale?: number
 ) {
   if (!(svg instanceof SVGSVGElement) || !(shape instanceof SVGPathElement)) {
     return
@@ -16,6 +17,8 @@ export function randomPointWithinSVG(
   const bbox = shape.getBBox()
   const matrix = shape.getScreenCTM()!
 
+  matrix.a = scale ? matrix.a / scale : matrix.a
+  matrix.d = scale ? matrix.d / scale : matrix.d
   matrix.e = parseInt(svg.style.getPropertyValue('left')?.replace(/.*?(\d+).*?/g, '$1'))
   matrix.f = parseInt(svg.style.getPropertyValue('top')?.replace(/.*?(\d+).*?/g, '$1')) + 64
 

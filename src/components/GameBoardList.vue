@@ -5,7 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion'
-import { Settings } from 'lucide-vue-next'
+import { Settings, Map } from 'lucide-vue-next'
 import Button from '@/components/ui/button/Button.vue'
 import SystemDialog from '@/components/SystemDialog.vue'
 
@@ -13,6 +13,7 @@ import { useSystemsStore } from '@/stores/systems'
 import { ref } from 'vue'
 import { getSystemOverview } from '@/lib/utils'
 import type { SystemKey } from '@/Archive'
+import { RouterLink } from 'vue-router'
 
 const systemsStore = useSystemsStore()
 const activeSystem = ref<SystemKey | null>()
@@ -25,9 +26,12 @@ function updateDialog(open: boolean) {
 </script>
 
 <template>
-  <div class="px-4">
+  <div class="px-4 pb-10">
     <p class="w-full py-2 text-lg">{{ $t('campaign.board_state_help') }}</p>
-    <Accordion type="multiple">
+    <Accordion
+      type="multiple"
+      :default-value="['1', '2', '3', '4', '5', '6']"
+    >
       <AccordionItem
         v-for="(systems, cluster) in systemsStore.clusters"
         :key="cluster"
@@ -74,6 +78,7 @@ function updateDialog(open: boolean) {
                   </span>
                 </div>
                 <Button
+                  size="icon"
                   variant="ghost"
                   class="self-end"
                   @click.stop="activeSystem = system"
@@ -115,6 +120,22 @@ function updateDialog(open: boolean) {
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+  </div>
+
+  <!-- Float button -->
+  <div class="space-y-1 map-controls">
+    <RouterLink
+      :to="{ name: 'map' }"
+      v-slot="{ navigate }"
+      custom
+    >
+      <Button
+        size="icon"
+        @click="navigate"
+      >
+        <Map />
+      </Button>
+    </RouterLink>
   </div>
 
   <SystemDialog
