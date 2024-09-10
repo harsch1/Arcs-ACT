@@ -19,7 +19,7 @@ const attrs = useAttrs() as { onMove(id: string, location: string): void }
 const card = computed(() => props.row.original)
 
 const rowWrapper = ref<HTMLElement | null>(null)
-const rowEl = ref<any>(null)
+const rowEl = ref<HTMLElement | null>(null)
 const left = ref('0')
 const { isSwiping, direction, distanceX } = usePointerSwipe(rowEl, {
   onSwipe(e) {
@@ -61,7 +61,7 @@ const { isSwiping, direction, distanceX } = usePointerSwipe(rowEl, {
     </div>
     <div
       ref="rowEl"
-      class="top-0 left-0 flex items-center w-full h-full bg-background"
+      class="top-0 left-0 flex items-center w-full h-full bg-background !touch-pan-y"
       :class="{ absolute: isSwiping }"
       :style="{ left }"
     >
