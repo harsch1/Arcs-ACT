@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import { romanNumerals } from '@/lib/utils'
 import { Fate } from '@/Archive'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import fateMeta from '@/assets/decks/fate-meta.json'
 
 import type { Player } from '@/Archive'
@@ -28,6 +28,8 @@ const emit = defineEmits<{
   update: [Fate, { act: number; power: number; succeeded: boolean; currentFate: boolean }]
   add: []
 }>()
+
+const hasFlagship = defineModel({ default: false })
 
 const canAddFate = computed(() => {
   if (!props.act) {
@@ -82,6 +84,13 @@ function updateFate(
 function addFate() {
   emit('add')
 }
+
+watch(
+  () => props.player.fateHistory,
+  (fateHistory) => {
+    hasFlagship.value = fateHistory.some(([fate]) => fateMeta[fate]?.flagship)
+  }
+)
 </script>
 
 <template>

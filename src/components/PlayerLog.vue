@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { CardType, Color, EmpireStatus, Fate, Player } from '@/Archive'
 import PlayerFlagship from '@/components/PlayerFlagship.vue'
 import PlayerResources from '@/components/player-log/PlayerResources.vue'
@@ -29,6 +29,7 @@ const props = defineProps<{
 
 const gameStore = useGameStore()
 
+const hasFlagship = ref(false)
 const playerColors = computed(() =>
   Object.values(Color).filter((c) => c !== Color.empire && c !== Color.free)
 )
@@ -99,7 +100,10 @@ function updateFate(
       <TabsTrigger value="court">
         {{ $t('player_area.court') }}
       </TabsTrigger>
-      <TabsTrigger value="flagship">
+      <TabsTrigger
+        v-if="hasFlagship"
+        value="flagship"
+      >
         {{ $t('player_area.flagship') }}
       </TabsTrigger>
     </TabsList>
@@ -181,6 +185,7 @@ function updateFate(
         <!-- Fates -->
         <PlayerFateHistory
           class="my-2"
+          v-model="hasFlagship"
           :player="player"
           :act="act"
           :unavailableFates="unavailableFates"
@@ -199,11 +204,25 @@ function updateFate(
         <PlayerResources
           class="my-2"
           :player="player"
-          @update="
-            (resource) =>
+          :pool="gameStore.resourcePool"
+          @remove="
+            (e) => {
+              gameStore.resourcePool.push(e)
+              gameStore.resourcePool.sort()
+            }
+          "
+          @add="
+            (resource) => {
+              // Remove the resource from the pool and add it to the player
+              const i = gameStore.resourcePool.findIndex((res) => res === resource)
+              gameStore.resourcePool = [
+                ...gameStore.resourcePool.slice(0, i),
+                ...gameStore.resourcePool.slice(i + 1)
+              ]
               updatePlayer({
                 resources: [...player.resources, resource]
               })
+            }
           "
         />
 

@@ -9,21 +9,24 @@ import {
 import { Label } from '@/components/ui/label'
 import { CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import { vOnClickOutside } from '@vueuse/components'
-import { ref } from 'vue'
-import { Resource } from '@/Archive'
-
-import type { Player } from '@/Archive'
+import { computed, ref } from 'vue'
 import { isResource } from '@/lib/utils'
 
-defineProps<{
+import type { Resource } from '@/Archive'
+import type { Player } from '@/Archive'
+
+const props = defineProps<{
   player: Player
+  pool: Resource[]
 }>()
 
 const emit = defineEmits<{
-  update: [Resource]
+  add: [Resource]
+  remove: [Resource]
 }>()
 
 const resourceOpen = ref(false)
+const availableResourceTypes = computed(() => new Set(props.pool))
 </script>
 
 <template>
@@ -32,9 +35,8 @@ const resourceOpen = ref(false)
     <Label for="player-resources">{{ $t('player_area.resources') }}</Label>
     <ComboboxRoot
       v-model:open="resourceOpen"
-      :value="player.resources"
-      multiple
       class="flex flex-grow"
+      multiple
     >
       <ComboboxAnchor as-child>
         <TagsInput
@@ -54,7 +56,7 @@ const resourceOpen = ref(false)
                 class="h-6"
               />
               <span class="ml-2 mr-1">{{ $t(`resources.${resource}`) }}</span>
-              <TagsInputItemDelete />
+              <TagsInputItemDelete @click="emit('remove', resource as Resource)" />
             </TagsInputItem>
           </div>
 
@@ -85,13 +87,13 @@ const resourceOpen = ref(false)
           <CommandEmpty />
           <CommandGroup>
             <CommandItem
-              v-for="resource in Resource"
+              v-for="resource in availableResourceTypes"
               :key="resource"
               :value="resource"
               @select.prevent="
                 (e) => {
                   if (e.detail.value && isResource(e.detail.value)) {
-                    emit('update', e.detail.value)
+                    emit('add', e.detail.value)
                   }
                 }
               "

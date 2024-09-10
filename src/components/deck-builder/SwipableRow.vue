@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import TableRowActions from '@/components/deck-builder/TableRowActions.vue'
 import { FlexRender, type Row } from '@tanstack/vue-table'
-import { useSwipe } from '@vueuse/core'
+import { usePointerSwipe } from '@vueuse/core'
 import { computed, ref, useAttrs } from 'vue'
 import { SquarePlus, SquareX } from 'lucide-vue-next'
 
@@ -21,12 +21,12 @@ const card = computed(() => props.row.original)
 const rowWrapper = ref<HTMLElement | null>(null)
 const rowEl = ref<any>(null)
 const left = ref('0')
-const { isSwiping, direction, lengthX } = useSwipe(rowEl, {
+const { isSwiping, direction, distanceX } = usePointerSwipe(rowEl, {
   onSwipe(e) {
-    left.value = `${lengthX.value * -1}px`
+    left.value = `${distanceX.value * -1}px`
   },
   onSwipeEnd(e, direction) {
-    if (Math.abs(lengthX.value) > 120) {
+    if (Math.abs(distanceX.value) > 120) {
       if (direction === 'right') {
         attrs.onMove(card.value.id, 'scrap')
       }

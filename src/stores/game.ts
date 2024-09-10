@@ -11,6 +11,8 @@ import i18n from '@/i18n'
 import test from '@/stores/test.json'
 import { snakeCase } from 'lodash'
 import { useUiStore } from '@/stores/ui'
+import { getInitialResourcePool } from '@/lib/utils'
+
 import type { ISOStringFormat } from 'date-fns'
 
 export type GameSettings = {
@@ -32,6 +34,7 @@ export const useGameStore = defineStore('game', () => {
   const cards = useCardsStore()
   const systems = useSystemsStore()
   const players = ref<Player[]>([])
+  const resourcePool = ref(getInitialResourcePool())
   const settings = reactive<GameSettings>({
     id: undefined,
     name: undefined,
@@ -44,6 +47,7 @@ export const useGameStore = defineStore('game', () => {
 
   function $reset() {
     players.value = []
+    resourcePool.value = getInitialResourcePool()
     settings.id = undefined
     settings.name = undefined
     settings.act = 1
@@ -241,6 +245,7 @@ export const useGameStore = defineStore('game', () => {
     savedGames,
     settings,
     players,
+    resourcePool,
     isGameLoaded,
     deleteGame,
     listGames,

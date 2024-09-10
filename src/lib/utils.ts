@@ -173,3 +173,13 @@ export function isFlagship(piece: unknown): piece is ShipType.flagship {
 export function isUniqueToken(piece: unknown): boolean {
   return piece !== TokenType.blight
 }
+
+export function getInitialResourcePool(): Resource[] {
+  return [
+    ...Array(5).fill(Resource.fuel),
+    ...Array(5).fill(Resource.material),
+    ...Array(5).fill(Resource.psionic),
+    ...Array(5).fill(Resource.relic),
+    ...Array(5).fill(Resource.weapon)
+  ]
+}
