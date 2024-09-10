@@ -54,7 +54,7 @@ function loadTestGame(id: string) {
           <img
             :alt="$t('arcs_act')"
             class="logo"
-            src="@/assets/images/archivist.png"
+            src="@/assets/images/archivist.png?h=128"
           />
         </SheetDescription>
       </SheetHeader>

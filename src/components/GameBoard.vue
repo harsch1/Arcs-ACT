@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import boardImage from '@/assets/images/board-2.jpg'
+import boardImage from '@/assets/images/board-2.jpg?quality=90'
 import systemsUiConfig from '@/lib/systems-ui-config'
 import { useSystemsStore } from '@/stores/systems'
 import { pausableFilter } from '@vueuse/core'

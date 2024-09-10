@@ -7,6 +7,7 @@ import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import svgLoader from 'vite-svg-loader'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import { imagetools } from 'vite-imagetools'
 
 const __dirname = path.resolve()
 
@@ -19,6 +20,7 @@ export default defineConfig({
     VueI18nPlugin({
       include: [path.resolve(__dirname, 'src/i18n/locales/**')]
     }),
+    imagetools(),
     vueDevTools()
   ],
   base: process.env.NODE_ENV === 'production' ? '/Arcs-CAT/' : '/',

@@ -162,7 +162,7 @@ function moveTo(id: string, location: string) {
 
 <style scoped>
 .search-bar {
-  background-image: url('/images/background.png');
+  background-image: url('/images/background.jpg');
   background-size: cover;
 }
 </style>

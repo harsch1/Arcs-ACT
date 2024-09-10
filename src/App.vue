@@ -34,7 +34,7 @@ router
     <img
       :alt="$t('arcs_act')"
       class="logo -scale-x-100"
-      src="@/assets/images/archivist.png"
+      src="@/assets/images/archivist.png?h=128"
     />
     <h1
       class="ml-2 text-lg font-bold grow"

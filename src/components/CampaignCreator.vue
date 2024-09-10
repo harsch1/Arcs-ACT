@@ -119,7 +119,7 @@ watch([players, () => gameStore.settings.act], () => {
             >
               <img
                 class="agent-button"
-                :src="`./images/${color.toLowerCase()}_agent.png`"
+                :src="`./images/${color.toLowerCase()}_agent_80.png`"
               />
             </ToggleGroupItem>
 
@@ -151,7 +151,7 @@ watch([players, () => gameStore.settings.act], () => {
           >
             <img
               class="h-12"
-              :src="`./images/${player.color.toLowerCase()}_agent.png`"
+              :src="`./images/${player.color.toLowerCase()}_agent_80.png`"
             />
           </TabsTrigger>
         </TabsList>
